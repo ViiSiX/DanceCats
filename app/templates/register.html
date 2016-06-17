@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Register New User</h2>
+  <hr/>
+  {% from "_formhelper.html" import render_field %}
+  <form method=post action="/register">
+    {{ form.hidden_tag() }}
+    <dl>
+      {{ render_field(form.email) }}
+      {{ render_field(form.password) }}
+    </dl>
+    <p><input type=submit value=Register>
+  </form>
+{% endblock %}

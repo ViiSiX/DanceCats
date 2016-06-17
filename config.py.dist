@@ -1,0 +1,2 @@
+WTF_CSRF_ENABLED = True
+SECRET_KEY = 'dance cat is dancing'

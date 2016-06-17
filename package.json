@@ -1,0 +1,23 @@
+{
+  "name": "dance_cat",
+  "version": "0.0.1",
+  "description": "Data Reporting",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "data",
+    "reporting"
+  ],
+  "author": "Nguyen Trong Nghia <ntngh2712@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "^1.7.9",
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-browser": "^2.1.9",
+    "gulp-size": "^2.1.0",
+    "reactify": "^1.1.1"
+  }
+}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+  <a class="btn btn-success top-margin-20" href="{{ url_for('connection_create') }}">
+    New Connection
+  </a>
+  <hr>
+  <h3>Connections List</h3>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Host</th>
+          <th>Database</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      {% for connection in connections %}
+        <tr>
+          <td>{{ connection.name }}</td>
+          <td>{{ connection.type }}</td>
+          <td>{{ connection.host }}</td>
+          <td>{{ connection.database }}</td>
+          <td>
+            <a href="{{ url_for('connection_edit', connection_id=connection.id) }}"
+            >Edit</a> |
+            <a href="#" onclick="delete_onclick($(this).parent().parent(),
+                '{{ url_for('connection_delete') }}', {{ connection.id }})"
+            >Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endblock %}

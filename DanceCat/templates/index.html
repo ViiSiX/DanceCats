@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <h3>Jobs List</h3>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Job Name</th>
+          <th>Connection</th>
+          <th>Schedule</th>
+          <th>Creator</th>
+          <th>Last Update</th>
+        </tr>
+      </thead>
+      {% for job in jobs %}
+        <tr>
+          <td>{{ job.name }}</td>
+          <td>{{ job.connection }}</td>
+          <td>{{ job.schedule }}</td>
+          <td>{{ job.creator }}</td>
+          <td>{{ job.last_edit }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endblock %}

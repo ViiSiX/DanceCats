@@ -1,0 +1,10 @@
+node_modules/
+app/static/bower_components
+app/static/script/js
+
+config.py
+
+*.pyc
+
+.idea
+.DS_Store

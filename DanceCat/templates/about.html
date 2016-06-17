@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron">
+    <h3>About Dance Cat</h3>
+    <img src="{{ url_for('static', filename = 'img/about.jpg') }}" width="250px"/>
+    <p class="lead">
+      Dance Cat just want to dance with you.<br/>
+      Meow!
+    </p>
+  </div>
+{% endblock %}

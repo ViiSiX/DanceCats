@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h3>Edit Database Connection</h3>
+  {% from "_formhelper.html" import render_field %}
+  <form id="connection-edit-form" method=post action="{{ url_for('connection_edit', connection_id=connection_id) }}">
+    {{ form.hidden_tag() }}
+    <dl>
+      {{ render_field(form.type) }}
+      {{ render_field(form.name) }}
+      {{ render_field(form.host) }}
+      {{ render_field(form.port) }}
+      {{ render_field(form.userName) }}
+      {{ render_field(form.password) }}
+      {{ render_field(form.database) }}
+    </dl>
+    <div class="test-box">
+      <div class="led led-off"></div>
+      <a href="#" class="test-button btn btn-default"
+         onclick="db_connect_test_onclick('{{ url_for('connection_test', connection_id=connection_id) }}',
+             $('#connection-edit-form').serializeArray(), $('div.led'))">Test Connection</a>
+    </div>
+    <input class="btn btn-primary" type=submit value="Save">
+  </form>
+{% endblock %}

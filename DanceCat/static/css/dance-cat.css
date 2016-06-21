@@ -127,3 +127,8 @@
   border-radius: 50%;
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #6b6b6b 0 -1px 9px, #cdcdcd 0 2px 14px;
 }
+
+.jumbotron .btn-dance-cat {
+  padding: 6px 12px;
+  font-size: 14px;
+}

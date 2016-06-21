@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- style -->
+  <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='css/justified-nav.css') }}">
+  <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='css/dance-cat.css') }}">
+  <!-- script -->
+  <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='script/dance-cat-pre.js') }}"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="masthead">
+      <h3 class="text-muted">{{ title }}</h3>
+      <nav>
+        <ul class="nav nav-justified">
+          <li><a href="/">Home</a></li>
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('connection') }}">DB Connection</a></li>
+            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+          {% else %}
+            <li><a href="{{ url_for('login') }}">Log In</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('about') }}">About</a></li>
+        </ul>
+      </nav>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">
+              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

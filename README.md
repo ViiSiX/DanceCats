@@ -1,3 +1,6 @@
-`pip install -r requirement.txt`
-`npm install`
-`bower install`
+#### Installation
+```
+pip install -r requirement.txt
+npm install
+bower install
+```

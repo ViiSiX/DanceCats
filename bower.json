@@ -10,7 +10,7 @@
     "reporting"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/scattm/dance_cat",
   "private": true,
   "ignore": [
     "**/.*",

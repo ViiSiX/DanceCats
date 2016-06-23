@@ -36,3 +36,15 @@ class ConnectionForm(Form):
     database = StringField('Database', validators=[
         validators.DataRequired()
     ])
+
+
+class JobForm(Form):
+    name = StringField('Name', validators=[
+        validators.DataRequired()
+    ])
+    annotation = TextAreaField('Annotation')
+    connectionId = SelectField('Connection',
+                               coerce=int)
+    query = TextAreaField('Query', validators=[
+        validators.DataRequired
+    ])

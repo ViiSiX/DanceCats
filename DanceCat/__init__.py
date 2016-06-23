@@ -17,4 +17,4 @@ lm.session_protection = "strong"
 lm.login_message = "Please log in to continue!"
 lm.login_message_category = "alert-danger"
 
-from DanceCat import Views, Models
+from DanceCat import Models, Views, ErrorViews

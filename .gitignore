@@ -1,10 +1,7 @@
 node_modules/
-app/static/bower_components
-app/static/script/js
+DanceCat/static/bower_components
+DanceCat/static/script/js
 
 config.py
 
 *.pyc
-
-.idea
-.DS_Store

@@ -1,4 +1,5 @@
 from Crypto.Cipher import ARC4
+import datetime
 import mysql.connector
 import pymssql
 import base64
@@ -35,12 +36,22 @@ def null_handler(obj):
         return None
     return obj
 
-"""
-For references
-def sqlserver_connect(config):
-    return pymssql.connect(server=config['host'],
-                           port=config['port'],
-                           user=config['user'],
-                           password=config['password'],
-                           database=config['database'])
-"""
+
+def validate_int_between(value, floor, cell):
+    return True if value <= floor <= cell else False
+
+
+def validate_minute_of_hour(value):
+    return validate_int_between(value, 0, 59)
+
+
+def validate_hour_of_day(value):
+    return validate_int_between(value, 0, 23)
+
+
+def validate_day_of_week(value):
+    return validate_int_between(value, 0, 6)
+
+
+def validate_day_of_month(value):
+    return validate_int_between(value, 1, 31)

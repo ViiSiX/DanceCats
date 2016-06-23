@@ -15,9 +15,16 @@ class DBConnect:
         elif self.type == Constants.SQLSERVER:
             self.connection = pymssql.connect(**self.config)
 
+    def close(self):
+        if self.type in [
+            Constants.MYSQL, Constants.SQLSERVER
+        ]:
+            self.connection.close()
+
     def connection_test(self):
         try:
             self.connect()
+            self.close()
             return not not self.connection
         except:
             return False

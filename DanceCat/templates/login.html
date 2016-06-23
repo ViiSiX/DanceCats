@@ -5,10 +5,13 @@
   {% from "_formhelper.html" import render_field %}
   <form method=post action="{{ url_for('login') }}">
     {{ form.hidden_tag() }}
-    <dl>
+    <dl class="dl-horizontal">
       {{ render_field(form.email) }}
       {{ render_field(form.password) }}
+      <br/>
+      <dt></dt>
+      <dd><input type=submit value=Login class="btn btn-default"></dd>
     </dl>
-    <p><input type=submit value=Login>
+
   </form>
 {% endblock %}

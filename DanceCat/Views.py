@@ -158,7 +158,9 @@ def connection_test(connection_id):
             'connected': db_connect.connection_test()
         })
 
-    abort('500')
+    return jsonify({
+        'connected': False
+    })
 
 
 @app.route('/login', methods=['GET', 'POST'])

@@ -1,3 +1,5 @@
+# Dance Cat
+-----------
 #### Installation
 
 Download and install mysql-connector-python [here](https://dev.mysql.com/downloads/connector/python/). My version is 2.1.3.
@@ -14,6 +16,8 @@ npm install
 bower install
 ```
 
+#### DB
+
 Setup DB using python console.
 
 `cp config.py.dist config.py`
@@ -25,8 +29,20 @@ from DanceCat import db
 db.create_all()
 ```
 
+#### SSL
+
+Generate new key using openssl
+```
+openssl genrsa 1024 > ssl.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key ssl.key > ssl.cert
+```
+
+#### Run
+
+Copy main python file
+
+`cp DanceCat.py.dist DanceCat.py`
+
 Run local web server.
 
 `python DanceCat.py`
-
-If you want to run it on your server, please using uWSGI and nginx.

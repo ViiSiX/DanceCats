@@ -2,6 +2,10 @@ node_modules/
 DanceCat/static/bower_components
 DanceCat/static/script/js
 
+DanceCat.py
 config.py
 
 *.pyc
+
+*.key
+*.cert

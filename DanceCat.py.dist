@@ -1,0 +1,13 @@
+from DanceCat import app
+
+
+if __name__ == '__main__':
+    # For SSL
+    # context = ('ssl.cert', 'ssl.key')
+
+    app.run(host='0.0.0.0',
+            port=8443,
+            # For SSL
+            # ssl_context=context,
+            threaded=True,
+            debug=True)

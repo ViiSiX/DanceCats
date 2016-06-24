@@ -18,11 +18,13 @@ CONNECTION_TYPES_LIST = [
 CONNECTION_TYPES_DICT = {
     MYSQL: {
         'name': 'MySQL',
-        'default_port': 3306
+        'default_port': 3306,
+        'mime': 'text/x-mysql'
     },
     SQLSERVER: {
         'name': 'SQL Server',
-        'default_port': 1433
+        'default_port': 1433,
+        'mime': 'text/x-mssql'
     }
 }
 

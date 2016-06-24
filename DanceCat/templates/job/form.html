@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block ext_style %}
+  <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static', filename='bower_components/codemirror/lib/codemirror.css') }}">
+{% endblock %}
+{% block pre_script %}
+  <script src="{{ url_for('static', filename='bower_components/autosize/dist/autosize.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bower_components/codemirror/lib/codemirror.js') }}"></script>
+  <script src="{{ url_for('static', filename='bower_components/codemirror/mode/sql/sql.js') }}"></script>
+{% endblock %}
+{% block content %}
+  <div class="form-main">
+    <h3>{{ head }}</h3><legend></legend>
+    {% from "job/_formhelper.html" import render_field %}
+    <form id="job-form"
+          role="form"
+          method=post
+          class="job-form"
+          action="{{ action }}">
+      {{ form.hidden_tag() }}
+      {{ render_field(form.name, class="form-control") }}
+      {{ render_field(form.annotation, class="form-control") }}
+      {{ render_field(form.connectionId, class="form-control") }}
+      {{ render_field(form.query, class="form-control") }}
+      <div class="row">
+        <div class="col-sm-3">
+          <input class="btn btn-primary" type=submit value=Save>
+        </div>
+        <div class="col-sm-9">
+          <a href="#"
+             class="btn btn-success pull-right"
+          >Check this query</a>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+{% block post_script %}
+  <script type="application/javascript">
+    var annotation = $('#job-form #annotation');
+    autosize(annotation);
+
+    var query = $('#job-form #query');
+    autosize(query);
+
+    var query_code_mirror = CodeMirror.fromTextArea(document.getElementById('query'), {
+      mode: 'text/x-sql',
+      indentWithTabs: true,
+      smartIndent: true,
+      lineNumbers: true
+    });
+
+  </script>
+{% endblock %}

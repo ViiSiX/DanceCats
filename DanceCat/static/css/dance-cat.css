@@ -1,8 +1,24 @@
+/* General */
+
 .top-margin-20 {
   margin-top: 20px;
 }
 
+.jumbotron .btn-dance-cat {
+  padding: 6px 12px;
+  font-size: 14px;
+}
 
+/* Form */
+.form-main {
+  width: 100%;
+}
+
+.job-form textarea {
+  resize: none;
+}
+
+/* Test Box */
 
 .test-box {
   height: 40px;
@@ -15,6 +31,8 @@
   margin-left: 20px;
   margin-top: -5px;
 }
+
+/* Led */
 
 .led {
   display: inline-block;
@@ -126,9 +144,4 @@
   background-color: #cdcdcd;
   border-radius: 50%;
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #6b6b6b 0 -1px 9px, #cdcdcd 0 2px 14px;
-}
-
-.jumbotron .btn-dance-cat {
-  padding: 6px 12px;
-  font-size: 14px;
 }

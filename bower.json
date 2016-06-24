@@ -22,6 +22,8 @@
   ],
   "dependencies": {
     "bootstrap": "^3.3.6",
-    "react": "^15.1.0"
+    "react": "^15.1.0",
+    "autosize": "^3.0.15",
+    "codemirror": "^5.16.0"
   }
 }

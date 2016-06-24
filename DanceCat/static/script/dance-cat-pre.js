@@ -21,20 +21,24 @@ function led_remove_status(led_el) {
 function db_connect_test_onclick(test_url, connection, led_el) {
   led_remove_status(led_el);
   led_el.addClass('led-yellow');
+
   var connection_data = {};
+
   for (var i = 0; i < connection.length; i++) {
     connection_data[connection[i]['name']] = connection[i]['value']
   }
+
   $.post(
     test_url,
     connection_data,
-    function(ret_data) {
+    function (ret_data) {
       led_remove_status(led_el);
+
       if (ret_data.connected) {
         led_el.addClass('led-green');
       } else {
         led_el.addClass('led-red');
       }
     }
-  )
+  );
 }

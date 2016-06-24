@@ -1,8 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from DanceCat import app, db, lm, Constants, Helpers
-from DanceCat.Forms import RegisterForm, ConnectionForm
-from DanceCat.Models import User, AllowedEmail, Connection
+from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
+from DanceCat.Models import User, AllowedEmail, Connection, \
+    Job, Schedule, TrackJobRun
 from DanceCat.DBConnect import DBConnect
 import datetime
 
@@ -13,6 +14,7 @@ def load_user(user_id):
 
 
 @app.route('/')
+@app.route('/job')
 @login_required
 def index():
     jobs = [
@@ -31,9 +33,23 @@ def index():
             "last_edit": ""
         }
     ]
-    return render_template('index.html',
+    return render_template('job/list.html',
                            title=Constants.PROJECT_NAME,
                            jobs=jobs)
+
+
+@app.route('/job/create', methods=['GET', 'POST'])
+def job_create():
+    form = JobForm(request.form)
+    form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            return redirect(url_for('index'))
+    return render_template('job/form.html',
+                           title=Constants.PROJECT_NAME,
+                           head='Creating new Job',
+                           action=url_for('job_create'),
+                           form=form)
 
 
 @app.route('/connection')
@@ -66,7 +82,6 @@ def connection_create():
                                title=Constants.PROJECT_NAME,
                                form=form)
     if form.validate_on_submit():
-        print request.form
         new_connection = Connection(name=request.form['name'],
                                     db_type=int(request.form['type']),
                                     database=request.form['database'],
@@ -87,9 +102,7 @@ def connection_create():
 @app.route('/connection/edit/<connection_id>', methods=['GET', 'POST'])
 @login_required
 def connection_edit(connection_id):
-    editing_connection = Connection.query.get(connection_id)
-    if editing_connection is None:
-        abort(404)
+    editing_connection = Connection.query.get_or_404(connection_id)
     form = ConnectionForm(request.form, editing_connection)
     if request.method == 'GET':
         return render_template('connection/edit.html',
@@ -123,6 +136,22 @@ def connection_delete():
         return jsonify({
             'deleted': False
         })
+
+
+@app.route('/connection/get_mime/', defaults={'connection_id': 0})
+@app.route('/connection/get_mime/<connection_id>')
+@login_required
+def connection_get_mime(connection_id):
+    conn = Connection.query.with_entities(Connection.id, Connection.type).filter_by(id=connection_id).first()
+    if conn is not None:
+        return jsonify({
+            'id': connection_id,
+            'mime': Constants.CONNECTION_TYPES_DICT[conn[1]]['mime']
+        })
+    else:
+        return jsonify({
+            'id': 0
+        }), 404
 
 
 @app.route('/connection/test', methods=['POST'], defaults={'connection_id': 0})

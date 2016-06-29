@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+  <a class="btn btn-success top-margin-20" href="{{ url_for('job_create') }}">
+    New Job
+  </a>
+  <hr/>
   <h3>Jobs List</h3>
   <div class="table-responsive">
     <table class="table table-striped">

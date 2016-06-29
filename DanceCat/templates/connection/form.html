@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-  <h3>New Database Connection</h3>
+  <h3>{{ action }} Database Connection</h3>
   <legend></legend>
   {% from "_formhelper.html" import render_field %}
-  <form id="connection-create-form"
+  <form id="connection-edit-form"
         class="form form-horizontal"
         role="form"
-        method=post action="{{ url_for('connection_create') }}">
+        method=post action="{{ action_url }}">
     <div class="test-box">
       <div class="led led-off"></div>
       <a href="#" class="test-button btn btn-default"
-         onclick="db_connect_test_onclick('{{ url_for('connection_test') }}',
-             $('#connection-create-form').serializeArray(), $('div.led'))">Test Connection</a>
+         onclick="DanceCat.Main.db_connect_test_on_click('{{ test_url }}',
+             DanceCat.Main.$('#connection-edit-form').serializeArray(),
+             DanceCat.Main.$('div.led'))">Test Connection</a>
     </div>
     {{ form.hidden_tag() }}
     <dl class="dl-horizontal">
@@ -22,10 +23,10 @@
       {{ render_field(form.userName) }}
       {{ render_field(form.password) }}
       {{ render_field(form.database) }}
-      <br>
+      <br/>
       <dt></dt>
       <dd>
-        <input type=submit value=Save>
+        <input class="btn btn-primary" type=submit value="Save">
       </dd>
     </dl>
   </form>

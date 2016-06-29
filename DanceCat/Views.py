@@ -1,8 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from DanceCat import app, db, lm, Constants, Helpers
-from DanceCat.Forms import RegisterForm, ConnectionForm
-from DanceCat.Models import User, AllowedEmail, Connection
+from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
+from DanceCat.Models import User, AllowedEmail, Connection, \
+    Job, Schedule, TrackJobRun
 from DanceCat.DBConnect import DBConnect
 import datetime
 
@@ -13,8 +14,14 @@ def load_user(user_id):
 
 
 @app.route('/')
-@login_required
 def index():
+    return render_template('about.html',
+                           title=Constants.PROJECT_NAME)
+
+
+@app.route('/job')
+@login_required
+def job():
     jobs = [
         {
             "name": "Count Application Number",
@@ -31,9 +38,23 @@ def index():
             "last_edit": ""
         }
     ]
-    return render_template('index.html',
+    return render_template('job/list.html',
                            title=Constants.PROJECT_NAME,
                            jobs=jobs)
+
+
+@app.route('/job/create', methods=['GET', 'POST'])
+def job_create():
+    form = JobForm(request.form)
+    form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            return redirect(url_for('job'))
+    return render_template('job/form.html',
+                           title=Constants.PROJECT_NAME,
+                           head='Creating new Job',
+                           action=url_for('job_create'),
+                           form=form)
 
 
 @app.route('/connection')
@@ -61,41 +82,40 @@ def connection():
 @login_required
 def connection_create():
     form = ConnectionForm(request.form)
-    if request.method == 'GET':
-        return render_template('connection/create.html',
-                               title=Constants.PROJECT_NAME,
-                               form=form)
-    if form.validate_on_submit():
-        print request.form
-        new_connection = Connection(name=request.form['name'],
-                                    db_type=int(request.form['type']),
-                                    database=request.form['database'],
-                                    host=request.form['host'],
-                                    port=Helpers.null_handler(request.form['port']),
-                                    user_name=request.form['userName'],
-                                    password=Helpers.null_handler(request.form['password']),
-                                    creator_user_id=current_user.id
-                                    )
-        db.session.add(new_connection)
-        db.session.commit()
-        return redirect(url_for('connection'))
-    return render_template('connection/create.html',
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_connection = Connection(name=request.form['name'],
+                                        db_type=int(request.form['type']),
+                                        database=request.form['database'],
+                                        host=request.form['host'],
+                                        port=Helpers.null_handler(request.form['port']),
+                                        user_name=request.form['userName'],
+                                        password=Helpers.null_handler(request.form['password']),
+                                        creator_user_id=current_user.id
+                                        )
+            db.session.add(new_connection)
+            db.session.commit()
+            return redirect(url_for('connection'))
+    return render_template('connection/form.html',
                            title=Constants.PROJECT_NAME,
+                           action='Create',
+                           action_url=url_for('connection_create'),
+                           test_url=url_for('connection_test'),
                            form=form)
 
 
 @app.route('/connection/edit/<connection_id>', methods=['GET', 'POST'])
 @login_required
 def connection_edit(connection_id):
-    editing_connection = Connection.query.get(connection_id)
-    if editing_connection is None:
-        abort(404)
+    editing_connection = Connection.query.get_or_404(connection_id)
     form = ConnectionForm(request.form, editing_connection)
     if request.method == 'GET':
-        return render_template('connection/edit.html',
+        return render_template('connection/form.html',
                                title=Constants.PROJECT_NAME,
-                               form=form,
-                               connection_id=connection_id)
+                               action='Edit',
+                               action_url=url_for('connection_edit', connection_id=connection_id),
+                               test_url=url_for('connection_test', connection_id=connection_id),
+                               form=form)
     else:
         if Helpers.null_handler(request.form['password']) is not None:
             form.populate_obj(editing_connection)
@@ -123,6 +143,22 @@ def connection_delete():
         return jsonify({
             'deleted': False
         })
+
+
+@app.route('/connection/get_mime/', defaults={'connection_id': 0})
+@app.route('/connection/get_mime/<connection_id>')
+@login_required
+def connection_get_mime(connection_id):
+    conn = Connection.query.with_entities(Connection.id, Connection.type).filter_by(id=connection_id).first()
+    if conn is not None:
+        return jsonify({
+            'id': connection_id,
+            'mime': Constants.CONNECTION_TYPES_DICT[conn[1]]['mime']
+        })
+    else:
+        return jsonify({
+            'id': 0
+        }), 404
 
 
 @app.route('/connection/test', methods=['POST'], defaults={'connection_id': 0})
@@ -192,19 +228,13 @@ def login():
                 registered_user.lastLogin = datetime.datetime.now()
                 db.session.commit()
                 flash('You have been logged in successfully!', 'alert-success')
-                return redirect(request.args.get('next') or url_for('index'))
+                return redirect(request.args.get('next') or url_for('job'))
             else:
                 flash('Wrong password!', 'alert-danger')
                 return redirect(url_for('login'))
 
 
-@app.route('/about')
-def about():
-    return render_template('about.html',
-                           title=Constants.PROJECT_NAME)
-
-
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('about'))
+    return redirect(url_for('index'))

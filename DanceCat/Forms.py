@@ -39,12 +39,17 @@ class ConnectionForm(Form):
 
 
 class JobForm(Form):
-    name = StringField('Name', validators=[
-        validators.DataRequired()
-    ])
-    annotation = TextAreaField('Annotation')
+    name = StringField('Name',
+                       render_kw={
+                           'placeholder': 'Your job name'
+                       },
+                       validators=[
+                           validators.DataRequired()
+                       ])
+    annotation = TextAreaField('Annotation',
+                               render_kw={
+                                   'placeholder': 'Job\'s annotation'
+                               })
     connectionId = SelectField('Connection',
                                coerce=int)
-    query = TextAreaField('Query', validators=[
-        validators.DataRequired
-    ])
+    query = TextAreaField('Query', validators=[validators.DataRequired()])

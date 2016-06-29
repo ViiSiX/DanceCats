@@ -1,6 +1,5 @@
 node_modules/
-DanceCat/static/bower_components
-DanceCat/static/script/js
+DanceCat/static/bundle
 
 DanceCat.py
 config.py

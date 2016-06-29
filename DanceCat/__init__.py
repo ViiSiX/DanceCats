@@ -1,10 +1,12 @@
 from flask import Flask
+from flask_compress import Compress
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 
 
 app = Flask(__name__)
+Compress(app)
 
 app.config.from_object('config')
 config = app.config

@@ -1,0 +1,12 @@
+- ~~User login~~
+- ~~Create connection~~
+- ~~Test connection~~
+- ~~Socket~~
+- ~~Query test for MySQL~~
+- ~~Simple React~~
+- Query test for SQL Server
+- Save job
+- Run and export CSV
+- Send emails (Flask-Mail)
+- Scheduling job
+- Apply Markdown to annotation (Flask-Misaka)

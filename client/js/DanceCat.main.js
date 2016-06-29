@@ -30,9 +30,9 @@ module.exports['delete_on_click'] = function delete_on_click(el, delete_url, del
   )
 };
 
-let led_remove_status = function(led_el) {
+function led_remove_status(led_el) {
   led_el.removeClass('led-off led-yellow led-blue led-red led-green')
-};
+}
 
 module.exports['db_connect_test_on_click'] = function db_connect_test_onclick(test_url, connection, led_el) {
   led_remove_status(led_el);

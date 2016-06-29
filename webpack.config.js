@@ -6,7 +6,7 @@ module.exports = [
     entry: {
       Main: './client/js/DanceCat.Main.js',
       Constants: ['./client/js/DanceCat.Constants.js'],
-      QueryResults: './client/jsx/DanceCat.QueryResult.jsx'
+      QueryResults: './client/jsx/DanceCat.QueryResult.js'
     },
     output: {
       path: './DanceCat/static/bundle/',
@@ -40,8 +40,11 @@ module.exports = [
           loader: "file-loader"
         },
         {
-          test: /\.jsx$/,
-          loader: 'jsx-loader?insertPragma=React.DOM&harmony'
+          test: /\.js$/,
+          loader: 'babel',
+          query: {
+            presets: ['es2015', 'react']
+          }
         }
       ]
     },
@@ -52,6 +55,9 @@ module.exports = [
         io: "socket.io-client",
         React: "react",
         ReactDOM: "react-dom"
+      }),
+      new webpack.optimize.UglifyJsPlugin({
+        compress: { warnings: false }
       })
     ]
   }

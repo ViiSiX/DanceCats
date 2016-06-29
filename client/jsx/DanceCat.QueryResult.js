@@ -55,7 +55,6 @@ var QueryResult = React.createClass({
   },
 
   _resultReceived: function (data) {
-    console.log(data);
     if (data.seq > this.state.seq) {
       if (data.status == 0){
         this.setState({

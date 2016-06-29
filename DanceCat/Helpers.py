@@ -1,7 +1,5 @@
 from Crypto.Cipher import ARC4
 import datetime
-import mysql.connector
-import pymssql
 import base64
 import hashlib
 import uuid
@@ -32,8 +30,14 @@ def db_credential_decrypt(b64_string, secret_string):
 
 
 def null_handler(obj):
-    if not obj:
-        return None
+    return None if not obj else obj
+
+
+def py2sql_type_convert(obj):
+    if obj is None:
+        return 'NULL'
+    if type(obj) is datetime.datetime:
+        return u'{value}'.format(value=obj.strftime('%Y-%m-%d %H:%M:%S'))
     return obj
 
 

@@ -1,7 +1,7 @@
 from flask import Flask
-from Constants import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 
 
 app = Flask(__name__)
@@ -17,4 +17,6 @@ lm.session_protection = "strong"
 lm.login_message = "Please log in to continue!"
 lm.login_message_category = "alert-danger"
 
-from DanceCat import Models, Views, ErrorViews
+socket_io = SocketIO(app)
+
+from DanceCat import Models, Views, ErrorViews, Socket

@@ -145,3 +145,21 @@
   border-radius: 50%;
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #6b6b6b 0 -1px 9px, #cdcdcd 0 2px 14px;
 }
+
+/* Query Results */
+.query-result {
+  border: 1px solid #ccc;
+  border-top: 2px solid #ccc;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.query-result .error {
+  color: red;
+  font-weight: 500;
+}
+
+.query-result .result-table {
+  min-height: 450px;
+}

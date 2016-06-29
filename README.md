@@ -9,11 +9,12 @@ cd mysql-connector-python-2.1.3
 python setup.py install
 ```
 
-Install the rest of requirements.
+Install the rest of requirements. Then run `webpack` to package frontend things.
 ```
 pip install -r requirement.txt
 npm install
 bower install
+webpack
 ```
 
 #### DB

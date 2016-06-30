@@ -1,4 +1,5 @@
 from Crypto.Cipher import ARC4
+from decimal import Decimal
 import datetime
 import base64
 import hashlib
@@ -36,6 +37,8 @@ def null_handler(obj):
 def py2sql_type_convert(obj):
     if obj is None:
         return 'NULL'
+    if type(obj) is Decimal:
+        return str(obj)
     if type(obj) is datetime.datetime:
         return u'{value}'.format(value=obj.strftime('%Y-%m-%d %H:%M:%S'))
     return obj

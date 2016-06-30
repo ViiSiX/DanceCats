@@ -58,7 +58,8 @@ def test_query(received_data):
                     'status': -1,
                     'data': 'None',
                     'seq': runtime,
-                    'error': str(e)
+                    'error': str(e),
+                    'error_ext': [str(e.trace_back)]
                 })
 
         else:

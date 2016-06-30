@@ -3,11 +3,24 @@ var Constants = require('../js/DanceCat.Constants');
 
 var ErrorResult = React.createClass({
   propTypes: {
-    message: React.PropTypes.string
+    message: React.PropTypes.string,
+    error_ext: React.PropTypes.array
   },
 
   render: function () {
-    return <p className="error">{this.props.message}</p>
+    if (this.props.error_ext == null) {
+      return <p className="error">{this.props.message}</p>
+    }
+    else{
+      return (
+        <div className="error">
+          <p className="error">{this.props.message}</p>
+          {this.props.error_ext.map(function (message, i) {
+            return <p key={i}>{message}</p>
+          })}
+        </div>
+      )
+    }
   }
 });
 
@@ -49,6 +62,7 @@ var QueryResult = React.createClass({
     return {
       data: {},
       error: '',
+      error_ext: null,
       status: 0,
       seq: 0
     };
@@ -71,7 +85,8 @@ var QueryResult = React.createClass({
           data: {},
           error: data.error,
           status: data.status,
-          seq: data.seq
+          seq: data.seq,
+          error_ext: data.error_ext
         });
       }
     }
@@ -81,7 +96,8 @@ var QueryResult = React.createClass({
     if (this.state.seq > 0) {
       let content = null;
       if (this.state.status == -1) {
-        content = <ErrorResult message={this.state.error} />
+        content = <ErrorResult message={this.state.error}
+                               error_ext={this.state.error_ext} />
       } else if (this.state.status == 0) {
         content = <ResultInRows data={this.state.data} />
       }

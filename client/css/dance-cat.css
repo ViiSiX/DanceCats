@@ -162,4 +162,5 @@
 
 .query-result .result-table {
   min-height: 450px;
+  max-height: 725px;
 }

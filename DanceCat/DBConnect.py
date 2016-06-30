@@ -58,6 +58,20 @@ class DBConnect:
                 self.columns_name = self.cursor.column_names
                 if self.no_password:
                     self.password_field_coordinator()
+
+            elif self.type == Constants.SQLSERVER:
+                self.cursor = self.connection.cursor()
+                self.cursor.execute(query)
+
+                # create columns' name tuple
+                self.columns_name = ()
+                for i in range(0, len(self.cursor.description)):
+                    self.columns_name += (self.cursor.description[i][0],)
+                if self.no_password:
+                    self.password_field_coordinator()
+        except mysql.connector.ProgrammingError as e:
+            traceback.print_exc()
+            raise DBConnectException('Could not query "%s"' % query, self.type, trace_back=e)
         except Exception:
             traceback.print_exc()
             raise DBConnectException('Could not query "%s".' % query, self.type)
@@ -66,7 +80,7 @@ class DBConnect:
 
     def fetch(self):
         try:
-            if self.type == Constants.MYSQL:
+            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchone()
                 return self.convert_dict_one(data) if self.dict_format else self.tuple_process_one(data)
         except Exception:
@@ -75,7 +89,7 @@ class DBConnect:
 
     def fetch_many(self, size=1):
         try:
-            if self.type == Constants.MYSQL:
+            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchmany(size)
                 return self.convert_dict_many(data) if self.dict_format else self.tuple_process_many(data)
         except Exception:
@@ -84,7 +98,7 @@ class DBConnect:
 
     def fetch_all(self):
         try:
-            if self.type == Constants.MYSQL:
+            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchall()
                 return self.convert_dict_many(data) if self.dict_format else self.tuple_process_many(data)
         except Exception:
@@ -152,7 +166,8 @@ class DBConnect:
 
 
 class DBConnectException(Exception):
-    def __init__(self, message, connection_type):
+    def __init__(self, message, connection_type, trace_back=None):
         super(DBConnectException, self).__init__(message)
 
         self.connection_type = connection_type
+        self.trace_back = trace_back

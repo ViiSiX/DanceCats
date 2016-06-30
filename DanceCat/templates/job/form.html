@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="form-main">
-    <h3>{{ head }}</h3><legend></legend>
+    <h3>{{ action }} Job</h3><legend></legend>
     {% from "job/_formhelper.html" import render_field %}
     <form id="job-form"
           role="form"
           method=post
           class="job-form"
-          action="{{ action }}">
+          action="{{ action_url }}">
       {{ form.hidden_tag() }}
       {{ render_field(form.name, class="form-control") }}
       {{ render_field(form.annotation, class="form-control") }}
       {{ render_field(form.connectionId, class="form-control") }}
-      {{ render_field(form.query, class="form-control") }}
+      {{ render_field(form.queryString, class="form-control") }}
       <div class="row">
         <div class="col-sm-3">
           <input class="btn btn-primary" type=submit value=Save>
@@ -33,7 +33,7 @@
   <script type="text/javascript">
     var socket = DanceCat.Main.ws_connect('{{ url_for('index') }}');
     DanceCat.Main.AutoSize(document.getElementById('annotation'));
-    var queryTextArea = document.getElementById('query');
+    var queryTextArea = document.getElementById('queryString');
     var queryCodeMirror = DanceCat.Main.CodeMirror.fromTextArea(
         queryTextArea, {
           mode: 'text/x-sql',

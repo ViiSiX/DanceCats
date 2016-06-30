@@ -4,8 +4,8 @@
 - ~~Socket~~
 - ~~Query test for MySQL~~
 - ~~Simple React~~
-- Query test for SQL Server
-- Save job
+- ~~Query test for SQL Server~~
+- ~~Save job~~
 - Run and export CSV
 - Send emails (Flask-Mail)
 - Scheduling job

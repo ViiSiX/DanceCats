@@ -52,4 +52,4 @@ class JobForm(Form):
                                })
     connectionId = SelectField('Connection',
                                coerce=int)
-    query = TextAreaField('Query', validators=[validators.DataRequired()])
+    queryString = TextAreaField('Query', validators=[validators.DataRequired()])

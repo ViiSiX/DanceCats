@@ -27,6 +27,9 @@ class User(UserMixin, db.Model):
     lastUpdated = db.Column(db.DateTime, onupdate=datetime.datetime.now, default=datetime.datetime.now)
     version = db.Column(db.Integer, index=True, nullable=False)
 
+    connections = db.relationship('Connection', backref='User', lazy='joined')
+    jobs = db.relationship('Job', backref='User', lazy='joined')
+
     def __init__(self, user_email, user_password):
         self.email = user_email
         self.password = Helpers.encrypt_password(user_password)
@@ -62,6 +65,8 @@ class Connection(db.Model):
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     lastUpdated = db.Column(db.DateTime, onupdate=datetime.datetime.now, default=datetime.datetime.now)
     version = db.Column(db.Integer, index=True, nullable=False)
+
+    jobs = db.relationship('Job', backref='Connection', lazy='joined')
 
     def __init__(self, name, db_type, host, database, user_name,
                  creator_user_id, port=None, password=None):
@@ -103,18 +108,18 @@ class Job(db.Model):
     name = db.Column(db.String(100), nullable=False)
     annotation = db.Column(db.Text)
     connectionId = db.Column(db.Integer, db.ForeignKey('connection.id'), nullable=False)
-    query = db.Column(db.Text, nullable=False)
+    queryString = db.Column(db.Text, nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
     lastUpdated = db.Column(db.DateTime, onupdate=datetime.datetime.now, default=datetime.datetime.now)
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
-    def __init__(self, name, connection_id, query, user_id, annotation):
+    def __init__(self, name, connection_id, query_string, user_id, annotation):
         self.name = name
         self.annotation = annotation
         self.connectionId = connection_id
-        self.query = query
+        self.queryString = query_string
         self.userId = user_id
         self.version = Constants.MODEL_JOB_VERSION
 
@@ -146,6 +151,7 @@ class Schedule(db.Model):
     dayOfMonth = db.Column(db.SmallInteger, default=1, nullable=False)
     scheduleType = db.Column(db.SmallInteger, default=Constants.SCHEDULE_ONCE, nullable=False)
     nextRun = db.Column(db.DateTime, nullable=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
     version = db.Column(db.Integer, index=True, nullable=False)
 

@@ -22,25 +22,19 @@ def index():
 @app.route('/job')
 @login_required
 def job():
-    jobs = [
-        {
-            "name": "Count Application Number",
-            "connection": "FullDB",
-            "schedule": "Everyday at ",
-            "creator": "nghia.nguyen@navigosgroup.com",
-            "last_edit": ""
-        },
-        {
-            "name": "Count Application Number",
-            "connection": "FullDB",
-            "schedule": "Everyday at ",
-            "creator": "nghia.nguyen@navigosgroup.com",
-            "last_edit": ""
-        }
-    ]
+    jobs = Job.query.all()
+    job_lists = []
+    for job_object in jobs:
+        job_lists.append({
+            'id': job_object.id,
+            'name': job_object.name,
+            'last_updated': job_object.lastUpdated,
+            'user_email': job_object.User.email,
+            'connection_name': job_object.Connection.name
+        })
     return render_template('job/list.html',
                            title=Constants.PROJECT_NAME,
-                           jobs=jobs)
+                           jobs=job_lists)
 
 
 @app.route('/job/create', methods=['GET', 'POST'])
@@ -49,12 +43,38 @@ def job_create():
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
     if request.method == 'POST':
         if form.validate_on_submit():
+            new_job = Job(name=request.form['name'],
+                          annotation=request.form['annotation'],
+                          connection_id=request.form['connectionId'],
+                          query_string=request.form['query'],
+                          user_id=current_user.id)
+            db.session.add(new_job)
+            db.session.commit()
             return redirect(url_for('job'))
     return render_template('job/form.html',
                            title=Constants.PROJECT_NAME,
-                           head='Creating new Job',
-                           action=url_for('job_create'),
+                           action='Creating',
+                           action_url=url_for('job_create'),
                            form=form)
+
+
+@app.route('/job/edit/<job_id>', methods=['GET', 'POST'])
+@login_required
+def job_edit(job_id):
+    editing_job = Job.query.get_or_404(job_id)
+    form = JobForm(request.form, editing_job)
+    form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
+    if request.method == 'GET':
+        return render_template('job/form.html',
+                               title=Constants.PROJECT_NAME,
+                               action='Edit',
+                               action_url=url_for('job_edit', job_id=job_id),
+                               form=form)
+    else:
+        if form.validate_on_submit():
+            form.populate_obj(editing_job)
+            db.session.commit()
+        return redirect(url_for('job'))
 
 
 @app.route('/connection')
@@ -117,14 +137,15 @@ def connection_edit(connection_id):
                                test_url=url_for('connection_test', connection_id=connection_id),
                                form=form)
     else:
-        if Helpers.null_handler(request.form['password']) is not None:
-            form.populate_obj(editing_connection)
-            editing_connection.encrypt_password(request.form['password'])
-        else:
-            old_password = editing_connection.password
-            form.populate_obj(editing_connection)
-            editing_connection.password = old_password
-        db.session.commit()
+        if form.validate_on_submit():
+            if Helpers.null_handler(request.form['password']) is not None:
+                form.populate_obj(editing_connection)
+                editing_connection.encrypt_password(request.form['password'])
+            else:
+                old_password = editing_connection.password
+                form.populate_obj(editing_connection)
+                editing_connection.password = old_password
+            db.session.commit()
         return redirect(url_for('connection'))
 
 

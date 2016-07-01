@@ -9,10 +9,10 @@ class DBConnect:
     def __init__(self, connection_type, config, **kwargs):
         self.type = connection_type
         self.config = config
-        self.convert_sql = kwargs.get('convert_sql', False)
-        self.no_password = kwargs.get('no_password', True)
-        self.dict_format = kwargs.get('dict_format', False)
-        self.timeout = kwargs.get('timeout', 30)
+        self.is_sql_data_type = kwargs.get('sql_data_type', False)
+        self.is_hiding_password = kwargs.get('hide_password', True)
+        self.is_return_dict = kwargs.get('dict_format', False)
+        self.timeout = kwargs.get('timeout', 60)
 
         self.connection = None
         self.cursor = None
@@ -20,16 +20,16 @@ class DBConnect:
         self.columns_name = ()
         self.ignore_position = []
 
-    def connect(self):
+    def connect(self, timeout=None):
         try:
             if self.type == Constants.MYSQL:
-                self.config['connection_timeout'] = self.timeout
+                self.config['connection_timeout'] = self.timeout if timeout is None else timeout
                 self.connection = mysql.connector.connect(**self.config)
             elif self.type == Constants.SQLSERVER:
                 self.connection = pymssql.connect(**self.config)
-        except Exception:
+        except Exception as e:
             traceback.print_exc()
-            raise DBConnectException('Could not connect to the database.', self.type)
+            raise DBConnectException('Could not connect to the database.', self.type, trace_back=e)
 
     def close(self):
         try:
@@ -41,14 +41,10 @@ class DBConnect:
             traceback.print_exc()
             raise DBConnectException('Could not close the connection.', self.type)
 
-    def connection_test(self):
-        try:
-            self.connect()
-            self.close()
-            return not not self.connection
-        except DBConnectException:
-            traceback.print_exc()
-            return False
+    def connection_test(self, timeout=None):
+        self.connect(timeout)
+        self.close()
+        return bool(self.connection)
 
     def execute(self, query):
         try:
@@ -56,7 +52,7 @@ class DBConnect:
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(query)
                 self.columns_name = self.cursor.column_names
-                if self.no_password:
+                if self.is_hiding_password:
                     self.password_field_coordinator()
 
             elif self.type == Constants.SQLSERVER:
@@ -67,14 +63,11 @@ class DBConnect:
                 self.columns_name = ()
                 for i in range(0, len(self.cursor.description)):
                     self.columns_name += (self.cursor.description[i][0],)
-                if self.no_password:
+                if self.is_hiding_password:
                     self.password_field_coordinator()
-        except mysql.connector.ProgrammingError as e:
+        except Exception as e:
             traceback.print_exc()
-            raise DBConnectException('Could not query "%s"' % query, self.type, trace_back=e)
-        except Exception:
-            traceback.print_exc()
-            raise DBConnectException('Could not query "%s".' % query, self.type)
+            raise DBConnectException('Could not query "%s".' % query, self.type, trace_back=e)
         else:
             return True
 
@@ -82,28 +75,28 @@ class DBConnect:
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchone()
-                return self.convert_dict_one(data) if self.dict_format else self.tuple_process_one(data)
-        except Exception:
+                return self.convert_dict_one(data) if self.is_return_dict else self.tuple_process_one(data)
+        except Exception as e:
             traceback.print_exc()
-            raise DBConnectException('Could not fetch result(s).', self.type)
+            raise DBConnectException('Could not fetch result(s).', self.type, trace_back=e)
 
     def fetch_many(self, size=1):
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchmany(size)
-                return self.convert_dict_many(data) if self.dict_format else self.tuple_process_many(data)
-        except Exception:
+                return self.convert_dict_many(data) if self.is_return_dict else self.tuple_process_many(data)
+        except Exception as e:
             traceback.print_exc()
-            raise DBConnectException('Could not fetch result(s).', self.type)
+            raise DBConnectException('Could not fetch result(s).', self.type, trace_back=e)
 
     def fetch_all(self):
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchall()
-                return self.convert_dict_many(data) if self.dict_format else self.tuple_process_many(data)
-        except Exception:
+                return self.convert_dict_many(data) if self.is_return_dict else self.tuple_process_many(data)
+        except Exception as e:
             traceback.print_exc()
-            raise DBConnectException('Could not fetch result(s).', self.type)
+            raise DBConnectException('Could not fetch result(s).', self.type, trace_back=e)
 
     def convert_dict_one(self, data_tuple):
         if len(self.columns_name) == 0:
@@ -115,7 +108,7 @@ class DBConnect:
             if i in self.ignore_position:
                 continue
             data_dict[self.columns_name[i]] = \
-                Helpers.py2sql_type_convert(data_tuple[i]) if self.convert_sql else data_tuple[i]
+                Helpers.py2sql_type_convert(data_tuple[i]) if self.is_sql_data_type else data_tuple[i]
 
         return data_dict
 
@@ -132,7 +125,7 @@ class DBConnect:
                 if j in self.ignore_position:
                     continue
                 data_dict[self.columns_name[j]] = \
-                    Helpers.py2sql_type_convert(data_tuple_list[i][j]) if self.convert_sql else data_tuple_list[i][j]
+                    Helpers.py2sql_type_convert(data_tuple_list[i][j]) if self.is_sql_data_type else data_tuple_list[i][j]
 
             data_dict_list.append(data_dict)
 
@@ -144,7 +137,7 @@ class DBConnect:
         for i in range(0, len(data_tuple)):
             if i in self.ignore_position:
                 continue
-            new_data_tuple += (Helpers.py2sql_type_convert(data_tuple[i]) if self.convert_sql else data_tuple[i],)
+            new_data_tuple += (Helpers.py2sql_type_convert(data_tuple[i]) if self.is_sql_data_type else data_tuple[i],)
 
         return new_data_tuple
 
@@ -160,8 +153,8 @@ class DBConnect:
         if len(self.columns_name) == 0:
             raise DBConnectException('Column(s) name is empty.', self.type)
         for i in range(0, len(self.columns_name)):
-            if self.no_password:
-                if re.search(r'password|secret', self.columns_name[i], re.IGNORECASE) is not None:
+            if self.is_hiding_password:
+                if re.search(r'password|secret|userpass|confidential', self.columns_name[i], re.IGNORECASE) is not None:
                     self.ignore_position.append(i)
 
 

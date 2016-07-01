@@ -2,7 +2,8 @@ node_modules/
 DanceCat/static/bundle
 
 DanceCat.py
-config.py
+config.cfg
+start.sh
 
 *.pyc
 

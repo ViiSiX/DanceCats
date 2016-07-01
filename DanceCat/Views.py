@@ -4,7 +4,7 @@ from DanceCat import app, db, lm, Constants, Helpers
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
     Job, Schedule, TrackJobRun
-from DanceCat.DBConnect import DBConnect
+from DanceCat.DBConnect import DBConnect, DBConnectException
 import datetime
 
 
@@ -211,9 +211,15 @@ def connection_test(connection_id):
             testing_config = testing_connection.db_config_generator()
 
         db_connect = DBConnect(int(request.form['type']), testing_config)
-        return jsonify({
-            'connected': db_connect.connection_test()
-        })
+        try:
+            db_connect.connection_test(10)
+            return jsonify({
+                'connected': True
+            })
+        except DBConnectException:
+            return jsonify({
+                'connected': False
+            })
 
     return jsonify({
         'connected': False

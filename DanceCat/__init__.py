@@ -8,7 +8,6 @@ from flask_socketio import SocketIO
 app = Flask(__name__)
 Compress(app)
 
-app.config.from_object('config')
 config = app.config
 db = SQLAlchemy(app)
 

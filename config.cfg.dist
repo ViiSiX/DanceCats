@@ -2,6 +2,7 @@ WTF_CSRF_ENABLED = True
 SECRET_KEY = 'dance cat is dancing'
 
 DB_ENCRYPT_KEY = 'dance cat is trying to dance'
+DB_TIMEOUT = 120
 
 QUERY_TEST_LIMIT = 100
 

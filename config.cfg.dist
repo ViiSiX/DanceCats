@@ -8,3 +8,5 @@ QUERY_TEST_LIMIT = 100
 
 SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://dancecat:dancecat_password@127.0.0.1/dancecat'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+REDISLITE_PATH = '<path/to/redis/file.db>'

@@ -253,13 +253,15 @@ class Schedule(db.Model):
 class TrackJobRun(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    scheduleId = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=True)
     runOn = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     duration = db.Column(db.Integer, default=0, nullable=False)
     status = db.Column(db.SmallInteger, default=0, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
-    def __init__(self, job_id):
+    def __init__(self, job_id, schedule_id=None):
         self.jobId = job_id
+        self.scheduleId = schedule_id
         self.version = Constants.MODEL_TRACK_JOB_RUN_VERSION
 
     def update_run_duration(self, run_duration):

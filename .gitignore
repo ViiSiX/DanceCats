@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 DanceCat/static/bundle
 
 DanceCat.py
@@ -9,3 +9,6 @@ start.sh
 
 *.key
 *.cert
+
+*.rdb
+*.rdb.*

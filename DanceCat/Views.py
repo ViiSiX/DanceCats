@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
-from DanceCat import app, db, lm, Constants, Helpers
+from DanceCat import app, db, lm, Constants, Helpers, rdb
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
     Job, Schedule, TrackJobRun

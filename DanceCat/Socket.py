@@ -1,5 +1,4 @@
 import functools
-import flask_excel as excel
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 from DanceCat import socket_io, db, config, \
@@ -111,7 +110,11 @@ def export_csv(received_data):
                 connector.connect()
                 connector.execute(query)
                 connector.close()
-                excel.make_response_from_array([[1, 2], [3, 4]], "csv")
+                return emit(Constants.WS_CSV_RUN_SEND, {
+                    'status': 0,
+                    'header': connector.columns_name,
+                    'seq': runtime
+                })
             except DBConnectException as e:
                 print e
                 return emit(Constants.WS_QUERY_SEND, {

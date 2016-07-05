@@ -1,8 +1,7 @@
 import functools
 from flask_login import current_user
 from flask_socketio import disconnect, emit
-from DanceCat import socket_io, db, config, \
-    Constants, Helpers
+from DanceCat import socket_io, config, Constants, Helpers
 from DanceCat.DBConnect import DBConnect, DBConnectException
 from DanceCat.Models import Connection
 
@@ -74,65 +73,6 @@ def run_query(received_data):
 
     else:
         return emit(Constants.WS_QUERY_SEND, {
-            'status': -1,
-            'seq': runtime,
-            'error': 'Wrong data received!'
-        })
-
-
-@socket_io.on(Constants.WS_CSV_RUN_RECEIVE)
-@authenticated_only
-def export_csv(received_data):
-    """
-    :param received_data: Dictionary with connection id and query
-    :type received_data: dict
-    """
-    runtime = Helpers.generate_runtime()
-    if isinstance(received_data, dict):
-        connection_id = received_data.get('connectionId', 0)
-        query = received_data.get('query', '')
-
-        if query == '':
-            return emit(Constants.WS_QUERY_SEND, {
-                'status': -1,
-                'seq': runtime,
-                'error': 'Query is required!'
-            })
-
-        running_connection = Connection.query.get(connection_id)
-        if running_connection is not None:
-            try:
-                connector = DBConnect(running_connection.type,
-                                      running_connection.db_config_generator(),
-                                      sql_data_type=True,
-                                      dict_format=True,
-                                      timeout=5)
-                connector.connect()
-                connector.execute(query)
-                connector.close()
-                return emit(Constants.WS_CSV_RUN_SEND, {
-                    'status': 0,
-                    'header': connector.columns_name,
-                    'seq': runtime
-                })
-            except DBConnectException as e:
-                print e
-                return emit(Constants.WS_QUERY_SEND, {
-                    'status': -1,
-                    'data': 'None',
-                    'seq': runtime,
-                    'error': str(e),
-                    'error_ext': [str(e.trace_back)]
-                })
-        else:
-            return emit(Constants.WS_CSV_RUN_SEND, {
-                'status': -1,
-                'seq': runtime,
-                'error': 'Wrong data received!'
-            })
-
-    else:
-        return emit(Constants.WS_CSV_RUN_SEND, {
             'status': -1,
             'seq': runtime,
             'error': 'Wrong data received!'

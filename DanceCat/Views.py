@@ -13,8 +13,28 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+def simple_job():
+    import time
+    time.sleep(2)
+    return 12345
+
+
 @app.route('/')
 def index():
+    run_time = Helpers.generate_runtime()
+    job_id = 'foo_%d' % run_time
+
+    print 'Attention here\n==============='
+
+    queue = rdb.queue
+
+    queue.enqueue(simple_job, ttl=60, result_ttl=60, job_id=job_id)
+    print queue.jobs
+    print queue.fetch_job('foo_1467678098536')
+    job_ = queue.fetch_job(job_id)
+    print job_
+    print "End of attention\n==============="
+
     return render_template('about.html',
                            title=Constants.PROJECT_NAME)
 

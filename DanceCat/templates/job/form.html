@@ -22,12 +22,6 @@
              class="btn btn-success pull-right"
              id="run-query-btn"
           >Run</a>
-          {% if action == 'Edit' %}
-            <a href="#"
-               class="btn btn-success pull-right right-margin-10"
-               id="export-csv-btn"
-            >Export CSV</a>
-          {% endif %}
         </div>
       </div>
     </form>
@@ -63,20 +57,6 @@
 
       socket.emit(DanceCat.Constants.WS_QUERY_SEND, sendingData);
     } );
-
-    {% if action == 'Edit' %}
-      var $exportCsvBtn = DanceCat.Main.$(document.getElementById('export-csv-btn'));
-      $exportCsvBtn.click( function(){
-        $exportCsvBtn.addClass('disabled');
-
-        let sendingData = {
-          query: queryTextArea.value,
-          connectionId: document.getElementById('connectionId').value
-        };
-
-        socket.emit(DanceCat.Constants.WS_CSV_RUN_SEND, sendingData);
-      } );
-    {% endif %}
   </script>
   <script type="text/javascript"
           src="{{ url_for('static', filename='bundle/DanceCat.QueryResults.js') }}"

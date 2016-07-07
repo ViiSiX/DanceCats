@@ -1,11 +1,14 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify, abort
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from DanceCat import app, db, lm, Constants, Helpers, rdb
+from DanceCat import app, db, lm, rdb
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    Job, Schedule, TrackJobRun
-from DanceCat.DBConnect import DBConnect, DBConnectException
+    Job, TrackJobRun
+from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
+from JobWorker import job_worker
 import datetime
+import Helpers
+import Constants
 
 
 @lm.user_loader
@@ -13,28 +16,8 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-def simple_job():
-    import time
-    time.sleep(2)
-    return 12345
-
-
 @app.route('/')
 def index():
-    run_time = Helpers.generate_runtime()
-    job_id = 'foo_%d' % run_time
-
-    print 'Attention here\n==============='
-
-    queue = rdb.queue
-
-    queue.enqueue(simple_job, ttl=60, result_ttl=60, job_id=job_id)
-    print queue.jobs
-    print queue.fetch_job('foo_1467678098536')
-    job_ = queue.fetch_job(job_id)
-    print job_
-    print "End of attention\n==============="
-
     return render_template('about.html',
                            title=Constants.PROJECT_NAME)
 
@@ -54,7 +37,8 @@ def job():
         })
     return render_template('job/list.html',
                            title=Constants.PROJECT_NAME,
-                           jobs=job_lists)
+                           jobs=job_lists,
+                           trigger_url=url_for('job_run'))
 
 
 @app.route('/job/create', methods=['GET', 'POST'])
@@ -95,6 +79,31 @@ def job_edit(job_id):
             form.populate_obj(editing_job)
             db.session.commit()
         return redirect(url_for('job'))
+
+
+@app.route('/job/run', methods=['POST'])
+@login_required
+def job_run():
+    triggered_job = Job.query.get_or_404(request.form['id'])
+    tracker = TrackJobRun(triggered_job.id)
+    db.session.add(tracker)
+    db.session.commit()
+    queue = rdb.queue
+    queue.enqueue(
+        f=job_worker, kwargs={
+            'job_id': triggered_job.id,
+            'tracker_id': tracker.id
+        },
+        ttl=900, result_ttl=86400, job_id="%d" % tracker.id
+    )
+    return jsonify({'ack': True, 'tracker_id': tracker.id})
+
+
+@app.route('/job/result/<tracker_id>')
+@login_required
+def job_result(tracker_id):
+    queue = rdb.queue
+    return jsonify(queue.fetch_job(tracker_id).result)
 
 
 @app.route('/connection')
@@ -230,13 +239,13 @@ def connection_test(connection_id):
                 testing_connection.password = old_password
             testing_config = testing_connection.db_config_generator()
 
-        db_connect = DBConnect(int(request.form['type']), testing_config)
+        db_connect = DatabaseConnector(int(request.form['type']), testing_config)
         try:
             db_connect.connection_test(10)
             return jsonify({
                 'connected': True
             })
-        except DBConnectException:
+        except DatabaseConnectorException:
             return jsonify({
                 'connected': False
             })

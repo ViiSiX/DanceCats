@@ -22,11 +22,22 @@
           <td>{{ job.connection_name }}</td>
           <td>{{ job.user_email }}</td>
           <td>{{ job.last_updated }}</td>
-          <td><a href="{{ url_for('job_edit', job_id=job.id) }}">
-            Edit
-          </a> | Delete</td>
+          <td>
+            <a href="#"
+               id="job-run-btn"
+               onclick="DanceCat.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
+            >Run</a> |
+            <a href="{{ url_for('job_edit', job_id=job.id) }}">
+              Edit
+            </a> | Delete
+          </td>
         </tr>
       {% endfor %}
     </table>
   </div>
+{% endblock %}
+{% block post_script %}
+  <script type="text/javascript">
+
+  </script>
 {% endblock %}

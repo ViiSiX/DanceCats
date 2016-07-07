@@ -1,8 +1,7 @@
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
-    SelectField, \
-    BooleanField, IntegerField, validators
-from DanceCat import Constants
+    SelectField, IntegerField, validators
+import Constants
 
 
 class RegisterForm(Form):

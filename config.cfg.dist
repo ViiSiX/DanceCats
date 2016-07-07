@@ -10,5 +10,4 @@ SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://dancecat:dancecat_password@127
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 REDISLITE_PATH = '<path/to/redis/file.db>'
-
-WORKER_PID = '<path/to/redis/worker.pid>'
+REDISLITE_WORKER_PID = '<path/to/redis/worker.pid>'

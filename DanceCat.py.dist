@@ -2,11 +2,9 @@ import os
 from DanceCat import app, socket_io
 
 if __name__ == '__main__':
-    # edit this to suite your way of getting configuration
-    app.config.from_envvar('CONFIG_FILE')
-
     # key_file = os.path.join('DanceCat.key')
     # cert_file = os.path.join('DanceCat.cert')
+
     socket_io.run(app,
                   host='0.0.0.0',
                   port=8443,

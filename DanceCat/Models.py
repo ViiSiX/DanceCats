@@ -1,7 +1,9 @@
 from flask_login import UserMixin
-from DanceCat import db, config, Helpers, Constants
+from DanceCat import db, config
 from dateutil.relativedelta import relativedelta
 import datetime
+import Helpers
+import Constants
 
 
 class AllowedEmail(db.Model):
@@ -68,16 +70,18 @@ class Connection(db.Model):
 
     jobs = db.relationship('Job', backref='Connection', lazy='joined')
 
-    def __init__(self, name, db_type, host, database, user_name,
-                 creator_user_id, port=None, password=None):
-        self.name = name
+    def __init__(self, db_type, host, database, **kwargs):
+        self.name = kwargs.get(
+            'name',
+            "{host} - {db}".format(host=host, db=database)
+        )
         self.type = db_type
         self.host = host
-        self.port = port
-        self.userName = user_name
-        self.encrypt_password(password)
         self.database = database
-        self.userId = creator_user_id
+        self.port = kwargs.get('port')
+        self.userName = kwargs.get('user_name')
+        self.encrypt_password(kwargs.get('password'))
+        self.userId = kwargs['creator_user_id']
         self.version = Constants.MODEL_CONNECTION_VERSION
 
     def encrypt_password(self, password):
@@ -115,12 +119,12 @@ class Job(db.Model):
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
-    def __init__(self, name, connection_id, query_string, user_id, annotation):
+    def __init__(self, name, connection_id, query_string, **kwargs):
         self.name = name
-        self.annotation = annotation
+        self.annotation = kwargs.get('annotation')
         self.connectionId = connection_id
         self.queryString = query_string
-        self.userId = user_id
+        self.userId = kwargs['user_id']
         self.version = Constants.MODEL_JOB_VERSION
 
     def update_executed_times(self):
@@ -256,7 +260,8 @@ class TrackJobRun(db.Model):
     scheduleId = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=True)
     runOn = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     duration = db.Column(db.Integer, default=0, nullable=False)
-    status = db.Column(db.SmallInteger, default=0, nullable=False)
+    status = db.Column(db.SmallInteger, default=Constants.JOB_QUEUED, nullable=False)
+    errorString = db.Column(db.Text, nullable=True)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, job_id, schedule_id=None):
@@ -267,5 +272,6 @@ class TrackJobRun(db.Model):
     def update_run_duration(self, run_duration):
         self.duration = run_duration
 
-    def update_run_status(self, run_status):
+    def update_run_status(self, run_status, error_string=None):
         self.status = run_status
+        self.errorString = error_string

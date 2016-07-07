@@ -12,3 +12,4 @@ start.sh
 
 *.rdb
 *.rdb.*
+*.pid

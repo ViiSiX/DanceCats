@@ -2,7 +2,7 @@ import functools
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 from DanceCat import socket_io, config, Constants, Helpers
-from DanceCat.DBConnect import DBConnect, DBConnectException
+from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from DanceCat.Models import Connection
 
 
@@ -38,11 +38,11 @@ def run_query(received_data):
         running_connection = Connection.query.get(connection_id)
         if running_connection is not None:
             try:
-                connector = DBConnect(running_connection.type,
-                                      running_connection.db_config_generator(),
-                                      sql_data_type=True,
-                                      dict_format=True,
-                                      timeout=config.get('DB_TIMEOUT', 60))
+                connector = DatabaseConnector(running_connection.type,
+                                              running_connection.db_config_generator(),
+                                              sql_data_type=True,
+                                              dict_format=True,
+                                              timeout=config.get('DB_TIMEOUT', 60))
                 connector.connection_test(10)
                 connector.connect()
                 connector.execute(query)
@@ -54,7 +54,7 @@ def run_query(received_data):
                     'header': connector.columns_name,
                     'seq': runtime
                 })
-            except DBConnectException as e:
+            except DatabaseConnectorException as e:
                 print e
                 return emit(Constants.WS_QUERY_SEND, {
                     'status': -1,

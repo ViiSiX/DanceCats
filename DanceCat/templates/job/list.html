@@ -35,9 +35,15 @@
       {% endfor %}
     </table>
   </div>
+  <div class="container tracker-list" id="dc-trackers"></div>
 {% endblock %}
 {% block post_script %}
   <script type="text/javascript">
-
+    var socket = DanceCat.Main.ws_connect('{{ url_for('index') }}');
+    socket.emit(DanceCat.Constants.WS_TRACKERS_SEND);
   </script>
+  <script type="text/javascript"
+          src="{{ url_for('static', filename='bundle/DanceCat.Trackers.js') }}"
+          charset="UTF-8"
+          ></script>
 {% endblock %}

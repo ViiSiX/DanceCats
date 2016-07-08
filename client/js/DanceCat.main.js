@@ -31,17 +31,11 @@ module.exports['delete_on_click'] = function delete_on_click(el, delete_url, del
 };
 
 module.exports['job_trigger_on_click'] = function (trigger_url, job_id) {
-  console.log(trigger_url);
-  console.log(job_id);
   $.post(
     trigger_url,
     {
       id: job_id
-    },
-    function (ret_data) {
-      console.log(ret_data)
     }
-    
   )
 };
 

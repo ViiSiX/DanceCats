@@ -1,10 +1,12 @@
 import functools
 import Helpers
+import Constants
+from flask import url_for
 from flask_login import current_user
 from flask_socketio import disconnect, emit
-from DanceCat import socket_io, config, Constants
+from DanceCat import socket_io, config, db
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
-from DanceCat.Models import Connection
+from DanceCat.Models import Connection, Job, TrackJobRun
 
 
 def authenticated_only(f):
@@ -78,3 +80,32 @@ def run_query(received_data):
             'seq': runtime,
             'error': 'Wrong data received!'
         })
+
+
+@socket_io.on(Constants.WS_TRACKERS_RECEIVE)
+@authenticated_only
+def get_trackers():
+    runtime = Helpers.generate_runtime()
+
+    query = db.session.query(TrackJobRun, Job).join(Job)
+    trackers = query.order_by(TrackJobRun.id.desc()).limit(20).all()
+    trackers_list = []
+
+    for tracker in trackers:
+        trackers_list.append({
+            'id': tracker.TrackJobRun.id,
+            'jobName': tracker.Job.name,
+            'database': tracker.Job.Connection.database,
+            'status': Constants.JOB_TRACKING_STATUS_DICT[tracker.TrackJobRun.status]['name'],
+            'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ranOn),
+            'duration': tracker.TrackJobRun.duration,
+            'csv': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='csv') if
+            tracker.TrackJobRun.status == Constants.JOB_RUN_SUCCESS else None,
+            'xlsx': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='xlsx') if
+            tracker.TrackJobRun.status == Constants.JOB_RUN_SUCCESS else None,
+        })
+
+    return emit(Constants.WS_TRACKERS_SEND, {
+        'seq': runtime,
+        'trackers': trackers_list
+    })

@@ -175,3 +175,14 @@
   border-radius: 2px;
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
 }
+
+/* Tracker List */
+.tracker-list {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.tracker-list .table th,td {
+  text-align: center;
+}

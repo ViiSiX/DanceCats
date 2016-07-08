@@ -1,5 +1,8 @@
 # Dance Cat
 -----------
+
+[![Code Health](https://landscape.io/github/scattm/DanceCat/master/landscape.svg?style=flat)](https://landscape.io/github/scattm/DanceCat/master)
+
 #### Installation
 
 Download and install mysql-connector-python [here](https://dev.mysql.com/downloads/connector/python/). My version is 2.1.3.

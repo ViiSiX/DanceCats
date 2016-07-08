@@ -5,11 +5,6 @@ PROJECT_NAME = 'Dance Cat - Data Report'
 MYSQL = 1
 SQLSERVER = 2
 
-DB_DEFAULT_PORT = {
-    MYSQL: 3306,
-    SQLSERVER: 1433
-}
-
 CONNECTION_TYPES_LIST = [
     (MYSQL, 'MySQL'),
     (SQLSERVER, 'SQL Server')
@@ -34,6 +29,21 @@ JOB_RUNNING = 1
 JOB_RUN_SUCCESS = 2
 JOB_RUN_FAILED = 3
 
+JOB_TRACKING_STATUS_DICT = {
+    JOB_QUEUED: {
+        'name': 'Queued'
+    },
+    JOB_RUNNING: {
+        'name': 'Running'
+    },
+    JOB_RUN_SUCCESS: {
+        'name': 'Success'
+    },
+    JOB_RUN_FAILED: {
+        'name': 'Failed'
+    }
+}
+
 # Model versions section
 MODEL_ALLOWED_EMAIL_VERSION = 1
 MODEL_USER_VERSION = 1
@@ -52,5 +62,5 @@ SCHEDULE_MONTHLY = 4
 # Socket Section
 WS_QUERY_SEND = 'r_query'
 WS_QUERY_RECEIVE = 's_query'
-WS_CSV_RUN_SEND = 'r_csv_run'
-WS_CSV_RUN_RECEIVE = 's_csv_run'
+WS_TRACKERS_SEND = 's_trackers'
+WS_TRACKERS_RECEIVE = 'r_trackers'

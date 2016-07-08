@@ -1,6 +1,5 @@
-import Constants
+from Helpers import Timer
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
-from DanceCat.Timer import Timer
 
 
 def job_worker(job_id, tracker_id):
@@ -22,7 +21,7 @@ def job_worker(job_id, tracker_id):
     job = Job.query.get(job_id)
 
     tracker = TrackJobRun.query.get(tracker_id)
-    tracker.update_run_status(run_status=Constants.JOB_RUNNING)
+    tracker.start()
     db.session.commit()
 
     try:
@@ -39,8 +38,10 @@ def job_worker(job_id, tracker_id):
         results_header = db_connector.columns_name
         results_rows = db_connector.fetch_all()
 
-        tracker.update_run_status(run_status=Constants.JOB_RUN_SUCCESS)
-        tracker.update_run_duration(run_duration=timer.get_total_milliseconds())
+        tracker.complete(
+            is_success=True,
+            run_duration=timer.get_total_milliseconds()
+        )
         db.session.commit()
 
         return {
@@ -49,13 +50,19 @@ def job_worker(job_id, tracker_id):
         }
 
     except DatabaseConnectorException as e:
-        tracker.update_run_status(run_status=Constants.JOB_RUN_FAILED, error_string=e.message)
-        tracker.update_run_duration(run_duration=timer.get_total_milliseconds())
+        tracker.complete(
+            is_success=False,
+            run_duration=timer.get_total_milliseconds(),
+            error_string=e.message
+        )
         db.session.commit()
 
     except Exception as e:
-        tracker.update_run_status(run_status=Constants.JOB_RUN_FAILED, error_string=e.message)
-        tracker.update_run_duration(run_duration=timer.get_total_milliseconds())
+        tracker.complete(
+            is_success=False,
+            run_duration=timer.get_total_milliseconds(),
+            error_string=e.message
+        )
         db.session.commit()
 
     return None

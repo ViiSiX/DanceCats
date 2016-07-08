@@ -1,10 +1,10 @@
+import FrequencyTaskChecker
 from flask import Flask
 from flask_compress import Compress
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from flask_redislite import FlaskRedis
-# from FrequencyTaskChecker import frequency_checker
 
 
 app = Flask(__name__)
@@ -25,9 +25,9 @@ lm.login_message_category = "alert-danger"
 
 socket_io = SocketIO(app)
 
-# frequency_task_checker(5)
-
 with app.app_context():
     rdb.start_worker()
+
+FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
 
 from DanceCat import Views, ErrorViews, Socket

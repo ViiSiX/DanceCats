@@ -6,7 +6,8 @@ module.exports = [
     entry: {
       Main: './client/js/DanceCat.Main.js',
       Constants: ['./client/js/DanceCat.Constants.js'],
-      QueryResults: './client/jsx/DanceCat.QueryResult.js'
+      QueryResults: './client/jsx/DanceCat.QueryResult.js',
+      Trackers: './client/jsx/DanceCat.Trackers.js'
     },
     output: {
       path: './DanceCat/static/bundle/',

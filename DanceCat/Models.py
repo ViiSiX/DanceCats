@@ -258,7 +258,8 @@ class TrackJobRun(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     scheduleId = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=True)
-    runOn = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+    scheduledOn = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
+    ranOn = db.Column(db.DateTime, nullable=True)
     duration = db.Column(db.Integer, default=0, nullable=False)
     status = db.Column(db.SmallInteger, default=Constants.JOB_QUEUED, nullable=False)
     errorString = db.Column(db.Text, nullable=True)
@@ -269,9 +270,11 @@ class TrackJobRun(db.Model):
         self.scheduleId = schedule_id
         self.version = Constants.MODEL_TRACK_JOB_RUN_VERSION
 
-    def update_run_duration(self, run_duration):
-        self.duration = run_duration
+    def start(self):
+        self.ranOn = datetime.datetime.now()
+        self.status = Constants.JOB_RUNNING
 
-    def update_run_status(self, run_status, error_string=None):
-        self.status = run_status
+    def complete(self, is_success, run_duration, error_string=None):
+        self.status = Constants.JOB_RUN_SUCCESS if is_success else Constants.JOB_RUN_FAILED
+        self.duration = run_duration
         self.errorString = error_string

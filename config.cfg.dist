@@ -3,6 +3,7 @@ SECRET_KEY = 'dance cat is dancing'
 
 DB_ENCRYPT_KEY = 'dance cat is trying to dance'
 DB_TIMEOUT = 120
+FREQUENCY_PID = '<path/to/your/frequency.pid>'
 
 QUERY_TEST_LIMIT = 100
 

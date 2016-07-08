@@ -1,7 +1,8 @@
 import functools
+import Helpers
 from flask_login import current_user
 from flask_socketio import disconnect, emit
-from DanceCat import socket_io, config, Constants, Helpers
+from DanceCat import socket_io, config, Constants
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from DanceCat.Models import Connection
 

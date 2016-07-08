@@ -6,7 +6,7 @@ import Constants
 import Helpers
 
 
-class DatabaseConnector:
+class DatabaseConnector(object):
     def __init__(self, connection_type, config, **kwargs):
         self.type = connection_type
         self.config = config

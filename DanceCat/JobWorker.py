@@ -1,6 +1,4 @@
 import Constants
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from DanceCat.Timer import Timer
 

@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from DanceCat import app, db, lm, rdb
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
@@ -6,6 +6,7 @@ from DanceCat.Models import User, AllowedEmail, Connection, \
     Job, TrackJobRun
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from JobWorker import job_worker
+import flask_excel as excel
 import datetime
 import Helpers
 import Constants
@@ -50,7 +51,7 @@ def job_create():
             new_job = Job(name=request.form['name'],
                           annotation=request.form['annotation'],
                           connection_id=request.form['connectionId'],
-                          query_string=request.form['query'],
+                          query_string=request.form['queryString'],
                           user_id=current_user.id)
             db.session.add(new_job)
             db.session.commit()
@@ -99,11 +100,24 @@ def job_run():
     return jsonify({'ack': True, 'tracker_id': tracker.id})
 
 
-@app.route('/job/result/<tracker_id>')
+@app.route('/job/result/<tracker_id>/<result_type>')
 @login_required
-def job_result(tracker_id):
+def job_result(tracker_id, result_type):
     queue = rdb.queue
-    return jsonify(queue.fetch_job(tracker_id).result)
+    result = queue.fetch_job(tracker_id).result
+    if result_type in ['csv', 'xls', 'xlsx', 'ods']:
+        result_array = [list(result['header'])]
+        for row in result['rows']:
+            result_array.append(list(row))
+        return excel.make_response_from_array(
+            result_array,
+            result_type,
+            file_name="Result_tid_{tid}.{ext}".format(tid=tracker_id, ext=result_type)
+        )
+    elif result_type == 'raw':
+        return jsonify(result)
+    else:
+        abort(404)
 
 
 @app.route('/connection')

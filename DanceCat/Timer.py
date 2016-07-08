@@ -1,7 +1,7 @@
 import time
 
 
-class Timer:
+class Timer(object):
     def __init__(self):
         self.start_time = time.time() * 1000
 

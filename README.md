@@ -28,6 +28,7 @@ Setup DB using python console.
 Update `config.cfg` file that suite your needs. Then setup DB using python console:
 ```
 source /path/to/your/virtualenv/bin/activate
+export CONFIG_FILE=</path/to/config/file>
 python
 from DanceCat import db
 db.create_all()

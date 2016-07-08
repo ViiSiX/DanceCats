@@ -1,11 +1,15 @@
+import os
 from DanceCat import app, socket_io
 
 if __name__ == '__main__':
+    # key_file = os.path.join('DanceCat.key')
+    # cert_file = os.path.join('DanceCat.cert')
+
     socket_io.run(app,
                   host='0.0.0.0',
                   port=8443,
                   debug=True,
                   # For SSL
-                  # keyfile='DanceCat.key'
-                  # certfile='DanceCat.cert'
+                  # keyfile=key_file,
+                  # certfile=cert_file
                   )

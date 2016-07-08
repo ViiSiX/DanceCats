@@ -1,11 +1,15 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
-from DanceCat import app, db, lm, Constants, Helpers
+from DanceCat import app, db, lm, rdb
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    Job, Schedule, TrackJobRun
-from DanceCat.DBConnect import DBConnect
+    Job, TrackJobRun
+from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
+from JobWorker import job_worker
+import flask_excel as excel
 import datetime
+import Helpers
+import Constants
 
 
 @lm.user_loader
@@ -34,7 +38,8 @@ def job():
         })
     return render_template('job/list.html',
                            title=Constants.PROJECT_NAME,
-                           jobs=job_lists)
+                           jobs=job_lists,
+                           trigger_url=url_for('job_run'))
 
 
 @app.route('/job/create', methods=['GET', 'POST'])
@@ -46,7 +51,7 @@ def job_create():
             new_job = Job(name=request.form['name'],
                           annotation=request.form['annotation'],
                           connection_id=request.form['connectionId'],
-                          query_string=request.form['query'],
+                          query_string=request.form['queryString'],
                           user_id=current_user.id)
             db.session.add(new_job)
             db.session.commit()
@@ -75,6 +80,44 @@ def job_edit(job_id):
             form.populate_obj(editing_job)
             db.session.commit()
         return redirect(url_for('job'))
+
+
+@app.route('/job/run', methods=['POST'])
+@login_required
+def job_run():
+    triggered_job = Job.query.get_or_404(request.form['id'])
+    tracker = TrackJobRun(triggered_job.id)
+    db.session.add(tracker)
+    db.session.commit()
+    queue = rdb.queue
+    queue.enqueue(
+        f=job_worker, kwargs={
+            'job_id': triggered_job.id,
+            'tracker_id': tracker.id
+        },
+        ttl=900, result_ttl=86400, job_id="%d" % tracker.id
+    )
+    return jsonify({'ack': True, 'tracker_id': tracker.id})
+
+
+@app.route('/job/result/<tracker_id>/<result_type>')
+@login_required
+def job_result(tracker_id, result_type):
+    queue = rdb.queue
+    result = queue.fetch_job(tracker_id).result
+    if result_type in ['csv', 'xls', 'xlsx', 'ods']:
+        result_array = [list(result['header'])]
+        for row in result['rows']:
+            result_array.append(list(row))
+        return excel.make_response_from_array(
+            result_array,
+            result_type,
+            file_name="Result_tid_{tid}.{ext}".format(tid=tracker_id, ext=result_type)
+        )
+    elif result_type == 'raw':
+        return jsonify(result)
+    else:
+        abort(404)
 
 
 @app.route('/connection')
@@ -210,10 +253,16 @@ def connection_test(connection_id):
                 testing_connection.password = old_password
             testing_config = testing_connection.db_config_generator()
 
-        db_connect = DBConnect(int(request.form['type']), testing_config)
-        return jsonify({
-            'connected': db_connect.connection_test()
-        })
+        db_connect = DatabaseConnector(int(request.form['type']), testing_config)
+        try:
+            db_connect.connection_test(10)
+            return jsonify({
+                'connected': True
+            })
+        except DatabaseConnectorException:
+            return jsonify({
+                'connected': False
+            })
 
     return jsonify({
         'connected': False

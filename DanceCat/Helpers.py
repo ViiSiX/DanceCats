@@ -1,6 +1,7 @@
 from Crypto.Cipher import ARC4
 from decimal import Decimal
 import datetime
+import time
 import base64
 import hashlib
 import uuid
@@ -37,9 +38,9 @@ def null_handler(obj):
 def py2sql_type_convert(obj):
     if obj is None:
         return 'NULL'
-    if type(obj) is Decimal:
+    if isinstance(obj, Decimal):
         return str(obj)
-    if type(obj) is datetime.datetime:
+    if isinstance(obj, datetime.datetime):
         return u'{value}'.format(value=obj.strftime('%Y-%m-%d %H:%M:%S'))
     return obj
 
@@ -62,3 +63,28 @@ def validate_day_of_week(value):
 
 def validate_day_of_month(value):
     return validate_int_between(value, 1, 31)
+
+
+def generate_runtime():
+    return int(time.time() * 1000)
+
+
+def sleep(seconds):
+    time.sleep(seconds)
+
+
+class Timer(object):
+    def __init__(self):
+        self.start_time = time.time() * 1000
+
+    def get_total_time(self):
+        total_time = time.time() * 1000 - self.start_time
+        if total_time >= 60000:
+            return "%d minutes %d seconds" % (total_time / 60000, (total_time % 60000) / 1000)
+        elif total_time >= 1000:
+            return "%d seconds" % (total_time / 1000)
+        else:
+            return "%d milliseconds" % total_time
+
+    def get_total_milliseconds(self):
+        return time.time() * 1000 - self.start_time

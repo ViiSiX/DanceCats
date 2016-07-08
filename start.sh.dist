@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export KEY_FILE=</path/to/key/file>
+export CERT_FILE=</path/to/cert/file>
+
+export CONFIG_FILE=</path/to/config/file>
+
+source </path/to/your/virtualenv>/bin/activate
+
+cd </path/to/your/DanceCat>
+python DanceCat.py

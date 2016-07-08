@@ -30,6 +30,15 @@ module.exports['delete_on_click'] = function delete_on_click(el, delete_url, del
   )
 };
 
+module.exports['job_trigger_on_click'] = function (trigger_url, job_id) {
+  $.post(
+    trigger_url,
+    {
+      id: job_id
+    }
+  )
+};
+
 function led_remove_status(led_el) {
   led_el.removeClass('led-off led-yellow led-blue led-red led-green')
 }
@@ -57,6 +66,10 @@ module.exports['db_connect_test_on_click'] = function db_connect_test_onclick(te
       }
     }
   );
+};
+
+module.exports['job_run_on_click'] = function (url, job_id) {
+  
 };
 
 module.exports['ws_connect'] = function (connect_url) {

@@ -1,0 +1,9 @@
+doc-warnings: true
+test-warnings: false
+strictness: high
+max-line-length: 120
+uses:
+  - flask
+autodetect: true
+python-targets:
+  - 2

@@ -19,6 +19,7 @@ def job_worker(job_id, tracker_id):
     from DanceCat import db
 
     job = Job.query.get(job_id)
+    job.update_executed_times()
 
     tracker = TrackJobRun.query.get(tracker_id)
     tracker.start()

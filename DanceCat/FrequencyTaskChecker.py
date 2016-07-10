@@ -1,3 +1,7 @@
+"""
+This module will be used to check the schedule and
+enqueue the next running job into the queue.
+"""
 import time
 import atexit
 import signal

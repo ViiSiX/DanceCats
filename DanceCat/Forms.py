@@ -1,6 +1,8 @@
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
-    SelectField, IntegerField, validators
+    SelectField, IntegerField, \
+    FormField, FieldList, \
+    validators
 import Constants
 
 
@@ -37,6 +39,19 @@ class ConnectionForm(Form):
     ])
 
 
+class JobMailToForm(Form):
+    emailAddress = StringField(
+        'Email',
+        render_kw={
+            'placeholder': 'report_to@dancecat.com'
+        },
+        validators=[
+            validators.DataRequired(),
+            validators.Email()
+        ]
+    )
+
+
 class JobForm(Form):
     name = StringField('Name',
                        render_kw={
@@ -52,3 +67,6 @@ class JobForm(Form):
     connectionId = SelectField('Connection',
                                coerce=int)
     queryString = TextAreaField('Query', validators=[validators.DataRequired()])
+    emails = FieldList(FormField(JobMailToForm),
+                       'Send Result To',
+                       min_entries=1)

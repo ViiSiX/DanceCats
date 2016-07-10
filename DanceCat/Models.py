@@ -119,6 +119,8 @@ class Job(db.Model):
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
+    emails = db.relationship('JobMailTo', backref='Job', lazy='joined')
+
     def __init__(self, name, connection_id, query_string, **kwargs):
         self.name = name
         self.annotation = kwargs.get('annotation')
@@ -253,6 +255,11 @@ class Schedule(db.Model):
 
         self.nextRun = next_run_time
 
+    def __repr__(self):
+        return '<Schedule Id {id} of Job Id {jobId}>'.format(
+            id=self.id, jobId=self.jobId
+        )
+
 
 class TrackJobRun(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -299,3 +306,28 @@ class TrackJobRun(db.Model):
             return True
 
         return False
+
+    def __repr__(self):
+        return '<Tracker {id}: Job Id {jobId} {status}>'.format(
+            id=self.id, jobId=self.jobId,
+            status=Constants.JOB_TRACKING_STATUS_DICT[self.status]['name']
+        )
+
+
+class JobMailTo(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    emailAddress = db.Column(db.String(100), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('jobId', 'emailAddress', name='job_email_unq'),
+    )
+
+    def __init__(self, job_id, email_address):
+        self.jobId = job_id
+        self.emailAddress = email_address
+
+    def __repr__(self):
+        return '<Job {id} - {email_address}>'.format(
+            id=self.id, email_address=self.emailAddress
+        )

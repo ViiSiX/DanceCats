@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from DanceCat import app, db, lm, rdb
 from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    Job, TrackJobRun
+    Job, TrackJobRun, JobMailTo
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from JobWorker import job_worker
 import flask_excel as excel
@@ -46,6 +46,8 @@ def job():
 def job_create():
     form = JobForm(request.form)
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
+    if len(form.emails.entries) == 0:
+        form.emails.append_entry()
     if request.method == 'POST':
         if form.validate_on_submit():
             new_job = Job(name=request.form['name'],
@@ -55,6 +57,16 @@ def job_create():
                           user_id=current_user.id)
             db.session.add(new_job)
             db.session.commit()
+
+            for mail_to in form.emails.entries:
+                if mail_to.data['emailAddress'] != '':
+                    new_mail_to = JobMailTo(
+                        job_id=new_job.id,
+                        email_address=mail_to.data['emailAddress']
+                    )
+                    db.session.add(new_mail_to)
+                    db.session.commit()
+
             return redirect(url_for('job'))
     return render_template('job/form.html',
                            title=Constants.PROJECT_NAME,

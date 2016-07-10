@@ -275,6 +275,27 @@ class TrackJobRun(db.Model):
         self.status = Constants.JOB_RUNNING
 
     def complete(self, is_success, run_duration, error_string=None):
-        self.status = Constants.JOB_RUN_SUCCESS if is_success else Constants.JOB_RUN_FAILED
+        self.status = Constants.JOB_RAN_SUCCESS if is_success else Constants.JOB_RAN_FAILED
         self.duration = run_duration
         self.errorString = error_string
+
+    def check_expiration(self):
+        """
+
+        :return: True if the result is expiring.
+                 False if the result is still valid or expired.
+        """
+        if self.status != Constants.JOB_RAN_SUCCESS:
+            return False
+
+        time_delta = (
+                         (
+                             datetime.datetime.now() - self.ranOn
+                         ).total_seconds() * 1000
+                     ) + self.duration
+        if self.status == Constants.JOB_RAN_SUCCESS\
+                and time_delta > config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
+            self.status = Constants.JOB_RESULT_EXPIRED
+            return True
+
+        return False

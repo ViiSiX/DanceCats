@@ -92,6 +92,8 @@ def get_trackers():
     trackers_list = []
 
     for tracker in trackers:
+        if tracker.TrackJobRun.check_expiration():
+            db.session.commit()
         trackers_list.append({
             'id': tracker.TrackJobRun.id,
             'jobName': tracker.Job.name,
@@ -100,9 +102,9 @@ def get_trackers():
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ranOn),
             'duration': tracker.TrackJobRun.duration,
             'csv': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='csv') if
-            tracker.TrackJobRun.status == Constants.JOB_RUN_SUCCESS else None,
+            tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
             'xlsx': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='xlsx') if
-            tracker.TrackJobRun.status == Constants.JOB_RUN_SUCCESS else None,
+            tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
         })
 
     return emit(Constants.WS_TRACKERS_SEND, {

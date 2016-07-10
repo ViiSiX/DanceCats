@@ -7,6 +7,8 @@ FREQUENCY_PID = '<path/to/your/frequency.pid>'
 
 QUERY_TEST_LIMIT = 100
 
+JOB_RESULT_VALID_SECONDS = 86400
+
 SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://dancecat:dancecat_password@127.0.0.1/dancecat'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 

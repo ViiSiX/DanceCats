@@ -95,7 +95,9 @@ def job_run():
             'job_id': triggered_job.id,
             'tracker_id': tracker.id
         },
-        ttl=900, result_ttl=86400, job_id="%d" % tracker.id
+        ttl=900,
+        result_ttl=app.config.get('JOB_RESULT_VALID_SECONDS', 86400),
+        job_id="%d" % tracker.id
     )
     return jsonify({'ack': True, 'tracker_id': tracker.id})
 

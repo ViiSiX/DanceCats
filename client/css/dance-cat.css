@@ -183,6 +183,7 @@
   width: 100%;
 }
 
-.tracker-list .table th,td {
+.tracker-list table th,
+.tracker-list table td {
   text-align: center;
 }

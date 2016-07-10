@@ -26,8 +26,9 @@ CONNECTION_TYPES_DICT = {
 # Job Tracking section
 JOB_QUEUED = 0
 JOB_RUNNING = 1
-JOB_RUN_SUCCESS = 2
-JOB_RUN_FAILED = 3
+JOB_RAN_SUCCESS = 2
+JOB_RAN_FAILED = 3
+JOB_RESULT_EXPIRED = 4
 
 JOB_TRACKING_STATUS_DICT = {
     JOB_QUEUED: {
@@ -36,11 +37,14 @@ JOB_TRACKING_STATUS_DICT = {
     JOB_RUNNING: {
         'name': 'Running'
     },
-    JOB_RUN_SUCCESS: {
+    JOB_RAN_SUCCESS: {
         'name': 'Success'
     },
-    JOB_RUN_FAILED: {
+    JOB_RAN_FAILED: {
         'name': 'Failed'
+    },
+    JOB_RESULT_EXPIRED: {
+        'name': 'Result Expired'
     }
 }
 

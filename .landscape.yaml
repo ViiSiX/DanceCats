@@ -1,7 +1,7 @@
 doc-warnings: true
 test-warnings: false
 strictness: high
-max-line-length: 120
+max-line-length: 100
 uses:
   - flask
 autodetect: true

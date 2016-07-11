@@ -1,13 +1,24 @@
+"""
+Contains the forms classes which is extended from
+    WTForms. Used for template's forms rendering.
+"""
+
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
     SelectField, IntegerField, \
-    FormField, FieldList, \
+    FieldList, \
     validators
 from wtforms.compat import iteritems
-import Constants
+from . import Constants
 
 
 class RegisterForm(Form):
+
+    """
+    Form which is used for register new member
+        and also Log In function.
+    """
+
     email = StringField('Email Address', validators=[
         validators.DataRequired(),
         validators.Email()
@@ -19,6 +30,9 @@ class RegisterForm(Form):
 
 
 class ConnectionForm(Form):
+
+    """Form which is used to create/edit Database connection"""
+
     type = SelectField('Connection Type',
                        coerce=int,
                        choices=Constants.CONNECTION_TYPES_LIST)
@@ -40,20 +54,10 @@ class ConnectionForm(Form):
     ])
 
 
-class JobMailToForm(Form):
-    emailAddress = StringField(
-        'Email',
-        render_kw={
-            'placeholder': 'report_to@dancecat.com'
-        },
-        validators=[
-            validators.DataRequired(),
-            validators.Email()
-        ]
-    )
-
-
 class JobForm(Form):
+
+    """Used to create/edit data getting jobs."""
+
     name = StringField('Name',
                        render_kw={
                            'placeholder': 'Your job name'
@@ -79,6 +83,13 @@ class JobForm(Form):
                        'Send Result To')
 
     def populate_obj(self, obj):
+        """
+        Since Form's default `populate_obj` function populate all
+            the fields in this class, this function will do the same
+            function except `emails` field.
+
+        :param obj: Job Model object.
+        """
         for name, field in iteritems(self._fields):
             if name != 'emails':
                 field.populate_obj(obj, name)

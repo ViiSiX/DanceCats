@@ -1,21 +1,32 @@
+"""
+This module contains functions which will be called
+    whenever the application receive the right socket event.
+"""
+
 import functools
-import Helpers
-import Constants
 from flask import url_for
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 from DanceCat import socket_io, config, db
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from DanceCat.Models import Connection, Job, TrackJobRun
+from . import Helpers
+from . import Constants
 
 
-def authenticated_only(f):
-    @functools.wraps(f)
+def authenticated_only(func):
+    """
+    Wrapper which ensure the user must be logged in
+        to call the functions.
+    """
+    @functools.wraps(func)
     def wrapped(*args, **kwargs):
+        """Wrapper."""
         if not current_user.is_authenticated:
             disconnect()
         else:
-            return f(*args, **kwargs)
+            return func(*args, **kwargs)
+
     return wrapped
 
 
@@ -23,8 +34,10 @@ def authenticated_only(f):
 @authenticated_only
 def run_query(received_data):
     """
-    :param received_data: Dictionary with connection id and query
-    :type received_data: dict
+    Used to run/test the query input from job's form.
+
+    :param received_data: Dictionary with connection id and query.
+    :type received_data: dict.
     """
     runtime = Helpers.generate_runtime()
     if isinstance(received_data, dict):
@@ -43,7 +56,7 @@ def run_query(received_data):
             try:
                 connector = DatabaseConnector(running_connection.type,
                                               running_connection.db_config_generator(),
-                                              sql_data_type=True,
+                                              sql_data_style=True,
                                               dict_format=True,
                                               timeout=config.get('DB_TIMEOUT', 60))
                 connector.connection_test(10)
@@ -57,14 +70,14 @@ def run_query(received_data):
                     'header': connector.columns_name,
                     'seq': runtime
                 })
-            except DatabaseConnectorException as e:
-                print e
+            except DatabaseConnectorException as exception:
+                print exception
                 return emit(Constants.WS_QUERY_SEND, {
                     'status': -1,
                     'data': 'None',
                     'seq': runtime,
-                    'error': str(e),
-                    'error_ext': [str(e.trace_back)]
+                    'error': str(exception),
+                    'error_ext': [str(exception.trace_back)]
                 })
 
         else:
@@ -85,6 +98,7 @@ def run_query(received_data):
 @socket_io.on(Constants.WS_TRACKERS_RECEIVE)
 @authenticated_only
 def get_trackers():
+    """Get the trackers of ran jobs. """
     runtime = Helpers.generate_runtime()
 
     query = db.session.query(TrackJobRun, Job).join(Job)
@@ -101,10 +115,14 @@ def get_trackers():
             'status': Constants.JOB_TRACKING_STATUS_DICT[tracker.TrackJobRun.status]['name'],
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ranOn),
             'duration': tracker.TrackJobRun.duration,
-            'csv': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='csv') if
-            tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
-            'xlsx': url_for('job_result', tracker_id=tracker.TrackJobRun.id, result_type='xlsx') if
-            tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
+            'csv': url_for('job_result',
+                           tracker_id=tracker.TrackJobRun.id,
+                           result_type='csv')
+            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
+            'xlsx': url_for('job_result',
+                            tracker_id=tracker.TrackJobRun.id,
+                            result_type='xlsx')
+            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
         })
 
     return emit(Constants.WS_TRACKERS_SEND, {

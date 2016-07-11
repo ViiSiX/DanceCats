@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from flask_redislite import FlaskRedis
+from flask_mail import Mail
 
 
 app = Flask(__name__)
@@ -22,6 +23,8 @@ lm.login_view = 'login'
 lm.session_protection = "strong"
 lm.login_message = "Please log in to continue!"
 lm.login_message_category = "alert-danger"
+
+mail = Mail(app)
 
 socket_io = SocketIO(app)
 

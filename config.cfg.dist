@@ -14,3 +14,10 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 REDISLITE_PATH = '<path/to/redis/file.db>'
 REDISLITE_WORKER_PID = '<path/to/redis/worker.pid>'
+
+MAIL_SERVER = 'your-mail-server'
+MAIL_PORT = 465
+MAIL_USE_SSL = True
+MAIL_USERNAME = 'your-user-name'
+MAIL_PASSWORD = 'your-password'
+MAIL_DEFAULT_SENDER = 'your-default-sender'

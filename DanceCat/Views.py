@@ -1,24 +1,28 @@
+import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
+import flask_excel as excel
 from DanceCat import app, db, lm, rdb
-from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.Models import User, AllowedEmail, Connection, \
     Job, TrackJobRun, JobMailTo
+from DanceCat.Forms import RegisterForm, ConnectionForm, JobForm
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
-from JobWorker import job_worker
-import flask_excel as excel
-import datetime
-import Helpers
-import Constants
+from .JobWorker import job_worker
+from . import Helpers
+from . import Constants
 
 
 @lm.user_loader
 def load_user(user_id):
+    """Load the user."""
+
     return User.query.get(user_id)
 
 
 @app.route('/')
 def index():
+    """Render and return About Page."""
+
     return render_template('about.html',
                            title=Constants.PROJECT_NAME)
 
@@ -26,6 +30,8 @@ def index():
 @app.route('/job')
 @login_required
 def job():
+    """Render and return Job Listing Page."""
+
     jobs = Job.query.all()
     job_lists = []
     for job_object in jobs:
@@ -44,6 +50,8 @@ def job():
 
 @app.route('/job/create', methods=['GET', 'POST'])
 def job_create():
+    """Render and return Create New Job Page."""
+
     form = JobForm(request.form)
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
     if request.method == 'POST':
@@ -76,6 +84,8 @@ def job_create():
 @app.route('/job/edit/<job_id>', methods=['GET', 'POST'])
 @login_required
 def job_edit(job_id):
+    """Render and return Edit Job Page."""
+
     editing_job = Job.query.get_or_404(job_id)
     form = JobForm(request.form, editing_job)
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
@@ -119,6 +129,8 @@ def job_edit(job_id):
 @app.route('/job/run', methods=['POST'])
 @login_required
 def job_run():
+    """Trigger a job."""
+
     triggered_job = Job.query.get_or_404(request.form['id'])
     tracker = TrackJobRun(triggered_job.id)
     db.session.add(tracker)
@@ -139,6 +151,8 @@ def job_run():
 @app.route('/job/result/<tracker_id>/<result_type>')
 @login_required
 def job_result(tracker_id, result_type):
+    """Download Job's result."""
+
     queue = rdb.queue
     result = queue.fetch_job(tracker_id).result
     if result_type in ['csv', 'xls', 'xlsx', 'ods']:
@@ -159,6 +173,8 @@ def job_result(tracker_id, result_type):
 @app.route('/connection')
 @login_required
 def connection():
+    """Render and return Collection Listing Page."""
+
     connections = Connection.query.all()
     connections_list = []
     for connection_obj in connections:
@@ -180,6 +196,8 @@ def connection():
 @app.route('/connection/create', methods=['GET', 'POST'])
 @login_required
 def connection_create():
+    """Render and return Create New Connection Page."""
+
     form = ConnectionForm(request.form)
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -206,6 +224,7 @@ def connection_create():
 @app.route('/connection/edit/<connection_id>', methods=['GET', 'POST'])
 @login_required
 def connection_edit(connection_id):
+    """Render and return Edit Connection Page."""
     editing_connection = Connection.query.get_or_404(connection_id)
     form = ConnectionForm(request.form, editing_connection)
     if request.method == 'GET':
@@ -231,6 +250,8 @@ def connection_edit(connection_id):
 @app.route('/connection/delete', methods=['POST'])
 @login_required
 def connection_delete():
+    """Delete the Connection."""
+
     deleting_connection = Connection.query.get(request.form['id'])
     if deleting_connection is not None:
         db.session.delete(deleting_connection)
@@ -249,6 +270,8 @@ def connection_delete():
 @app.route('/connection/get_mime/<connection_id>')
 @login_required
 def connection_get_mime(connection_id):
+    """Get the mime of the Connection. Currently unused."""
+
     conn = Connection.query.with_entities(Connection.id, Connection.type).filter_by(id=connection_id).first()
     if conn is not None:
         return jsonify({
@@ -265,6 +288,8 @@ def connection_get_mime(connection_id):
 @app.route('/connection/test/<connection_id>', methods=['POST'])
 @login_required
 def connection_test(connection_id):
+    """Test the connection."""
+
     form = ConnectionForm(obj=request.form)
     if form.validate_on_submit():
         if connection_id == 0:
@@ -307,6 +332,8 @@ def connection_test(connection_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Log In Page."""
+
     form = RegisterForm(request.form)
     if request.method == 'GET':
         return render_template('login.html',
@@ -342,5 +369,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """Log Out."""
+
     logout_user()
     return redirect(url_for('index'))

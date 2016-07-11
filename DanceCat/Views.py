@@ -46,8 +46,6 @@ def job():
 def job_create():
     form = JobForm(request.form)
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
-    if len(form.emails.entries) == 0:
-        form.emails.append_entry()
     if request.method == 'POST':
         if form.validate_on_submit():
             new_job = Job(name=request.form['name'],
@@ -59,10 +57,10 @@ def job_create():
             db.session.commit()
 
             for mail_to in form.emails.entries:
-                if mail_to.data['emailAddress'] != '':
+                if mail_to.data != '':
                     new_mail_to = JobMailTo(
                         job_id=new_job.id,
-                        email_address=mail_to.data['emailAddress']
+                        email_address=mail_to.data
                     )
                     db.session.add(new_mail_to)
                     db.session.commit()
@@ -81,6 +79,8 @@ def job_edit(job_id):
     editing_job = Job.query.get_or_404(job_id)
     form = JobForm(request.form, editing_job)
     form.connectionId.choices = Connection.query.with_entities(Connection.id, Connection.name).all()
+    if len(form.emails.entries) == 0:
+        form.emails.append_entry()
     if request.method == 'GET':
         return render_template('job/form.html',
                                title=Constants.PROJECT_NAME,
@@ -91,6 +91,28 @@ def job_edit(job_id):
         if form.validate_on_submit():
             form.populate_obj(editing_job)
             db.session.commit()
+
+            db.session.query(JobMailTo).\
+                filter_by(jobId=editing_job.id).\
+                update({JobMailTo.enable: False})
+            db.session.commit()
+            for mail_to in form.emails.entries:
+                if mail_to.data != '':
+                    existing_mail_to = \
+                        JobMailTo.query.filter_by(
+                            jobId=editing_job.id, emailAddress=mail_to.data
+                        ).first()
+                    if existing_mail_to is None:
+                        new_mail_to = JobMailTo(
+                            job_id=editing_job.id,
+                            email_address=mail_to.data
+                        )
+                        db.session.add(new_mail_to)
+                        db.session.commit()
+                    else:
+                        existing_mail_to.enable = True
+                        db.session.commit()
+
         return redirect(url_for('job'))
 
 

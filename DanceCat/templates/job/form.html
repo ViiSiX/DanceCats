@@ -16,10 +16,10 @@
       <div class="form-group job-email-to-field-list col-md-6">
         <label>{{ form.emails.label }}</label>
         {% for e in form.emails %}
-          {{ e.form.emailAddress(class="form-control form-control-mail-to")|safe }}
-          {% if e.form.emailAddress.errors %}
+          {{ e(class="form-control form-control-mail-to")|safe }}
+          {% if e.errors %}
             <ul class=errors>
-            {% for error in e.form.emailAddress.errors %}
+            {% for error in e.errors %}
               <li>{{ error }}</li>
             {% endfor %}
             </ul>

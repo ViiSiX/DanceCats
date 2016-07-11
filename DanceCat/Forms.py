@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, TextAreaField, \
     SelectField, IntegerField, \
     FormField, FieldList, \
     validators
+from wtforms.compat import iteritems
 import Constants
 
 
@@ -67,6 +68,17 @@ class JobForm(Form):
     connectionId = SelectField('Connection',
                                coerce=int)
     queryString = TextAreaField('Query', validators=[validators.DataRequired()])
-    emails = FieldList(FormField(JobMailToForm),
-                       'Send Result To',
-                       min_entries=1)
+    emails = FieldList(StringField('Email',
+                                   render_kw={
+                                       'placeholder': 'report_to@dancecat.com'
+                                   },
+                                   validators=[
+                                       validators.Optional(),
+                                       validators.Email()
+                                   ]),
+                       'Send Result To')
+
+    def populate_obj(self, obj):
+        for name, field in iteritems(self._fields):
+            if name != 'emails':
+                field.populate_obj(obj, name)

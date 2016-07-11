@@ -119,7 +119,11 @@ class Job(db.Model):
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
-    emails = db.relationship('JobMailTo', backref='Job', lazy='joined')
+    emails = db.relationship('JobMailTo',
+                             primaryjoin="and_(Job.id==JobMailTo.jobId, "
+                                         "JobMailTo.enable==True)",
+                             backref='Job',
+                             lazy='joined')
 
     def __init__(self, name, connection_id, query_string, **kwargs):
         self.name = name
@@ -318,6 +322,7 @@ class JobMailTo(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     emailAddress = db.Column(db.String(100), nullable=False)
+    enable = db.Column(db.Boolean, default=True, nullable=False)
 
     __table_args__ = (
         db.UniqueConstraint('jobId', 'emailAddress', name='job_email_unq'),
@@ -328,6 +333,6 @@ class JobMailTo(db.Model):
         self.emailAddress = email_address
 
     def __repr__(self):
-        return '<Job {id} - {email_address}>'.format(
+        return '{email_address}'.format(
             id=self.id, email_address=self.emailAddress
         )

@@ -1,13 +1,22 @@
-import FrequencyTaskChecker
+"""
+Initial for the application.
+In this file import and setup the necessary extensions
+for later usages.
+"""
+
 from flask import Flask
 from flask_compress import Compress
-from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from flask_login import LoginManager
-from flask_socketio import SocketIO
 from flask_redislite import FlaskRedis
+from flask_socketio import SocketIO
+from flask_sqlalchemy import SQLAlchemy
+from . import FrequencyTaskChecker
 
 
+# pylint: disable=C0103
 app = Flask(__name__)
+
 Compress(app)
 
 config = app.config
@@ -23,6 +32,8 @@ lm.session_protection = "strong"
 lm.login_message = "Please log in to continue!"
 lm.login_message_category = "alert-danger"
 
+mail = Mail(app)
+
 socket_io = SocketIO(app)
 
 with app.app_context():
@@ -31,3 +42,5 @@ with app.app_context():
 FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
 
 from DanceCat import Views, ErrorViews, Socket
+
+# pylint: enable=C0103

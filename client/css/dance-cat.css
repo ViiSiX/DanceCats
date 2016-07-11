@@ -150,6 +150,7 @@
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #6b6b6b 0 -1px 9px, #cdcdcd 0 2px 14px;
 }
 
+/* Job */
 /* Query Results */
 .query-result {
   border: 1px solid #ccc;
@@ -168,6 +169,18 @@
   min-height: 450px;
   max-height: 725px;
 }
+
+/* Email To */
+.job-email-to-field-list {
+  display: block;
+  float: none;
+}
+
+.form-control-mail-to {
+  margin-top: 10px;
+}
+
+/* End Job */
 
 /* Code Mirror */
 .CodeMirror {

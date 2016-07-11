@@ -13,4 +13,4 @@ start.sh
 *.rdb
 *.rdb.*
 *.pid
-venv
+*venv

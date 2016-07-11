@@ -13,6 +13,19 @@
       {{ render_field(form.annotation, class="form-control") }}
       {{ render_field(form.connectionId, class="form-control") }}
       {{ render_field(form.queryString, class="form-control") }}
+      <div class="form-group job-email-to-field-list col-md-6">
+        <label>{{ form.emails.label }}</label>
+        {% for e in form.emails %}
+          {{ e(class="form-control form-control-mail-to")|safe }}
+          {% if e.errors %}
+            <ul class=errors>
+            {% for error in e.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
       <div class="row">
         <div class="col-sm-3">
           <input class="btn btn-primary" type=submit value=Save>

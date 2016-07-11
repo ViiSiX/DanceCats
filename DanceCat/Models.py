@@ -1,6 +1,6 @@
 """
 This module contains the Models which is extended from
-SQLAlchemy's Base Model.
+    SQLAlchemy's Base Model.
 """
 
 import datetime
@@ -14,9 +14,10 @@ from . import Constants
 # pylint: disable=C0103,R0902
 
 class AllowedEmail(db.Model):
+
     """
     AllowedEmail Model indicate which email
-    will be allowed to register new user.
+        will be allowed to register new user.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -42,9 +43,10 @@ class AllowedEmail(db.Model):
 
 
 class User(UserMixin, db.Model):
+
     """
     The User class represent for the User table
-    contain a user's information.
+        contain a user's information.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -67,7 +69,6 @@ class User(UserMixin, db.Model):
         :param user_email: User's email.
         :param user_password: User's password in clear text.
         """
-
         self.email = user_email
         self.password = Helpers.encrypt_password(user_password)
         self.version = Constants.MODEL_USER_VERSION
@@ -75,18 +76,15 @@ class User(UserMixin, db.Model):
     @property
     def is_active(self):
         """Check if the user is active or not - Flask-Login method."""
-
         return self.isActive
 
     @property
     def is_anonymous(self):
         """Return True if user is anonymous - Flask-Login method."""
-
         return False
 
     def get_id(self):
         """Get the user id in unicode string."""
-
         try:
             return unicode(self.id)
         except NameError:
@@ -94,14 +92,14 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         """Print the User instance."""
-
         return '<User %r - Id %r>' % (self.email, self.id)
 
 
 class Connection(db.Model):
+
     """
     Connection Model class represent for the connection table
-    which is used to store the connections to the Databases.
+        which is used to store the connections to the Databases.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -137,7 +135,6 @@ class Connection(db.Model):
             user_name: User which is used to connect to the database.
             password: Password which is used to connect to the database.
         """
-
         self.name = kwargs.get(
             'name',
             "{host} - {db}".format(host=host, db=database)
@@ -153,7 +150,6 @@ class Connection(db.Model):
 
     def encrypt_password(self, password):
         """Encrypt the clear text password."""
-
         self.password = Helpers.db_credential_encrypt(
             password, config['DB_ENCRYPT_KEY']
         ) if password else None
@@ -163,7 +159,6 @@ class Connection(db.Model):
         Generate the database configuration which will
         be passed to DatabaseConnector class's constructor.
         """
-
         db_config = {
             'user': self.userName,
             'host': self.host,
@@ -184,16 +179,16 @@ class Connection(db.Model):
 
     def __repr__(self):
         """Print the Connection instance."""
-
         return '<Connection "{name}" - Id {id}>'.format(
             name=self.name, id=self.id
         )
 
 
 class Job(db.Model):
+
     """
     Job Model class represent for job table which is used to
-    store the get data job's information.
+        store the get data job's information.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -228,7 +223,6 @@ class Job(db.Model):
             user_id: Job's creator's User Id.
             annotation: Job's description and annotation.
         """
-
         self.name = name
         self.annotation = kwargs.get('annotation')
         self.connectionId = connection_id
@@ -238,18 +232,17 @@ class Job(db.Model):
 
     def update_executed_times(self):
         """Update Job's total executed times."""
-
         self.noOfExecuted += 1
 
     def __repr__(self):
         """Print the Job instance."""
-
         return '<Job "{name}" - Id {id}>'.format(
             name=self.name, id=self.id
         )
 
 
 class Schedule(db.Model):
+
     """
     Schedule Model class represent for the schedule table.
 
@@ -292,7 +285,6 @@ class Schedule(db.Model):
             day_of_month: example 28.
             next_run: datetime instance.
         """
-
         self.jobId = job_id
         self.scheduleType = schedule_type
         self.isActive = kwargs.get('is_active', False)
@@ -324,7 +316,6 @@ class Schedule(db.Model):
         """
         :return: True if the schedule will be run on the feature else False.
         """
-
         if self.scheduleType == Constants.SCHEDULE_ONCE:
             return self.nextRun > datetime.datetime.now()
 
@@ -347,7 +338,6 @@ class Schedule(db.Model):
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
-
         # TODO: Better algorithm
 
         if not validated:
@@ -392,13 +382,13 @@ class Schedule(db.Model):
 
     def __repr__(self):
         """Print the Schedule instance."""
-
         return '<Schedule Id {id} of Job Id {jobId}>'.format(
             id=self.id, jobId=self.jobId
         )
 
 
 class TrackJobRun(db.Model):
+
     """Track status whenever a job is running."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -420,14 +410,12 @@ class TrackJobRun(db.Model):
         :param schedule_id:
             Running Schedule's Id.
         """
-
         self.jobId = job_id
         self.scheduleId = schedule_id
         self.version = Constants.MODEL_TRACK_JOB_RUN_VERSION
 
     def start(self):
         """Call to track when the Job begin to run."""
-
         self.ranOn = datetime.datetime.now()
         self.status = Constants.JOB_RUNNING
 
@@ -439,7 +427,6 @@ class TrackJobRun(db.Model):
         :param run_duration: Runtime in milliseconds.
         :param error_string: Error when the job is failed.
         """
-
         self.status = Constants.JOB_RAN_SUCCESS if is_success else Constants.JOB_RAN_FAILED
         self.duration = run_duration
         self.errorString = error_string
@@ -450,7 +437,6 @@ class TrackJobRun(db.Model):
         :return: True if the result is expiring.
                  False if the result is still valid or expired.
         """
-
         if self.status != Constants.JOB_RAN_SUCCESS:
             return False
 
@@ -467,7 +453,6 @@ class TrackJobRun(db.Model):
 
     def __repr__(self):
         """Print the Job Tracker instance."""
-
         return '<Tracker {id}: Job Id {jobId} {status}>'.format(
             id=self.id, jobId=self.jobId,
             status=Constants.JOB_TRACKING_STATUS_DICT[self.status]['name']
@@ -475,6 +460,7 @@ class TrackJobRun(db.Model):
 
 
 class JobMailTo(db.Model):
+
     """Emails which the result will be sent to."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -494,13 +480,11 @@ class JobMailTo(db.Model):
         :param email_address:
             Email which will receive the results.
         """
-
         self.jobId = job_id
         self.emailAddress = email_address
 
     def __repr__(self):
         """Print the email."""
-
         return '{email_address}'.format(
             email_address=self.emailAddress
         )

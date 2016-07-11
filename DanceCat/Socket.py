@@ -1,6 +1,6 @@
 """
 This module contains functions which will be called
-whenever the application receive the right socket event.
+    whenever the application receive the right socket event.
 """
 
 import functools
@@ -17,13 +17,11 @@ from . import Constants
 def authenticated_only(func):
     """
     Wrapper which ensure the user must be logged in
-    to call the functions.
+        to call the functions.
     """
-
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         """Wrapper."""
-
         if not current_user.is_authenticated:
             disconnect()
         else:
@@ -41,7 +39,6 @@ def run_query(received_data):
     :param received_data: Dictionary with connection id and query.
     :type received_data: dict.
     """
-
     runtime = Helpers.generate_runtime()
     if isinstance(received_data, dict):
         connection_id = received_data.get('connectionId', 0)
@@ -102,7 +99,6 @@ def run_query(received_data):
 @authenticated_only
 def get_trackers():
     """Get the trackers of ran jobs. """
-
     runtime = Helpers.generate_runtime()
 
     query = db.session.query(TrackJobRun, Job).join(Job)

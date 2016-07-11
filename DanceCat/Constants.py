@@ -1,6 +1,6 @@
 """
 Constant that will be used through throughout
-the application.
+    the application.
 """
 
 # Project section

@@ -1,6 +1,6 @@
 """
 This module will be used to check the schedule and
-enqueue the next running job into the queue.
+    enqueue the next running job into the queue.
 """
 
 import time
@@ -14,15 +14,13 @@ from os import remove
 def frequency_checker(pid_path, feq=60):
     """
     This function will check and enqueue scheduled jobs
-    when the running time will come. After that sleep
-    for `feq` seconds and repeat.
+        when the running time will come. After that sleep
+        for `feq` seconds and repeat.
     """
-
     # TODO: sleep if not enough time to cover lost time.
 
     def exit_handler(*args):
         """Clean up before quiting the process."""
-
         if len(args) > 0:
             print "Exit py signal {signal}".format(signal=args[0])
         remove(pid_path)
@@ -46,7 +44,6 @@ def start(feq=60, pid_path='frequency.pid'):
     :param feq: Seconds the checker will sleep throughout idle time.
     :param pid_path: Location of the PID file.
     """
-
     try:
         pid_file = open(pid_path, 'r')
         pid = int(pid_file.read())

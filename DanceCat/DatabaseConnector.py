@@ -1,7 +1,7 @@
 """
 This module contain DatabaseConnector and
-DatabaseConnectorException class which is used
-to wrap different DBMS Connector drivers.
+    DatabaseConnectorException class which is used
+    to wrap different DBMS Connector drivers.
 """
 
 import traceback
@@ -13,9 +13,10 @@ from . import Helpers
 
 
 class DatabaseConnector(object):
+
     """
     DatabaseConnector will be use to wrap around
-    other DBMS Connector drivers to different DBMS.
+        other DBMS Connector drivers to different DBMS.
     """
 
     def __init__(self, connection_type, config, **kwargs):
@@ -37,7 +38,6 @@ class DatabaseConnector(object):
                 dict_format: return data rows in dictionary or tuple format.
                 timeout: default timeout for the connection.
         """
-
         self.type = connection_type
         self.config = config
         self.is_sql_data_type = kwargs.get('sql_data_style', False)
@@ -59,7 +59,6 @@ class DatabaseConnector(object):
             Default timeout to be passed to the new connection.
         :return: raise DatabaseConnectorException on failed.
         """
-
         try:
             if self.type == Constants.MYSQL:
                 self.config['connection_timeout'] = \
@@ -80,7 +79,6 @@ class DatabaseConnector(object):
         Close the Database connection. Raise
         DatabaseConnectorException on failed.
         """
-
         try:
             if self.type in [
                 Constants.MYSQL, Constants.SQLSERVER
@@ -103,14 +101,12 @@ class DatabaseConnector(object):
             the class's default timeout.
         :return: True if connection is established else False.
         """
-
         self.connect(timeout)
         self.close()
         return bool(self.connection)
 
     def execute(self, query):
         """Execute the given query. Return True on success."""
-
         try:
             if self.type == Constants.MYSQL:
                 self.cursor = self.connection.cursor()
@@ -141,7 +137,6 @@ class DatabaseConnector(object):
 
     def fetch(self):
         """Fetch single row of the result."""
-
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchone()
@@ -157,7 +152,6 @@ class DatabaseConnector(object):
 
     def fetch_many(self, size=1):
         """Fetch given number of rows of the result."""
-
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchmany(size)
@@ -173,7 +167,6 @@ class DatabaseConnector(object):
 
     def fetch_all(self):
         """Fetch all result rows."""
-
         try:
             if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
                 data = self.cursor.fetchall()
@@ -258,6 +251,7 @@ class DatabaseConnector(object):
 
 
 class DatabaseConnectorException(Exception):
+
     """Use as a exception type of DatabaseConnector class."""
 
     def __init__(self, message, connection_type, trace_back=None):

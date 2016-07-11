@@ -1,6 +1,6 @@
 """
 This module contains the job's workers that will be
-passed to the RQ worker to run in the background.
+    passed to the RQ worker to run in the background.
 """
 
 import traceback
@@ -14,12 +14,15 @@ from .Helpers import Timer
 def job_worker(job_id, tracker_id):
     """
     For now only focus on execute and save results to redis.
-    TODO:
-     - will focus on trunking for better performance.
-     - better error tracking
+
     :param job_id: Job object create from Model.Job
     :param tracker_id: Job Tracker for tracking job status
     :return: query result
+    """
+    """
+    TODO:
+    - will focus on trunking for better performance.
+    - better error tracking
     """
 
     timer = Timer()

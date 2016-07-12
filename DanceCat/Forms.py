@@ -51,7 +51,7 @@ class ConnectionForm(Form):
     ])
 
 
-class JobForm(Form):
+class QueryJobForm(Form):
     """Used to create/edit data getting jobs."""
 
     name = StringField('Name',
@@ -76,7 +76,8 @@ class JobForm(Form):
                                        validators.Optional(),
                                        validators.Email()
                                    ]),
-                       'Send Result To')
+                       'Send Result To',
+                       min_entries=1)
 
     def populate_obj(self, obj):
         """

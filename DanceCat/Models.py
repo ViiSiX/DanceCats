@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.Models module.
+
 This module contains the Models which is extended from
-    SQLAlchemy's Base Model.
+SQLAlchemy's Base Model.
 """
 
 import datetime
@@ -14,10 +16,11 @@ from . import Constants
 # pylint: disable=C0103,R0902
 
 class AllowedEmail(db.Model):
-
     """
+    Docstring for AllowedEmail class.
+
     AllowedEmail Model indicate which email
-        will be allowed to register new user.
+    will be allowed to register new user.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -26,6 +29,7 @@ class AllowedEmail(db.Model):
 
     def __init__(self, allowed_email):
         """
+        Constructor for AllowedEmail class.
 
         :param allowed_email:
             The email that will be allow to
@@ -35,18 +39,16 @@ class AllowedEmail(db.Model):
         self.version = Constants.MODEL_ALLOWED_EMAIL_VERSION
 
     def __repr__(self):
-        """
-
-        :return: The allowed email address.
-        """
+        """Print allowed email address."""
         return '{email}'.format(email=self.email)
 
 
 class User(UserMixin, db.Model):
-
     """
+    Docstring for User Model class.
+
     The User class represent for the User table
-        contain a user's information.
+    contain a user's information.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -65,6 +67,7 @@ class User(UserMixin, db.Model):
 
     def __init__(self, user_email, user_password):
         """
+        Constructor for User class.
 
         :param user_email: User's email.
         :param user_password: User's password in clear text.
@@ -96,10 +99,11 @@ class User(UserMixin, db.Model):
 
 
 class Connection(db.Model):
-
     """
+    Docstring for Connection Model class.
+
     Connection Model class represent for the connection table
-        which is used to store the connections to the Databases.
+    which is used to store the connections to the Databases.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -120,6 +124,7 @@ class Connection(db.Model):
 
     def __init__(self, db_type, host, database, creator_user_id, **kwargs):
         """
+        Constructor for Connection class.
 
         :param db_type:
             Database Type which is defined in Constant module.
@@ -156,6 +161,8 @@ class Connection(db.Model):
 
     def db_config_generator(self):
         """
+        Generate database config.
+
         Generate the database configuration which will
         be passed to DatabaseConnector class's constructor.
         """
@@ -185,10 +192,11 @@ class Connection(db.Model):
 
 
 class Job(db.Model):
-
     """
+    Docstring for Job Model class.
+
     Job Model class represent for job table which is used to
-        store the get data job's information.
+    store the get data job's information.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -212,6 +220,7 @@ class Job(db.Model):
 
     def __init__(self, name, connection_id, query_string, **kwargs):
         """
+        Constructor for Job.
 
         :param name:
             Job's name.
@@ -242,7 +251,6 @@ class Job(db.Model):
 
 
 class Schedule(db.Model):
-
     """
     Schedule Model class represent for the schedule table.
 
@@ -314,6 +322,8 @@ class Schedule(db.Model):
 
     def validate(self):
         """
+        Validate the schedule.
+
         :return: True if the schedule will be run on the feature else False.
         """
         if self.scheduleType == Constants.SCHEDULE_ONCE:
@@ -388,7 +398,6 @@ class Schedule(db.Model):
 
 
 class TrackJobRun(db.Model):
-
     """Track status whenever a job is running."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -433,6 +442,7 @@ class TrackJobRun(db.Model):
 
     def check_expiration(self):
         """
+        Check and update result expiration.
 
         :return: True if the result is expiring.
                  False if the result is still valid or expired.
@@ -460,7 +470,6 @@ class TrackJobRun(db.Model):
 
 
 class JobMailTo(db.Model):
-
     """Emails which the result will be sent to."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -474,6 +483,7 @@ class JobMailTo(db.Model):
 
     def __init__(self, job_id, email_address):
         """
+        Docstring for JobMailTo Model constructor.
 
         :param job_id:
             Job's Id.

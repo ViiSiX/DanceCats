@@ -1,8 +1,4 @@
-"""
-Initial for the application.
-In this file import and setup the necessary extensions
-for later usages.
-"""
+"""Initial for the application, import and setup the necessary extensions."""
 
 from flask import Flask
 from flask_compress import Compress

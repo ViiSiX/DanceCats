@@ -1,7 +1,4 @@
-"""
-Constant that will be used through throughout
-    the application.
-"""
+"""Constant that will be used through throughout the application."""
 
 # Project section
 PROJECT_NAME = 'Dance Cat - Data Report'

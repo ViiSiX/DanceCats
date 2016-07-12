@@ -14,7 +14,7 @@ def page_not_found(error):
 
 @app.errorhandler(500)
 def page_error(error):
-    """500 Error Page for the application"""
+    """500 Error Page for the application."""
     return render_template('error/500.html',
                            title=Constants.PROJECT_NAME,
                            error=error), 500

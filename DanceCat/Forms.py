@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.Forms module.
+
 Contains the forms classes which is extended from
-    WTForms. Used for template's forms rendering.
+WTForms. Used for template's forms rendering.
 """
 
 from flask_wtf import Form
@@ -13,11 +15,7 @@ from . import Constants
 
 
 class RegisterForm(Form):
-
-    """
-    Form which is used for register new member
-        and also Log In function.
-    """
+    """Form which is used for register new member and also Log In function."""
 
     email = StringField('Email Address', validators=[
         validators.DataRequired(),
@@ -30,8 +28,7 @@ class RegisterForm(Form):
 
 
 class ConnectionForm(Form):
-
-    """Form which is used to create/edit Database connection"""
+    """Form which is used to create/edit Database connection."""
 
     type = SelectField('Connection Type',
                        coerce=int,
@@ -55,7 +52,6 @@ class ConnectionForm(Form):
 
 
 class JobForm(Form):
-
     """Used to create/edit data getting jobs."""
 
     name = StringField('Name',
@@ -84,9 +80,11 @@ class JobForm(Form):
 
     def populate_obj(self, obj):
         """
+        Populate form to object.
+
         Since Form's default `populate_obj` function populate all
-            the fields in this class, this function will do the same
-            function except `emails` field.
+        the fields in this class, this function will do the same
+        function except `emails` field.
 
         :param obj: Job Model object.
         """

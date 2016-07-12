@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.JobWorker module.
+
 This module contains the job's workers that will be
-    passed to the RQ worker to run in the background.
+passed to the RQ worker to run in the background.
 """
 
 import traceback

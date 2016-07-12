@@ -39,8 +39,10 @@ def check_password(hashed_password, input_password):
 
 def db_credential_encrypt(credential_string, secret_string):
     """
+    Encrypt the credential.
+
     Encrypt the clear text credential string into a Rivest Cipher 4 stream
-        then encode it into a Base64 string.
+    then encode it into a Base64 string.
 
     :param credential_string:
         Credential string that need to be encrypt.
@@ -59,8 +61,10 @@ def db_credential_encrypt(credential_string, secret_string):
 
 def db_credential_decrypt(b64_string, secret_string):
     """
+    Decrypt the credential.
+
     Given a RC4 stream in Base64 and a secret string,
-        return the clear text credential.
+    return the clear text credential.
 
     :param b64_string: RC4 stream in Base64 string.
     :type b64_string: str
@@ -125,8 +129,7 @@ def validate_day_of_month(value):
 
 def generate_runtime():
     """
-    Generate an epoch timestamp in milliseconds
-        at the this function run.
+    Generate an epoch timestamp in milliseconds at the this function run.
 
     :return: Epoch timestamp in milliseconds.
     """
@@ -139,10 +142,11 @@ def sleep(seconds):
 
 
 class Timer(object):
-
     """
+    Timer Class.
+
     Timer class is used to track the total runtime
-        since the class construction.
+    since the class construction.
     """
 
     def __init__(self):
@@ -150,11 +154,7 @@ class Timer(object):
         self.start_time = time.time() * 1000
 
     def get_total_time(self):
-        """
-
-        :return: Total runtime since the class construction
-            in human readable string.
-        """
+        """Return total runtime since the class construction in human readable string."""
         total_time = time.time() * 1000 - self.start_time
 
         if total_time >= 60000:
@@ -169,9 +169,5 @@ class Timer(object):
             return "%d milliseconds" % total_time
 
     def get_total_milliseconds(self):
-        """
-
-        :return: Total runtime since the class construction
-            in milliseconds.
-        """
+        """Return total runtime since the class construction in milliseconds."""
         return time.time() * 1000 - self.start_time

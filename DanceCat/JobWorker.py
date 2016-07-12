@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.JobWorker module.
+
 This module contains the job's workers that will be
-    passed to the RQ worker to run in the background.
+passed to the RQ worker to run in the background.
 """
 
 import traceback
@@ -29,10 +31,10 @@ def job_worker(job_id, tracker_id):
 
     print "Begin executing job %d with tracker %d" % (job_id, tracker_id)
 
-    from .Models import Job, TrackJobRun
+    from .Models import QueryDataJob, TrackJobRun
     from DanceCat import db, mail
 
-    job = Job.query.get(job_id)
+    job = QueryDataJob.query.get(job_id)
     job.update_executed_times()
 
     tracker = TrackJobRun.query.get(tracker_id)
@@ -50,8 +52,10 @@ def job_worker(job_id, tracker_id):
 
         db_connector.connect()
         db_connector.execute(job.queryString)
-        results_header = db_connector.columns_name
-        results_rows = db_connector.fetch_all()
+        results = {
+            'header': db_connector.columns_name,
+            'rows': db_connector.fetch_all()
+        }
 
         tracker.complete(
             is_success=True,
@@ -59,22 +63,19 @@ def job_worker(job_id, tracker_id):
         )
         db.session.commit()
 
-        recipients = []
-
         if len(job.emails) > 0:
             results_file = StringIO()
-            results_file_data = [list(results_header)]
-            for row in results_rows:
-                results_file_data.append(list(row))
-            results_sheet = Sheet(results_file_data)
-            results_file = results_sheet.save_to_memory("xlsx", results_file)
 
-            for recipient in job.emails:
-                recipients.append(str(recipient.emailAddress))
+            results_file_data = [list(results['header'])]
+            for row in results['rows']:
+                results_file_data.append(list(row))
+
+            results_file = Sheet(results_file_data).\
+                save_to_memory("xlsx", results_file)
 
             message = Message(
                 "Job {job_name} ran successfully on DanceCat!".format(job_name=job.name),
-                recipients=recipients,
+                recipients=job.recipients,
                 body="Dear users,\n\nPlease kindly notice that "
                      "the job \"{job_name}\" ran successfully.\n"
                      "We attached the result in this email "
@@ -92,10 +93,7 @@ def job_worker(job_id, tracker_id):
 
             mail.send(message)
 
-        return {
-            'header': results_header,
-            'rows': results_rows
-        }
+        return results
 
     except DatabaseConnectorException as exception:
         tracker.complete(

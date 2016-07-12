@@ -1,7 +1,8 @@
 """
-This module contain DatabaseConnector and
-    DatabaseConnectorException class which is used
-    to wrap different DBMS Connector drivers.
+Docstring for DanceCat.DatabaseConnector module.
+
+This module contain DatabaseConnector and DatabaseConnectorException class
+which is used to wrap different DBMS Connector drivers.
 """
 
 import traceback
@@ -13,10 +14,11 @@ from . import Helpers
 
 
 class DatabaseConnector(object):
-
     """
+    DatabaseConnector class.
+
     DatabaseConnector will be use to wrap around
-        other DBMS Connector drivers to different DBMS.
+    other DBMS Connector drivers to different DBMS.
     """
 
     def __init__(self, connection_type, config, **kwargs):
@@ -75,10 +77,7 @@ class DatabaseConnector(object):
             )
 
     def close(self):
-        """
-        Close the Database connection. Raise
-        DatabaseConnectorException on failed.
-        """
+        """Close connection or Raise DatabaseConnectorException on failed."""
         try:
             if self.type in [
                 Constants.MYSQL, Constants.SQLSERVER
@@ -251,11 +250,11 @@ class DatabaseConnector(object):
 
 
 class DatabaseConnectorException(Exception):
-
     """Use as a exception type of DatabaseConnector class."""
 
     def __init__(self, message, connection_type, trace_back=None):
         """
+        Constructor for DatabaseConnectorException.
 
         :param message:
             Exception's message.

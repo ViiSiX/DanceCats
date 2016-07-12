@@ -1,7 +1,4 @@
-"""
-Constant that will be used through throughout
-    the application.
-"""
+"""Constant that will be used through throughout the application."""
 
 # Project section
 PROJECT_NAME = 'Dance Cat - Data Report'
@@ -53,11 +50,24 @@ JOB_TRACKING_STATUS_DICT = {
     }
 }
 
+# Job Type section
+JOB_TYPE_NONE = 0
+JOB_TYPE_QUERY = 1
+
+JOB_TYPE_DICT = {
+    JOB_TYPE_NONE: {
+        'name': 'No Job Type'
+    },
+    JOB_TYPE_QUERY: {
+        'name': 'Query Data Job'
+    }
+}
+
 # Model versions section
 MODEL_ALLOWED_EMAIL_VERSION = 1
 MODEL_USER_VERSION = 1
 MODEL_CONNECTION_VERSION = 1
-MODEL_JOB_VERSION = 1
+MODEL_JOB_VERSION = 2
 MODEL_SCHEDULE_VERSION = 1
 MODEL_TRACK_JOB_RUN_VERSION = 1
 

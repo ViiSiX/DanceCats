@@ -1,4 +1,6 @@
 """
+Docstring for DanceCat.Socket module.
+
 This module contains functions which will be called
     whenever the application receive the right socket event.
 """
@@ -15,10 +17,7 @@ from . import Constants
 
 
 def authenticated_only(func):
-    """
-    Wrapper which ensure the user must be logged in
-        to call the functions.
-    """
+    """Wrapper which ensure the user must be logged into call the functions."""
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         """Wrapper."""
@@ -98,7 +97,7 @@ def run_query(received_data):
 @socket_io.on(Constants.WS_TRACKERS_RECEIVE)
 @authenticated_only
 def get_trackers():
-    """Get the trackers of ran jobs. """
+    """Get the trackers of ran jobs."""
     runtime = Helpers.generate_runtime()
 
     query = db.session.query(TrackJobRun, Job).join(Job)

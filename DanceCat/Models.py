@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.Models module.
+
 This module contains the Models which is extended from
-    SQLAlchemy's Base Model.
+SQLAlchemy's Base Model.
 """
 
 import datetime
@@ -14,10 +16,11 @@ from . import Constants
 # pylint: disable=C0103,R0902
 
 class AllowedEmail(db.Model):
-
     """
+    Docstring for AllowedEmail class.
+
     AllowedEmail Model indicate which email
-        will be allowed to register new user.
+    will be allowed to register new user.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -26,6 +29,7 @@ class AllowedEmail(db.Model):
 
     def __init__(self, allowed_email):
         """
+        Constructor for AllowedEmail class.
 
         :param allowed_email:
             The email that will be allow to
@@ -35,18 +39,16 @@ class AllowedEmail(db.Model):
         self.version = Constants.MODEL_ALLOWED_EMAIL_VERSION
 
     def __repr__(self):
-        """
-
-        :return: The allowed email address.
-        """
+        """Print allowed email address."""
         return '{email}'.format(email=self.email)
 
 
 class User(UserMixin, db.Model):
-
     """
+    Docstring for User Model class.
+
     The User class represent for the User table
-        contain a user's information.
+    contain a user's information.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -65,6 +67,7 @@ class User(UserMixin, db.Model):
 
     def __init__(self, user_email, user_password):
         """
+        Constructor for User class.
 
         :param user_email: User's email.
         :param user_password: User's password in clear text.
@@ -96,10 +99,11 @@ class User(UserMixin, db.Model):
 
 
 class Connection(db.Model):
-
     """
+    Docstring for Connection Model class.
+
     Connection Model class represent for the connection table
-        which is used to store the connections to the Databases.
+    which is used to store the connections to the Databases.
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -120,6 +124,7 @@ class Connection(db.Model):
 
     def __init__(self, db_type, host, database, creator_user_id, **kwargs):
         """
+        Constructor for Connection class.
 
         :param db_type:
             Database Type which is defined in Constant module.
@@ -156,6 +161,8 @@ class Connection(db.Model):
 
     def db_config_generator(self):
         """
+        Generate database config.
+
         Generate the database configuration which will
         be passed to DatabaseConnector class's constructor.
         """
@@ -170,10 +177,9 @@ class Connection(db.Model):
 
         # If no password leave it alone
         if self.password is not None:
-            db_config['password'] = \
-                Helpers.db_credential_decrypt(
+            db_config['password'] = Helpers.db_credential_decrypt(
                     self.password, config['DB_ENCRYPT_KEY']
-                )
+            )
 
         return db_config
 
@@ -185,23 +191,29 @@ class Connection(db.Model):
 
 
 class Job(db.Model):
+    """
+    Docstring for Job Model class.
 
-    """
     Job Model class represent for job table which is used to
-        store the get data job's information.
+    store the get data job's information.
     """
+
+    __tablename__ = 'job'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     annotation = db.Column(db.Text)
-    connectionId = db.Column(db.Integer, db.ForeignKey('connection.id'), nullable=False)
-    queryString = db.Column(db.Text, nullable=False)
+    connectionId = db.Column(db.Integer, db.ForeignKey('connection.id'), nullable=True)
+    _commands = db.Column(db.Text, name='commands', nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
     lastUpdated = db.Column(db.DateTime,
                             onupdate=datetime.datetime.now,
                             default=datetime.datetime.now)
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
+    jobType = db.Column(db.SmallInteger,
+                        default=Constants.JOB_TYPE_NONE,
+                        nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     emails = db.relationship('JobMailTo',
@@ -210,29 +222,49 @@ class Job(db.Model):
                              backref='Job',
                              lazy='joined')
 
-    def __init__(self, name, connection_id, query_string, **kwargs):
-        """
+    __mapper_args__ = {
+        'polymorphic_on': jobType,
+        'polymorphic_identity': Constants.JOB_TYPE_NONE
+    }
 
-        :param name:
-            Job's name.
-        :param connection_id:
-            Connection's Id, reference to Connection Model.
-        :param query_string:
-            Job's query which will be executed again the database.
+    def __init__(self, name, commands, user_id, **kwargs):
+        """
+        Constructor for Job.
+
+        :param name: Job's name.
+        :param command: Job's command which will be executed.
+        :param user_id: Job's creator's User Id.
         :param kwargs:
-            user_id: Job's creator's User Id.
             annotation: Job's description and annotation.
         """
         self.name = name
-        self.annotation = kwargs.get('annotation')
-        self.connectionId = connection_id
-        self.queryString = query_string
-        self.userId = kwargs['user_id']
+        self.annotation = kwargs.get('annotation', None)
+        self.commands = commands
+        self.userId = user_id
         self.version = Constants.MODEL_JOB_VERSION
+
+    @property
+    def commands(self):
+        """Return command field."""
+        return self._commands
+
+    @commands.setter
+    def commands(self, commands):
+        """Setter for commands property."""
+        commands = "/* NO COMMAND */\n" + commands
+        self._commands = commands
 
     def update_executed_times(self):
         """Update Job's total executed times."""
         self.noOfExecuted += 1
+
+    @property
+    def recipients(self):
+        """Return Job recipients list."""
+        recipients_list = []
+        for recipient in self.emails:
+            recipients_list.append(str(recipient))
+        return recipients_list
 
     def __repr__(self):
         """Print the Job instance."""
@@ -241,8 +273,42 @@ class Job(db.Model):
         )
 
 
-class Schedule(db.Model):
+class QueryDataJob(Job):
+    """Job for query Data from Database."""
 
+    __mapper_args__ = {
+        'polymorphic_identity': Constants.JOB_TYPE_QUERY
+    }
+
+    def __init__(self, name, query_string, user_id, **kwargs):
+        """
+        Constructor for QueryDataJob class.
+
+        :param name: Job's name.
+        :param query_string: Query that will be used to get data from Database.
+        :param user_id: Job's creator's User Id.
+        :param kwargs:
+            annotation: Job's description and annotation.
+            connection_id: Connection's Id, reference to Connection Model.
+        """
+        self.connectionId = kwargs.get('connection_id')
+        self.jobType = Constants.JOB_TYPE_QUERY
+        super(QueryDataJob, self).__init__(name=name, commands=query_string,
+                                           user_id=user_id, kwargs=kwargs)
+
+    @property
+    def queryString(self):
+        """Return command field."""
+        return self._commands
+
+    @queryString.setter
+    def queryString(self, query_string):
+        """Setter for commands property."""
+        query_string = "/* QUERY STRING */\n" + query_string
+        self._commands = query_string
+
+
+class Schedule(db.Model):
     """
     Schedule Model class represent for the schedule table.
 
@@ -290,16 +356,20 @@ class Schedule(db.Model):
         self.isActive = kwargs.get('is_active', False)
 
         minute_of_hour = kwargs.get('minute_of_hour', 0)
-        self.minuteOfHour = minute_of_hour if Helpers.validate_minute_of_hour(minute_of_hour) else 0
+        self.minuteOfHour = \
+            minute_of_hour if Helpers.validate_minute_of_hour(minute_of_hour) else 0
 
         hour_of_day = kwargs.get('hour_of_day', 0)
-        self.hourOfDay = hour_of_day if Helpers.validate_hour_of_day(hour_of_day) else 0
+        self.hourOfDay = \
+            hour_of_day if Helpers.validate_hour_of_day(hour_of_day) else 0
 
         day_of_week = kwargs.get('day_of_week', 0)
-        self.dayOfWeek = day_of_week if Helpers.validate_day_of_week(day_of_week) else 0
+        self.dayOfWeek = \
+            day_of_week if Helpers.validate_day_of_week(day_of_week) else 0
 
         day_of_month = kwargs.get('day_of_month', 0)
-        self.dayOfMonth = day_of_month if Helpers.validate_day_of_month(day_of_month) else 0
+        self.dayOfMonth = \
+            day_of_month if Helpers.validate_day_of_month(day_of_month) else 0
 
         next_run = kwargs.get('next_run', None)
         if self.scheduleType == Constants.SCHEDULE_ONCE:
@@ -314,6 +384,8 @@ class Schedule(db.Model):
 
     def validate(self):
         """
+        Validate the schedule.
+
         :return: True if the schedule will be run on the feature else False.
         """
         if self.scheduleType == Constants.SCHEDULE_ONCE:
@@ -388,7 +460,6 @@ class Schedule(db.Model):
 
 
 class TrackJobRun(db.Model):
-
     """Track status whenever a job is running."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -433,6 +504,7 @@ class TrackJobRun(db.Model):
 
     def check_expiration(self):
         """
+        Check and update result expiration.
 
         :return: True if the result is expiring.
                  False if the result is still valid or expired.
@@ -460,7 +532,6 @@ class TrackJobRun(db.Model):
 
 
 class JobMailTo(db.Model):
-
     """Emails which the result will be sent to."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -474,6 +545,7 @@ class JobMailTo(db.Model):
 
     def __init__(self, job_id, email_address):
         """
+        Docstring for JobMailTo Model constructor.
 
         :param job_id:
             Job's Id.

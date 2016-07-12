@@ -1,6 +1,8 @@
 """
+Docstring for DanceCat.FrequencyTaskChecker(FTC) module.
+
 This module will be used to check the schedule and
-    enqueue the next running job into the queue.
+enqueue the next running job into the queue.
 """
 
 import time
@@ -13,9 +15,11 @@ from os import remove
 
 def frequency_checker(pid_path, feq=60):
     """
+    FTC main function.
+
     This function will check and enqueue scheduled jobs
-        when the running time will come. After that sleep
-        for `feq` seconds and repeat.
+    when the running time will come. After that sleep
+    for `feq` seconds and repeat.
     """
     # TODO: sleep if not enough time to cover lost time.
 

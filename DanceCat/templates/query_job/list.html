@@ -32,15 +32,17 @@
             </a>
           </td>
           <td>
-            <a id="job-run-btn"
-               onclick="DanceCat.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
-            >Run</a> |
+            <span id="job-run-btn"
+                  class="link-pretender"
+                  onclick="DanceCat.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
+            >Run</span> |
             <a href="{{ url_for('job_edit', job_id=job.id) }}">
               Edit
             </a> |
-            <a onclick="DanceCat.Main.delete_on_click(DanceCat.Main.$(this).parent().parent(),
+            <span onclick="DanceCat.Main.delete_on_click(DanceCat.Main.$(this).parent().parent(),
                 '{{ url_for('job_delete') }}', {{ job.id }})"
-            >Delete</a>
+                  class="link-pretender"
+            >Delete</span>
           </td>
         </tr>
       {% endfor %}

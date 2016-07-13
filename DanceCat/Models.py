@@ -239,7 +239,10 @@ class Job(db.Model):
         """
         self.name = name
         self.annotation = kwargs.get('annotation', None)
-        self.commands = commands
+        if self.jobType == Constants.JOB_TYPE_NONE:
+            self.commands = "/* NO COMMAND */\n" + commands
+        else:
+            self.commands = commands
         self.userId = user_id
         self.version = Constants.MODEL_JOB_VERSION
 
@@ -251,7 +254,6 @@ class Job(db.Model):
     @commands.setter
     def commands(self, commands):
         """Setter for commands property."""
-        commands = "/* NO COMMAND */\n" + commands
         self._commands = commands
 
     def update_executed_times(self):
@@ -293,6 +295,8 @@ class QueryDataJob(Job):
         """
         self.connectionId = kwargs.get('connection_id')
         self.jobType = Constants.JOB_TYPE_QUERY
+        query_string = "/* QUERY STRING */\n" + query_string
+
         super(QueryDataJob, self).__init__(name=name, commands=query_string,
                                            user_id=user_id, kwargs=kwargs)
 
@@ -304,7 +308,6 @@ class QueryDataJob(Job):
     @queryString.setter
     def queryString(self, query_string):
         """Setter for commands property."""
-        query_string = "/* QUERY STRING */\n" + query_string
         self._commands = query_string
 
 

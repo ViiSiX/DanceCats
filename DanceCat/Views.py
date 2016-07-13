@@ -58,8 +58,12 @@ def job_create():
     form = QueryJobForm(request.form)
     form.connectionId.choices = \
         Connection.query.with_entities(Connection.id, Connection.name).all()
+
     if request.method == 'POST':
-        if form.validate_on_submit():
+        if request.form.has_key('add-email'):
+            form.emails.append_entry()
+
+        elif form.validate_on_submit():
             new_job = QueryDataJob(name=request.form['name'],
                                    annotation=request.form['annotation'],
                                    connection_id=request.form['connectionId'],
@@ -95,14 +99,11 @@ def job_edit(job_id):
         Connection.query.with_entities(Connection.id, Connection.name).all()
     if len(form.emails.entries) == 0:
         form.emails.append_entry()
-    if request.method == 'GET':
-        return render_template('query_job/form.html',
-                               title=Constants.PROJECT_NAME,
-                               action='Edit',
-                               action_url=url_for('job_edit', job_id=job_id),
-                               form=form)
-    else:
-        if form.validate_on_submit():
+    if request.method == 'POST':
+        if request.form.has_key('add-email'):
+            form.emails.append_entry()
+
+        elif form.validate_on_submit():
             form.populate_obj(editing_job)
             db.session.commit()
 
@@ -127,7 +128,13 @@ def job_edit(job_id):
                         existing_mail_to.enable = True
                         db.session.commit()
 
-        return redirect(url_for('job'))
+            return redirect(url_for('job'))
+
+    return render_template('query_job/form.html',
+                           title=Constants.PROJECT_NAME,
+                           action='Edit',
+                           action_url=url_for('job_edit', job_id=job_id),
+                           form=form)
 
 
 @app.route('/job/delete', methods=['POST'])

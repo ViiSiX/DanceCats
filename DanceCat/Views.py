@@ -11,7 +11,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 import flask_excel as excel
 from DanceCat import app, db, lm, rdb
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    QueryDataJob, TrackJobRun, JobMailTo
+    QueryDataJob, TrackJobRun, JobMailTo, Job
 from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from .JobWorker import job_worker
@@ -130,6 +130,24 @@ def job_edit(job_id):
         return redirect(url_for('job'))
 
 
+@app.route('/job/delete', methods=['POST'])
+@login_required
+def job_delete():
+    """Delete a Job."""
+    deleting_job = Job.query.get(request.form['id'])
+    if deleting_job is not None:
+        db.session.delete(deleting_job)
+        db.session.commit()
+
+        return jsonify({
+            'deleted': True
+        })
+
+    return jsonify({
+        'deleted': False
+    })
+
+
 @app.route('/job/run', methods=['POST'])
 @login_required
 def job_run():
@@ -164,12 +182,43 @@ def job_result(tracker_id, result_type):
         return excel.make_response_from_array(
             result_array,
             result_type,
-            file_name="Result_tid_{tid}.{ext}".format(tid=tracker_id, ext=result_type)
+            file_name="Result_tid_{tid}.{ext}".format(
+                tid=tracker_id,
+                ext=result_type
+            )
         )
     elif result_type == 'raw':
         return jsonify(result)
     else:
         abort(404)
+
+
+@app.route('/job/latest-result/<job_id>/<result_type>')
+@login_required
+def job_latest_result(job_id, result_type):
+    """Download Job's latest result."""
+    fetching_result_job = Job.query.get_or_404(job_id)
+    last_tracker = TrackJobRun.query.filter_by(jobId=fetching_result_job.id).\
+        order_by(TrackJobRun.ranOn.desc()).first()
+    if last_tracker is not None:
+        queue = rdb.queue
+        result = queue.fetch_job(str(last_tracker.id)).result
+        if result_type in ['csv', 'xls', 'xlsx', 'ods']:
+            result_array = [list(result['header'])]
+            for row in result['rows']:
+                result_array.append(list(row))
+            return excel.make_response_from_array(
+                result_array,
+                result_type,
+                file_name="Result_tid_{tid}.{ext}".format(
+                    tid=last_tracker.id,
+                    ext=result_type
+                )
+            )
+        elif result_type == 'raw':
+            return jsonify(result)
+
+    abort(404)
 
 
 @app.route('/connection')

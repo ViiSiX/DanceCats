@@ -13,6 +13,7 @@
           <th>Connection</th>
           <th>Created By</th>
           <th>Updated On</th>
+          <th>Latest Result</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -23,13 +24,23 @@
           <td>{{ job.user_email }}</td>
           <td>{{ job.last_updated }}</td>
           <td>
-            <a href="#"
-               id="job-run-btn"
+            <a href="{{ url_for('job_latest_result', job_id=job.id, result_type='csv') }}">
+              CSV
+            </a> |
+            <a href="{{ url_for('job_latest_result', job_id=job.id, result_type='xlsx') }}">
+              XLSX
+            </a>
+          </td>
+          <td>
+            <a id="job-run-btn"
                onclick="DanceCat.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
             >Run</a> |
             <a href="{{ url_for('job_edit', job_id=job.id) }}">
               Edit
-            </a> | Delete
+            </a> |
+            <a onclick="DanceCat.Main.delete_on_click(DanceCat.Main.$(this).parent().parent(),
+                '{{ url_for('job_delete') }}', {{ job.id }})"
+            >Delete</a>
           </td>
         </tr>
       {% endfor %}

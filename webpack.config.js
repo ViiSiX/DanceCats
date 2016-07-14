@@ -13,7 +13,8 @@ module.exports = [
       path: './DanceCat/static/bundle/',
       filename: 'DanceCat.[name].js',
       library: ['DanceCat', "[name]"],
-      libraryTarget: "umd"
+      libraryTarget: "umd",
+      publicPath: '/static/bundle/'
     },
     module: {
       loaders: [
@@ -38,7 +39,7 @@ module.exports = [
         },
         {
           test: /\.(eot|ttf|svg|gif|png|woff|woff2)$/,
-          loader: "file?name=/static/bundle/[hash].[ext]"
+          loader: "file?name=[hash].[ext]"
         },
         {
           test: /\.js$/,

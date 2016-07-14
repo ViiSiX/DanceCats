@@ -38,7 +38,7 @@ module.exports = [
         },
         {
           test: /\.(eot|ttf|svg|gif|png|woff|woff2)$/,
-          loader: "file-loader"
+          loader: "file?name=/static/bundle/[hash].[ext]"
         },
         {
           test: /\.js$/,

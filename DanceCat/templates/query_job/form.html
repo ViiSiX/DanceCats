@@ -13,10 +13,19 @@
       {{ render_field(form.annotation, class="form-control") }}
       {{ render_field(form.connectionId, class="form-control") }}
       {{ render_field(form.queryString, class="form-control") }}
-      <div class="form-group job-email-to-field-list col-md-6">
-        <label>{{ form.emails.label }}</label>
+      <label>{{ form.emails.label }}</label>
+      <div class="form-group job-email-to-field-list col-sm-8">
         {% for e in form.emails %}
-          {{ e(class="form-control form-control-mail-to")|safe }}
+          {% if e == form.emails[0] %}
+            {{ e(class="form-control right-margin-10")|safe }}
+            <button class="btn btn-success mail-to-add-more"
+                    type="submit"
+                    name="add-email">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+          {% else %}
+            {{ e(class="form-control top-margin-10")|safe }}
+          {% endif %}
           {% if e.errors %}
             <ul class=errors>
             {% for error in e.errors %}
@@ -31,8 +40,7 @@
           <input class="btn btn-primary" type=submit value=Save>
         </div>
         <div class="col-sm-9">
-          <a href="#"
-             class="btn btn-success pull-right"
+          <a class="btn btn-success pull-right"
              id="run-query-btn"
           >Run</a>
         </div>

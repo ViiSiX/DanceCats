@@ -1,5 +1,9 @@
 /* General */
 
+.top-margin-10 {
+  margin-top: 10px;
+}
+
 .top-margin-20 {
   margin-top: 20px;
 }
@@ -11,6 +15,16 @@
 .jumbotron .btn-dance-cat {
   padding: 6px 12px;
   font-size: 14px;
+}
+
+.link-pretender {
+  color: #337ab7;
+  cursor: pointer;
+}
+
+.link-pretender:hover {
+  color: #23527c;
+  text-decoration: underline;
 }
 
 /* Form */
@@ -173,11 +187,19 @@
 /* Email To */
 .job-email-to-field-list {
   display: block;
+  border-radius: 2px;
+  padding: 15px;
   float: none;
 }
 
-.form-control-mail-to {
-  margin-top: 10px;
+.job-email-to-field-list .form-control {
+  display: inline-block;
+  width: 85%;
+}
+
+.job-email-to-field-list .mail-to-add-more {
+  display: inline-block;
+  margin-bottom: 3px;
 }
 
 /* End Job */

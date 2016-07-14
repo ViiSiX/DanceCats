@@ -2,6 +2,10 @@ doc-warnings: true
 test-warnings: false
 strictness: high
 max-line-length: 100
+pep257:
+  run: true
+  disable:
+    - D203
 uses:
   - flask
 autodetect: true

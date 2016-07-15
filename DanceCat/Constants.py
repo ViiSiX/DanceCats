@@ -7,11 +7,6 @@ PROJECT_NAME = 'Dance Cat - Data Report'
 MYSQL = 1
 SQLSERVER = 2
 
-CONNECTION_TYPES_LIST = [
-    (MYSQL, 'MySQL'),
-    (SQLSERVER, 'SQL Server')
-]
-
 CONNECTION_TYPES_DICT = {
     MYSQL: {
         'name': 'MySQL',
@@ -25,6 +20,17 @@ CONNECTION_TYPES_DICT = {
     }
 }
 
+CONNECTION_TYPES_LIST = [
+    (
+        MYSQL,
+        CONNECTION_TYPES_DICT[MYSQL]['name']
+    ),
+    (
+        SQLSERVER,
+        CONNECTION_TYPES_DICT[SQLSERVER]['name']
+    )
+]
+
 # Job Tracking section
 JOB_QUEUED = 0
 JOB_RUNNING = 1
@@ -32,7 +38,7 @@ JOB_RAN_SUCCESS = 2
 JOB_RAN_FAILED = 3
 JOB_RESULT_EXPIRED = 4
 
-JOB_TRACKING_STATUS_DICT = {
+JOB_TRACKING_STATUSES_DICT = {
     JOB_QUEUED: {
         'name': 'Queued'
     },
@@ -51,14 +57,14 @@ JOB_TRACKING_STATUS_DICT = {
 }
 
 # Job Type section
-JOB_TYPE_NONE = 0
-JOB_TYPE_QUERY = 1
+JOB_NONE = 0
+JOB_QUERY = 1
 
-JOB_TYPE_DICT = {
-    JOB_TYPE_NONE: {
+JOB_TYPES_DICT = {
+    JOB_NONE: {
         'name': 'No Job Type'
     },
-    JOB_TYPE_QUERY: {
+    JOB_QUERY: {
         'name': 'Query Data Job'
     }
 }
@@ -77,6 +83,29 @@ SCHEDULE_HOURLY = 1
 SCHEDULE_DAILY = 2
 SCHEDULE_WEEKLY = 3
 SCHEDULE_MONTHLY = 4
+
+SCHEDULE_TYPES_LIST = [
+    (
+        SCHEDULE_ONCE,
+        'Once'
+    ),
+    (
+        SCHEDULE_HOURLY,
+        'Hourly'
+    ),
+    (
+        SCHEDULE_DAILY,
+        'Daily'
+    ),
+    (
+        SCHEDULE_WEEKLY,
+        'Weekly'
+    ),
+    (
+        SCHEDULE_MONTHLY,
+        'Yearly'
+    )
+]
 
 # Socket Section
 WS_QUERY_SEND = 'r_query'

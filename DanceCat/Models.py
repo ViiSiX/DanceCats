@@ -212,7 +212,7 @@ class Job(db.Model):
                             default=datetime.datetime.now)
     noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
     jobType = db.Column(db.SmallInteger,
-                        default=Constants.JOB_TYPE_NONE,
+                        default=Constants.JOB_NONE,
                         nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
@@ -224,7 +224,7 @@ class Job(db.Model):
 
     __mapper_args__ = {
         'polymorphic_on': jobType,
-        'polymorphic_identity': Constants.JOB_TYPE_NONE
+        'polymorphic_identity': Constants.JOB_NONE
     }
 
     def __init__(self, name, commands, user_id, **kwargs):
@@ -239,7 +239,7 @@ class Job(db.Model):
         """
         self.name = name
         self.annotation = kwargs.get('annotation', None)
-        if self.jobType == Constants.JOB_TYPE_NONE:
+        if self.jobType == Constants.JOB_NONE:
             self.commands = "/* NO COMMAND */\n" + commands
         else:
             self.commands = commands
@@ -279,7 +279,7 @@ class QueryDataJob(Job):
     """Job for query Data from Database."""
 
     __mapper_args__ = {
-        'polymorphic_identity': Constants.JOB_TYPE_QUERY
+        'polymorphic_identity': Constants.JOB_QUERY
     }
 
     def __init__(self, name, query_string, user_id, **kwargs):
@@ -294,7 +294,7 @@ class QueryDataJob(Job):
             connection_id: Connection's Id, reference to Connection Model.
         """
         self.connectionId = kwargs.get('connection_id')
-        self.jobType = Constants.JOB_TYPE_QUERY
+        self.jobType = Constants.JOB_QUERY
         query_string = "/* QUERY STRING */\n" + query_string
 
         super(QueryDataJob, self).__init__(name=name, commands=query_string,
@@ -530,7 +530,7 @@ class TrackJobRun(db.Model):
         """Print the Job Tracker instance."""
         return '<Tracker {id}: Job Id {jobId} {status}>'.format(
             id=self.id, jobId=self.jobId,
-            status=Constants.JOB_TRACKING_STATUS_DICT[self.status]['name']
+            status=Constants.JOB_TRACKING_STATUSES_DICT[self.status]['name']
         )
 
 

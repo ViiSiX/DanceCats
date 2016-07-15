@@ -1,16 +1,10 @@
 node_modules
 DanceCat/static/bundle
 
-DanceCat.py
-config.cfg
+DanceCatBooter.py
 start.sh
+package.json
 
 *.pyc
 
-*.key
-*.cert
-
-*.rdb
-*.rdb.*
-*.pid
-*venv
+var

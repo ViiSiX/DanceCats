@@ -111,7 +111,7 @@ def get_trackers():
             'id': tracker.TrackJobRun.id,
             'jobName': tracker.Job.name,
             'database': tracker.Job.Connection.database,
-            'status': Constants.JOB_TRACKING_STATUS_DICT[tracker.TrackJobRun.status]['name'],
+            'status': Constants.JOB_TRACKING_STATUSES_DICT[tracker.TrackJobRun.status]['name'],
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ranOn),
             'duration': tracker.TrackJobRun.duration,
             'csv': url_for('job_result',

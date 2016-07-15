@@ -37,6 +37,4 @@ with app.app_context():
 
 FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
 
-from DanceCat import Views, ErrorViews, Socket
-
 # pylint: enable=C0103

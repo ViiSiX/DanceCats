@@ -19,8 +19,8 @@ Install the rest of requirements. Then run `webpack` to package frontend things.
 virtualenv /path/to/your/virtualenv
 source /path/to/your/virtualenv/bin/activate
 pip install -r requirement.txt
+cp package.json.dist package.json
 npm install
-bower install
 webpack
 ```
 

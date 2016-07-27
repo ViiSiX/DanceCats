@@ -4,8 +4,8 @@ Running script for DanceCat
 import os
 # Just in case proxy server do not work.
 # from werkzeug.contrib.fixers import ProxyFix
-from DanceCat import app, socket_io
-from DanceCat import app, socket_io, Views, ErrorViews, Socket
+from DanceCat import app, socket_io, rdb, \
+    Views, ErrorViews, Socket, FrequencyTaskChecker
 
 # In case of `code 400, message Bad request`
 # os.putenv('LANG', 'en_US.UTF-8')
@@ -19,6 +19,11 @@ from DanceCat import app, socket_io, Views, ErrorViews, Socket
 # app.wsgi_app = ProxyFix(app.wsgi_app)
 
 if __name__ == '__main__':
+    FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
+
+    with app.app_context():
+        rdb.start_worker()
+
     socket_io.run(app,
                   host='0.0.0.0',
                   port=8443,

@@ -8,7 +8,7 @@ WTForms. Used for template's forms rendering.
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
     SelectField, IntegerField, \
-    FieldList, \
+    FormField, FieldList, \
     validators
 from wtforms.compat import iteritems
 from . import Constants
@@ -49,6 +49,18 @@ class ConnectionForm(Form):
     database = StringField('Database', validators=[
         validators.DataRequired()
     ])
+
+
+class ScheduleForm(Form):
+    """Used to create/edit job's schedule."""
+
+    scheduleType = SelectField('Schedule Type',
+                               coerce=int,
+                               choices=Constants)
+    startTime = StringField('Start On',
+                            validators=[
+                                validators.DataRequired()
+                            ])
 
 
 class QueryJobForm(Form):

@@ -1,5 +1,7 @@
 node_modules
 DanceCat/static/bundle
+DanceCat/static/style/
+DanceCat.iml
 
 DanceCatBooter.py
 start.sh

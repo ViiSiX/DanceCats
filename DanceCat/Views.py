@@ -60,8 +60,11 @@ def job_create():
         Connection.query.with_entities(Connection.id, Connection.name).all()
 
     if request.method == 'POST':
-        if request.form.has_key('add-email'):
+        if 'add-email' in request.form:
             form.emails.append_entry()
+
+        elif 'add-schedule' in request.form:
+            form.schedules.append_entry()
 
         elif form.validate_on_submit():
             new_job = QueryDataJob(name=request.form['name'],
@@ -97,11 +100,13 @@ def job_edit(job_id):
     form = QueryJobForm(request.form, editing_job)
     form.connectionId.choices = \
         Connection.query.with_entities(Connection.id, Connection.name).all()
-    if len(form.emails.entries) == 0:
-        form.emails.append_entry()
+
     if request.method == 'POST':
-        if request.form.has_key('add-email'):
+        if 'add-email' in request.form:
             form.emails.append_entry()
+
+        elif 'add-schedule' in request.form:
+            form.schedules.append_entry()
 
         elif form.validate_on_submit():
             form.populate_obj(editing_job)

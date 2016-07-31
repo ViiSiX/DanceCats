@@ -4,15 +4,20 @@ require('../../node_modules/bootstrap/dist/css/bootstrap.min.css');
 require('../css/justified-nav.css');
 require('../css/dance-cat.css');
 require('../../node_modules/codemirror/lib/codemirror.css');
+require('../../node_modules/flatpickr/dist/flatpickr.confetti.min.css');
 
 /***** Library Section *****/
 var autosize = require('../../node_modules/autosize/dist/autosize.min');
 var CodeMirror = require('../../node_modules/codemirror/lib/codemirror');
+var Flatpickr = require('../../node_modules/flatpickr/src/flatpickr');
+var io = require('../../node_modules/socket.io-client/socket.io');
 require('../../node_modules/codemirror/mode/sql/sql');
 
 module.exports['$'] = $;
+module.exports['jQuery'] = jQuery;
 module.exports['AutoSize'] = autosize;
 module.exports['CodeMirror'] = CodeMirror;
+module.exports['Flatpickr'] = Flatpickr;
 
 module.exports['delete_on_click'] = function delete_on_click(el, delete_url, delete_obj_id) {
   $.post(

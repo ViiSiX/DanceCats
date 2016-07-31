@@ -84,26 +84,44 @@ SCHEDULE_DAILY = 2
 SCHEDULE_WEEKLY = 3
 SCHEDULE_MONTHLY = 4
 
+SCHEDULE_TYPES_DICT = {
+    SCHEDULE_ONCE: {
+        'name': 'Once'
+    },
+    SCHEDULE_HOURLY: {
+        'name': 'Hourly'
+    },
+    SCHEDULE_DAILY: {
+        'name': 'Daily'
+    },
+    SCHEDULE_WEEKLY: {
+        'name': 'Weekly'
+    },
+    SCHEDULE_MONTHLY: {
+        'name': 'Monthly'
+    }
+}
+
 SCHEDULE_TYPES_LIST = [
     (
         SCHEDULE_ONCE,
-        'Once'
+        SCHEDULE_TYPES_DICT[SCHEDULE_ONCE]['name']
     ),
     (
         SCHEDULE_HOURLY,
-        'Hourly'
+        SCHEDULE_TYPES_DICT[SCHEDULE_HOURLY]['name']
     ),
     (
         SCHEDULE_DAILY,
-        'Daily'
+        SCHEDULE_TYPES_DICT[SCHEDULE_DAILY]['name']
     ),
     (
         SCHEDULE_WEEKLY,
-        'Weekly'
+        SCHEDULE_TYPES_DICT[SCHEDULE_WEEKLY]['name']
     ),
     (
         SCHEDULE_MONTHLY,
-        'Yearly'
+        SCHEDULE_TYPES_DICT[SCHEDULE_MONTHLY]['name']
     )
 ]
 

@@ -56,7 +56,7 @@ class ScheduleForm(Form):
 
     scheduleType = SelectField('Schedule Type',
                                coerce=int,
-                               choices=Constants)
+                               choices=Constants.SCHEDULE_TYPES_LIST)
     startTime = StringField('Start On',
                             validators=[
                                 validators.DataRequired()
@@ -90,6 +90,9 @@ class QueryJobForm(Form):
                                    ]),
                        'Send Result To',
                        min_entries=1)
+    schedules = FieldList(FormField(ScheduleForm),
+                          'Job\'s schedules:',
+                          min_entries=0)
 
     def populate_obj(self, obj):
         """
@@ -102,5 +105,5 @@ class QueryJobForm(Form):
         :param obj: Job Model object.
         """
         for name, field in iteritems(self._fields):
-            if name != 'emails':
+            if name != 'emails' and name != 'schedules':
                 field.populate_obj(obj, name)

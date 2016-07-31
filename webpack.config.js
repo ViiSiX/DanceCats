@@ -22,7 +22,8 @@ module.exports = [
           test: /.\/client\/js\/\.js$/,
           loaders: ["babel"],
           query: {
-            presets: 'es2015'
+            presets: 'es2015',
+            compact: true
           }
         },
         {
@@ -45,7 +46,8 @@ module.exports = [
           test: /\.js$/,
           loader: 'babel',
           query: {
-            presets: ['es2015', 'react']
+            presets: ['es2015', 'react'],
+            compact: true
           }
         }
       ]
@@ -59,7 +61,6 @@ module.exports = [
       new webpack.ProvidePlugin({
         $: "jquery",
         jQuery: "jquery",
-        io: "socket.io-client",
         React: "react",
         ReactDOM: "react-dom"
       }),

@@ -35,6 +35,18 @@
           {% endif %}
         {% endfor %}
       </div>
+      <label>{{ form.schedules.label }}</label>
+      <div class="form-group job-schedule-field-list col-sm-8">
+        <button class="btn btn-success bot-margin-10"
+                type="submit"
+                name="add-schedule">
+          <span class="glyphicon glyphicon-plus"></span> New schedule
+        </button>
+        {% for e in form.schedules %}
+          {{ render_field(e.scheduleType, class="form-control") }}
+          {{ render_field(e.startTime, class="form-control schedule-field") }}
+        {% endfor %}
+      </div>
       <div class="row">
         <div class="col-sm-3">
           <input class="btn btn-primary" type=submit value=Save>
@@ -78,6 +90,11 @@
 
       socket.emit(DanceCat.Constants.WS_QUERY_SEND, sendingData);
     } );
+
+    var dateTimePickers = DanceCat.Main.$('.schedule-field');
+    DanceCat.Main.$.each(dateTimePickers, function() {
+      DanceCat.Main.Flatpickr(this, {enableTime: true});
+    })
   </script>
   <script type="text/javascript"
           src="{{ url_for('static', filename='bundle/DanceCat.QueryResults.js') }}"

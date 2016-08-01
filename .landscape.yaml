@@ -11,3 +11,5 @@ uses:
 autodetect: true
 python-targets:
   - 2
+ignore-paths:
+  - migrations

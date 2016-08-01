@@ -60,8 +60,8 @@ class ScheduleForm(Form):
                                 choices=Constants.SCHEDULE_TYPES_LIST)
     next_run = StringField('Start On',
                            validators=[
-                              validators.DataRequired()
-                          ])
+                               validators.DataRequired()
+                           ])
     is_active = BooleanField('Active')
 
 

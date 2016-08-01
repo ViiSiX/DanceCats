@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """
 Docstring for DanceCat.JobWorker module.
 
@@ -21,15 +23,13 @@ def job_worker(job_id, tracker_id):
     :param tracker_id: Job Tracker for tracking job status
     :return: query result
     """
-    """
-    TODO:
-    - will focus on trunking for better performance.
-    - better error tracking
-    """
 
     timer = Timer()
 
-    print "Begin executing job %d with tracker %d" % (job_id, tracker_id)
+    print(
+        "Begin executing job {job_id} with tracker {tracker_id}".
+        format(job_id=job_id, tracker_id=tracker_id)
+    )
 
     from .Models import QueryDataJob, TrackJobRun
     from DanceCat import db, mail

@@ -2,6 +2,7 @@
 -----------
 
 [![Code Health](https://landscape.io/github/scattm/DanceCat/master/landscape.svg?style=flat)](https://landscape.io/github/scattm/DanceCat/master)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/a717f58a1b9f429f98f7814e6a34f509/badge.svg)](https://www.quantifiedcode.com/app/project/a717f58a1b9f429f98f7814e6a34f509)
 
 #### Installation
 

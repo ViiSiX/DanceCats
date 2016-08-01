@@ -116,9 +116,6 @@ def job_edit(job_id):
     form.connection_id.choices = \
         Connection.query.with_entities(Connection.id, Connection.name).all()
 
-    for i in range(len(editing_job.schedules)):
-        form.schedules[i].start_time = editing_job.schedules[i].nextRun
-
     if request.method == 'POST':
         if 'add-email' in request.form:
             form.emails.append_entry()
@@ -194,7 +191,7 @@ def job_run():
         },
         ttl=900,
         result_ttl=app.config.get('JOB_RESULT_VALID_SECONDS', 86400),
-        job_id="%d" % tracker.id
+        job_id="{tracker_id}".format(tracker_id=tracker.id)
     )
     return jsonify({'ack': True, 'tracker_id': tracker.id})
 
@@ -278,20 +275,19 @@ def connection():
 def connection_create():
     """Render and return Create New Connection Page."""
     form = ConnectionForm(request.form)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_connection = Connection(name=request.form['name'],
-                                        db_type=int(request.form['type']),
-                                        database=request.form['database'],
-                                        host=request.form['host'],
-                                        port=Helpers.null_handler(request.form['port']),
-                                        user_name=request.form['user_name'],
-                                        password=Helpers.null_handler(request.form['password']),
-                                        creator_user_id=current_user.id
-                                        )
-            db.session.add(new_connection)
-            db.session.commit()
-            return redirect(url_for('connection'))
+    if request.method == 'POST' and form.validate_on_submit():
+        new_connection = Connection(name=request.form['name'],
+                                    db_type=int(request.form['type']),
+                                    database=request.form['database'],
+                                    host=request.form['host'],
+                                    port=Helpers.null_handler(request.form['port']),
+                                    user_name=request.form['user_name'],
+                                    password=Helpers.null_handler(request.form['password']),
+                                    creator_user_id=current_user.id
+                                    )
+        db.session.add(new_connection)
+        db.session.commit()
+        return redirect(url_for('connection'))
     return render_template('connection/form.html',
                            title=Constants.PROJECT_NAME,
                            action='Create',

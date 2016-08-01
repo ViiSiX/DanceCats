@@ -13,6 +13,8 @@ from . import Helpers
 from . import Constants
 
 
+# pylint: disable=C0103,R0902
+
 class AllowedEmail(db.Model):
     """
     Docstring for AllowedEmail class.
@@ -91,7 +93,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         """Print the User instance."""
-        return '<User %r - Id %r>' % (self.email, self.id)
+        return '<User {email} - Id {id}>'.format(email=self.email, id=self.id)
 
 
 class Connection(db.Model):
@@ -361,7 +363,7 @@ class Schedule(db.Model):
     version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, job_id, start_time, user_id,
-                 schedule_type=Constants.SCHEDULE_ONCE, is_active=False):
+                 **kwargs):
         """
         Input and validate schedule.
 
@@ -370,14 +372,14 @@ class Schedule(db.Model):
         :param start_time:
             Time when the job will be trigger, datetime instance.
         :type start_time: datetime.datetime
-        :param schedule_type:
-            Schedule type, see in the class's docstring.
-        :param is_active:
-            This schedule is active or not.
+        :param kwargs:
+            schedule_type: Schedule type, see in the class's docstring.
+            is_active: This schedule is active or not.
         """
         self.job_id = job_id
-        self.schedule_type = schedule_type
-        self.is_active = is_active
+        self.schedule_type = \
+            kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
+        self.is_active = kwargs.get('is_active', 0)
 
         self.minute_of_hour = start_time.minute
         self.hour_of_day = start_time.hour
@@ -405,18 +407,18 @@ class Schedule(db.Model):
             return Helpers.validate_minute_of_hour(self.minute_of_hour)
 
         if self.schedule_type == Constants.SCHEDULE_DAILY:
-            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
-                   and Helpers.validate_hour_of_day(self.hour_of_day)
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) and \
+                Helpers.validate_hour_of_day(self.hour_of_day)
 
         if self.schedule_type == Constants.SCHEDULE_WEEKLY:
-            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
-                   and Helpers.validate_hour_of_day(self.hour_of_day) \
-                   and Helpers.validate_day_of_week(self.day_of_week)
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) and \
+                Helpers.validate_hour_of_day(self.hour_of_day) and \
+                Helpers.validate_day_of_week(self.day_of_week)
 
         if self.schedule_type == Constants.SCHEDULE_MONTHLY:
-            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
-                   and Helpers.validate_hour_of_day(self.hour_of_day) \
-                   and Helpers.validate_day_of_week(self.day_of_month)
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) and \
+                Helpers.validate_hour_of_day(self.hour_of_day) and \
+                Helpers.validate_day_of_week(self.day_of_month)
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
@@ -577,3 +579,5 @@ class JobMailTo(db.Model):
         return '{email_address}'.format(
             email_address=self.email_address
         )
+
+# pylint: disable=C0103,R0902

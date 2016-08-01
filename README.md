@@ -3,8 +3,6 @@
 
 [![Code Health](https://landscape.io/github/scattm/DanceCat/master/landscape.svg?style=flat)](https://landscape.io/github/scattm/DanceCat/master)
 
-### [Project's Road Map](https://1drv.ms/x/s!AtdoGZ-ha3nacaZMSKh1SNS9vsA)
-
 #### Installation
 
 Download and install mysql-connector-python [here](https://dev.mysql.com/downloads/connector/python/). My version is 2.1.3.
@@ -37,6 +35,15 @@ export CONFIG_FILE=</path/to/config/file>
 python
 from DanceCat import db
 db.create_all()
+```
+
+#### DB Migration
+Run the following commands to upgrade your database version.
+
+```
+source /path/to/your/virtualenv/bin/activate
+export CONFIG_FILE=</path/to/config/file>
+python DanceCatDBMigrator.py db upgrade
 ```
 
 #### SSL

@@ -51,7 +51,7 @@ def job_worker(job_id, tracker_id):
         )
 
         db_connector.connect()
-        db_connector.execute(job.queryString)
+        db_connector.execute(job.query_string)
         results = {
             'header': db_connector.columns_name,
             'rows': db_connector.fetch_all()

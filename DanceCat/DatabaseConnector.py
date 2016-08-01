@@ -240,13 +240,12 @@ class DatabaseConnector(object):
         if len(self.columns_name) == 0:
             raise DatabaseConnectorException('Column(s) name is empty.', self.type)
         for i in range(0, len(self.columns_name)):
-            if self.is_hiding_password:
-                if re.search(
-                        r'password|secret|userpass|confidential',
-                        self.columns_name[i],
-                        re.IGNORECASE
-                ) is not None:
-                    self.ignore_position.append(i)
+            if self.is_hiding_password and re.search(
+                    r'password|secret|userpass|confidential',
+                    self.columns_name[i],
+                    re.IGNORECASE
+            ) is not None:
+                self.ignore_position.append(i)
 
 
 class DatabaseConnectorException(Exception):

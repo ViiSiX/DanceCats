@@ -11,3 +11,16 @@
     {% endif %}
   </div>
 {% endmacro %}
+
+{% macro render_checkbox(field) %}
+  <div class=form-group>
+    {{ field.label }}&nbsp;&nbsp;{{ field(**kwargs)|safe }}
+    {% if field.errors %}
+      <ul class=errors>
+        {% for error in field.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endmacro %}

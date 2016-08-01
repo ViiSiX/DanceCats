@@ -11,7 +11,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 import flask_excel as excel
 from DanceCat import app, db, lm, rdb
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    QueryDataJob, TrackJobRun, JobMailTo, Job
+    QueryDataJob, TrackJobRun, JobMailTo, Job, Schedule
 from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from .JobWorker import job_worker
@@ -42,7 +42,7 @@ def job():
         job_lists.append({
             'id': job_object.id,
             'name': job_object.name,
-            'last_updated': job_object.lastUpdated,
+            'last_updated': job_object.last_updated,
             'user_email': job_object.User.email,
             'connection_name': job_object.Connection.name
         })
@@ -56,7 +56,7 @@ def job():
 def job_create():
     """Render and return Create New Job Page."""
     form = QueryJobForm(request.form)
-    form.connectionId.choices = \
+    form.connection_id.choices = \
         Connection.query.with_entities(Connection.id, Connection.name).all()
 
     if request.method == 'POST':
@@ -69,9 +69,10 @@ def job_create():
         elif form.validate_on_submit():
             new_job = QueryDataJob(name=request.form['name'],
                                    annotation=request.form['annotation'],
-                                   connection_id=request.form['connectionId'],
-                                   query_string=request.form['queryString'],
+                                   connection_id=request.form['connection_id'],
+                                   query_string=request.form['query_string'],
                                    user_id=current_user.id)
+
             db.session.add(new_job)
             db.session.commit()
 
@@ -82,6 +83,20 @@ def job_create():
                         email_address=mail_to.data
                     )
                     db.session.add(new_mail_to)
+                    db.session.commit()
+
+            for schedule in form.schedules.entries:
+                if schedule.data != '':
+                    start_dt = Helpers.str2datetime(schedule.next_run.data, "%Y-%m-%d %I:%M %p")
+                    new_schedule = Schedule(
+                        job_id=new_job.id,
+                        schedule_type=schedule.schedule_type.data,
+                        user_id=current_user.id,
+                        is_active=schedule.is_active.data,
+                        start_time=start_dt
+                    )
+
+                    db.session.add(new_schedule)
                     db.session.commit()
 
             return redirect(url_for('job'))
@@ -98,8 +113,11 @@ def job_edit(job_id):
     """Render and return Edit Job Page."""
     editing_job = QueryDataJob.query.get_or_404(job_id)
     form = QueryJobForm(request.form, editing_job)
-    form.connectionId.choices = \
+    form.connection_id.choices = \
         Connection.query.with_entities(Connection.id, Connection.name).all()
+
+    for i in range(len(editing_job.schedules)):
+        form.schedules[i].start_time = editing_job.schedules[i].nextRun
 
     if request.method == 'POST':
         if 'add-email' in request.form:
@@ -113,14 +131,14 @@ def job_edit(job_id):
             db.session.commit()
 
             db.session.query(JobMailTo). \
-                filter_by(jobId=editing_job.id). \
+                filter_by(job_id=editing_job.id). \
                 update({JobMailTo.enable: False})
             db.session.commit()
             for mail_to in form.emails.entries:
                 if mail_to.data != '':
                     existing_mail_to = \
                         JobMailTo.query.filter_by(
-                            jobId=editing_job.id, emailAddress=mail_to.data
+                            job_id=editing_job.id, email_address=mail_to.data
                         ).first()
                     if existing_mail_to is None:
                         new_mail_to = JobMailTo(
@@ -210,8 +228,8 @@ def job_result(tracker_id, result_type):
 def job_latest_result(job_id, result_type):
     """Download Job's latest result."""
     fetching_result_job = Job.query.get_or_404(job_id)
-    last_tracker = TrackJobRun.query.filter_by(jobId=fetching_result_job.id).\
-        order_by(TrackJobRun.ranOn.desc()).first()
+    last_tracker = TrackJobRun.query.filter_by(job_id=fetching_result_job.id).\
+        order_by(TrackJobRun.ran_on.desc()).first()
     if last_tracker is not None:
         queue = rdb.queue
         result = queue.fetch_job(str(last_tracker.id)).result
@@ -267,7 +285,7 @@ def connection_create():
                                         database=request.form['database'],
                                         host=request.form['host'],
                                         port=Helpers.null_handler(request.form['port']),
-                                        user_name=request.form['userName'],
+                                        user_name=request.form['user_name'],
                                         password=Helpers.null_handler(request.form['password']),
                                         creator_user_id=current_user.id
                                         )
@@ -359,7 +377,7 @@ def connection_test(connection_id):
                                         database=request.form['database'],
                                         host=request.form['host'],
                                         port=Helpers.null_handler(request.form['port']),
-                                        user_name=request.form['userName'],
+                                        user_name=request.form['user_name'],
                                         password=Helpers.null_handler(request.form['password']),
                                         creator_user_id=current_user.id
                                         )
@@ -418,7 +436,7 @@ def login():
         else:
             if Helpers.check_password(registered_user.password, user_password):
                 login_user(registered_user)
-                registered_user.lastLogin = datetime.datetime.now()
+                registered_user.last_login = datetime.datetime.now()
                 db.session.commit()
                 flash('You have been logged in successfully!', 'alert-success')
                 return redirect(request.args.get('next') or url_for('job'))

@@ -13,8 +13,6 @@ from . import Helpers
 from . import Constants
 
 
-# pylint: disable=C0103,R0902
-
 class AllowedEmail(db.Model):
     """
     Docstring for AllowedEmail class.
@@ -54,13 +52,16 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    isActive = db.Column(db.Boolean, nullable=False, default=True)
-    createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
-    lastLogin = db.Column(db.DateTime, nullable=True)
-    lastUpdated = db.Column(db.DateTime,
-                            onupdate=datetime.datetime.now,
-                            default=datetime.datetime.now)
-    version = db.Column(db.Integer, index=True, nullable=False)
+    is_active = db.Column('isActive', db.Boolean,
+                          nullable=False, default=True)
+    created_on = db.Column('createdOn', db.DateTime,
+                           default=datetime.datetime.now)
+    last_login = db.Column('lastLogin', db.DateTime, nullable=True)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
+    version = db.Column(db.Integer, index=False, nullable=False)
 
     connections = db.relationship('Connection', backref='User', lazy='joined')
     jobs = db.relationship('Job', backref='User', lazy='joined')
@@ -75,11 +76,6 @@ class User(UserMixin, db.Model):
         self.email = user_email
         self.password = Helpers.encrypt_password(user_password)
         self.version = Constants.MODEL_USER_VERSION
-
-    @property
-    def is_active(self):
-        """Check if the user is active or not - Flask-Login method."""
-        return self.isActive
 
     @property
     def is_anonymous(self):
@@ -111,13 +107,15 @@ class Connection(db.Model):
     type = db.Column(db.SmallInteger, nullable=False)
     host = db.Column(db.String(100), nullable=False)
     port = db.Column(db.Integer, nullable=True)
-    userName = db.Column(db.String(100), nullable=False)
+    user_name = db.Column('userName', db.String(100), nullable=False)
     password = db.Column(db.TEXT, nullable=True)
     database = db.Column(db.String(100), nullable=False)
-    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    lastUpdated = db.Column(db.DateTime,
-                            onupdate=datetime.datetime.now,
-                            default=datetime.datetime.now)
+    user_id = db.Column('userId', db.Integer,
+                        db.ForeignKey('user.id'), nullable=False)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     jobs = db.relationship('Job', backref='Connection', lazy='joined')
@@ -148,9 +146,9 @@ class Connection(db.Model):
         self.host = host
         self.database = database
         self.port = kwargs.get('port')
-        self.userName = kwargs.get('user_name')
+        self.user_name = kwargs.get('user_name')
         self.encrypt_password(kwargs.get('password'))
-        self.userId = creator_user_id
+        self.user_id = creator_user_id
         self.version = Constants.MODEL_CONNECTION_VERSION
 
     def encrypt_password(self, password):
@@ -167,12 +165,13 @@ class Connection(db.Model):
         be passed to DatabaseConnector class's constructor.
         """
         db_config = {
-            'user': self.userName,
+            'user': self.user_name,
             'host': self.host,
             'database': self.database,
             'port':
                 self.port if self.port
-                else Constants.CONNECTION_TYPES_DICT[self.type]['default_port']
+                else Constants.
+                CONNECTION_TYPES_DICT[self.type]['default_port']
         }
 
         # If no password leave it alone
@@ -203,27 +202,35 @@ class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     annotation = db.Column(db.Text)
-    connectionId = db.Column(db.Integer, db.ForeignKey('connection.id'), nullable=True)
-    _commands = db.Column(db.Text, name='commands', nullable=False)
-    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
-    lastUpdated = db.Column(db.DateTime,
-                            onupdate=datetime.datetime.now,
-                            default=datetime.datetime.now)
-    noOfExecuted = db.Column(db.Integer, default=0, nullable=False)
-    jobType = db.Column(db.SmallInteger,
-                        default=Constants.JOB_NONE,
-                        nullable=False)
+    connection_id = db.Column('connectionId', db.Integer,
+                              db.ForeignKey('connection.id'), nullable=True)
+    _commands = db.Column('commands', db.Text, nullable=False)
+    user_id = db.Column('userId', db.Integer,
+                        db.ForeignKey('user.id'), nullable=False)
+    created_on = db.Column('createdOn', db.DateTime,
+                           default=datetime.datetime.now)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
+    no_of_executed = db.Column('noOfExecuted', db.Integer,
+                               default=0, nullable=False)
+    job_type = db.Column('jobType', db.SmallInteger,
+                         default=Constants.JOB_NONE,
+                         nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     emails = db.relationship('JobMailTo',
-                             primaryjoin="and_(Job.id==JobMailTo.jobId, "
+                             primaryjoin="and_(Job.id==JobMailTo.job_id, "
                                          "JobMailTo.enable==True)",
                              backref='Job',
                              lazy='joined')
+    schedules = db.relationship('Schedule',
+                                backref='Job',
+                                lazy='joined')
 
     __mapper_args__ = {
-        'polymorphic_on': jobType,
+        'polymorphic_on': job_type,
         'polymorphic_identity': Constants.JOB_NONE
     }
 
@@ -238,12 +245,12 @@ class Job(db.Model):
             annotation: Job's description and annotation.
         """
         self.name = name
-        self.annotation = kwargs.get('annotation', None)
-        if self.jobType == Constants.JOB_NONE:
+        self.annotation = kwargs.get('annotation')
+        if self.job_type == Constants.JOB_NONE:
             self.commands = "/* NO COMMAND */\n" + commands
         else:
             self.commands = commands
-        self.userId = user_id
+        self.user_id = user_id
         self.version = Constants.MODEL_JOB_VERSION
 
     @property
@@ -258,7 +265,7 @@ class Job(db.Model):
 
     def update_executed_times(self):
         """Update Job's total executed times."""
-        self.noOfExecuted += 1
+        self.no_of_executed += 1
 
     @property
     def recipients(self):
@@ -287,26 +294,27 @@ class QueryDataJob(Job):
         Constructor for QueryDataJob class.
 
         :param name: Job's name.
-        :param query_string: Query that will be used to get data from Database.
+        :param query_string:
+            Query that will be used to get data from Database.
         :param user_id: Job's creator's User Id.
         :param kwargs:
             annotation: Job's description and annotation.
             connection_id: Connection's Id, reference to Connection Model.
         """
-        self.connectionId = kwargs.get('connection_id')
-        self.jobType = Constants.JOB_QUERY
+        self.connection_id = kwargs.get('connection_id')
+        self.job_type = Constants.JOB_QUERY
         query_string = "/* QUERY STRING */\n" + query_string
 
         super(QueryDataJob, self).__init__(name=name, commands=query_string,
                                            user_id=user_id, kwargs=kwargs)
 
     @property
-    def queryString(self):
+    def query_string(self):
         """Return command field."""
         return self._commands
 
-    @queryString.setter
-    def queryString(self, query_string):
+    @query_string.setter
+    def query_string(self, query_string):
         """Setter for commands property."""
         self._commands = query_string
 
@@ -326,60 +334,59 @@ class Schedule(db.Model):
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    isActive = db.Column(db.Boolean, default=True, nullable=False)
-    minuteOfHour = db.Column(db.SmallInteger, default=0, nullable=False)
-    hourOfDay = db.Column(db.SmallInteger, default=0, nullable=False)
-    dayOfWeek = db.Column(db.SmallInteger, default=0, nullable=False)
-    dayOfMonth = db.Column(db.SmallInteger, default=1, nullable=False)
-    scheduleType = db.Column(db.SmallInteger, default=Constants.SCHEDULE_ONCE, nullable=False)
-    nextRun = db.Column(db.DateTime, nullable=True)
-    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    createdOn = db.Column(db.DateTime, default=datetime.datetime.now)
+    job_id = db.Column('jobId', db.Integer,
+                       db.ForeignKey('job.id'), nullable=False)
+    is_active = db.Column('isActive', db.Boolean,
+                          default=True, nullable=False)
+    minute_of_hour = db.Column('minuteOfHour',
+                               db.SmallInteger, default=0, nullable=False)
+    hour_of_day = db.Column('hourOfDay', db.SmallInteger,
+                            default=0, nullable=False)
+    day_of_week = db.Column('dayOfWeek', db.SmallInteger,
+                            default=0, nullable=False)
+    day_of_month = db.Column('dayOfMonth', db.SmallInteger,
+                             default=1, nullable=False)
+    schedule_type = db.Column('scheduleType', db.SmallInteger,
+                              default=Constants.SCHEDULE_ONCE,
+                              nullable=False)
+    next_run = db.Column('nextRun', db.DateTime, nullable=True)
+    user_id = db.Column('userId', db.Integer,
+                        db.ForeignKey('user.id'), nullable=False)
+    created_on = db.Column('createdOn', db.DateTime,
+                           default=datetime.datetime.now)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
     version = db.Column(db.Integer, index=True, nullable=False)
 
-    def __init__(self, job_id, schedule_type=0, **kwargs):
+    def __init__(self, job_id, start_time, user_id,
+                 schedule_type=Constants.SCHEDULE_ONCE, is_active=False):
         """
         Input and validate schedule.
 
         :param job_id:
             Scheduled Job's Id.
+        :param start_time:
+            Time when the job will be trigger, datetime instance.
+        :type start_time: datetime.datetime
         :param schedule_type:
             Schedule type, see in the class's docstring.
-        :param kwargs:
-            is_active: this schedule is active or not.
-            minute_of_hour: example 59.
-            hour_of_day: example 23.
-            day_of_week: example 5.
-            day_of_month: example 28.
-            next_run: datetime instance.
+        :param is_active:
+            This schedule is active or not.
         """
-        self.jobId = job_id
-        self.scheduleType = schedule_type
-        self.isActive = kwargs.get('is_active', False)
+        self.job_id = job_id
+        self.schedule_type = schedule_type
+        self.is_active = is_active
 
-        minute_of_hour = kwargs.get('minute_of_hour', 0)
-        self.minuteOfHour = \
-            minute_of_hour if Helpers.validate_minute_of_hour(minute_of_hour) else 0
+        self.minute_of_hour = start_time.minute
+        self.hour_of_day = start_time.hour
+        self.day_of_week = start_time.weekday()
+        self.day_of_month = start_time.day
+        self.user_id = user_id
 
-        hour_of_day = kwargs.get('hour_of_day', 0)
-        self.hourOfDay = \
-            hour_of_day if Helpers.validate_hour_of_day(hour_of_day) else 0
-
-        day_of_week = kwargs.get('day_of_week', 0)
-        self.dayOfWeek = \
-            day_of_week if Helpers.validate_day_of_week(day_of_week) else 0
-
-        day_of_month = kwargs.get('day_of_month', 0)
-        self.dayOfMonth = \
-            day_of_month if Helpers.validate_day_of_month(day_of_month) else 0
-
-        next_run = kwargs.get('next_run', None)
-        if self.scheduleType == Constants.SCHEDULE_ONCE:
-            if next_run is None:
-                raise ValueError('Run once schedule require next run time!')
-            else:
-                self.nextRun = next_run
+        if start_time >= datetime.datetime.now() + relativedelta(minutes=1):
+            self.next_run = start_time
         else:
             self.update_next_run(True)
 
@@ -391,25 +398,25 @@ class Schedule(db.Model):
 
         :return: True if the schedule will be run on the feature else False.
         """
-        if self.scheduleType == Constants.SCHEDULE_ONCE:
-            return self.nextRun > datetime.datetime.now()
+        if self.schedule_type == Constants.SCHEDULE_ONCE:
+            return self.next_run > datetime.datetime.now()
 
-        if self.scheduleType == Constants.SCHEDULE_HOURLY:
-            return Helpers.validate_minute_of_hour(self.minuteOfHour)
+        if self.schedule_type == Constants.SCHEDULE_HOURLY:
+            return Helpers.validate_minute_of_hour(self.minute_of_hour)
 
-        if self.scheduleType == Constants.SCHEDULE_DAILY:
-            return Helpers.validate_minute_of_hour(self.minuteOfHour) \
-                   and Helpers.validate_hour_of_day(self.hourOfDay)
+        if self.schedule_type == Constants.SCHEDULE_DAILY:
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
+                   and Helpers.validate_hour_of_day(self.hour_of_day)
 
-        if self.scheduleType == Constants.SCHEDULE_WEEKLY:
-            return Helpers.validate_minute_of_hour(self.minuteOfHour) \
-                   and Helpers.validate_hour_of_day(self.hourOfDay) \
-                   and Helpers.validate_day_of_week(self.dayOfWeek)
+        if self.schedule_type == Constants.SCHEDULE_WEEKLY:
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
+                   and Helpers.validate_hour_of_day(self.hour_of_day) \
+                   and Helpers.validate_day_of_week(self.day_of_week)
 
-        if self.scheduleType == Constants.SCHEDULE_MONTHLY:
-            return Helpers.validate_minute_of_hour(self.minuteOfHour) \
-                   and Helpers.validate_hour_of_day(self.hourOfDay) \
-                   and Helpers.validate_day_of_week(self.dayOfMonth)
+        if self.schedule_type == Constants.SCHEDULE_MONTHLY:
+            return Helpers.validate_minute_of_hour(self.minute_of_hour) \
+                   and Helpers.validate_hour_of_day(self.hour_of_day) \
+                   and Helpers.validate_day_of_week(self.day_of_month)
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
@@ -424,41 +431,41 @@ class Schedule(db.Model):
         cur_time = datetime.datetime.now()
         next_run_time = datetime.datetime.now()
 
-        if self.scheduleType == Constants.SCHEDULE_HOURLY:
-            next_run_time += relativedelta(minute=self.minuteOfHour)
+        if self.schedule_type == Constants.SCHEDULE_HOURLY:
+            next_run_time += relativedelta(minute=self.minute_of_hour)
 
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(hours=1)
 
-        elif self.scheduleType == Constants.SCHEDULE_DAILY:
-            next_run_time += relativedelta(minute=self.minuteOfHour,
-                                           hour=self.hourOfDay)
+        elif self.schedule_type == Constants.SCHEDULE_DAILY:
+            next_run_time += relativedelta(minute=self.minute_of_hour,
+                                           hour=self.hour_of_day)
 
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(days=1)
 
-        elif self.scheduleType == Constants.SCHEDULE_WEEKLY:
-            next_run_time += relativedelta(minute=self.minuteOfHour,
-                                           hour=self.hourOfDay,
-                                           weekday=self.dayOfWeek)
+        elif self.schedule_type == Constants.SCHEDULE_WEEKLY:
+            next_run_time += relativedelta(minute=self.minute_of_hour,
+                                           hour=self.hour_of_day,
+                                           weekday=self.day_of_week)
 
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(weeks=1)
 
-        elif self.scheduleType == Constants.SCHEDULE_MONTHLY:
-            next_run_time += relativedelta(minute=self.minuteOfHour,
-                                           hour=self.hourOfDay,
-                                           day=self.dayOfMonth)
+        elif self.schedule_type == Constants.SCHEDULE_MONTHLY:
+            next_run_time += relativedelta(minute=self.minute_of_hour,
+                                           hour=self.hour_of_day,
+                                           day=self.day_of_month)
 
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(months=1)
 
-        self.nextRun = next_run_time
+        self.next_run = next_run_time
 
     def __repr__(self):
         """Print the Schedule instance."""
         return '<Schedule Id {id} of Job Id {jobId}>'.format(
-            id=self.id, jobId=self.jobId
+            id=self.id, jobId=self.job_id
         )
 
 
@@ -466,13 +473,17 @@ class TrackJobRun(db.Model):
     """Track status whenever a job is running."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    scheduleId = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=True)
-    scheduledOn = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
-    ranOn = db.Column(db.DateTime, nullable=True)
+    job_id = db.Column('jobId', db.Integer,
+                       db.ForeignKey('job.id'), nullable=False)
+    schedule_id = db.Column('scheduleId', db.Integer,
+                            db.ForeignKey('schedule.id'), nullable=True)
+    scheduled_on = db.Column('scheduledOn', db.DateTime,
+                             default=datetime.datetime.now, nullable=False)
+    ran_on = db.Column('ranOn', db.DateTime, nullable=True)
     duration = db.Column(db.Integer, default=0, nullable=False)
-    status = db.Column(db.SmallInteger, default=Constants.JOB_QUEUED, nullable=False)
-    errorString = db.Column(db.Text, nullable=True)
+    status = db.Column(db.SmallInteger,
+                       default=Constants.JOB_QUEUED, nullable=False)
+    error_string = db.Column('errorString', db.Text, nullable=True)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, job_id, schedule_id=None):
@@ -484,13 +495,13 @@ class TrackJobRun(db.Model):
         :param schedule_id:
             Running Schedule's Id.
         """
-        self.jobId = job_id
-        self.scheduleId = schedule_id
+        self.job_id = job_id
+        self.schedule_id = schedule_id
         self.version = Constants.MODEL_TRACK_JOB_RUN_VERSION
 
     def start(self):
         """Call to track when the Job begin to run."""
-        self.ranOn = datetime.datetime.now()
+        self.ran_on = datetime.datetime.now()
         self.status = Constants.JOB_RUNNING
 
     def complete(self, is_success, run_duration, error_string=None):
@@ -501,9 +512,10 @@ class TrackJobRun(db.Model):
         :param run_duration: Runtime in milliseconds.
         :param error_string: Error when the job is failed.
         """
-        self.status = Constants.JOB_RAN_SUCCESS if is_success else Constants.JOB_RAN_FAILED
+        self.status = Constants.JOB_RAN_SUCCESS \
+            if is_success else Constants.JOB_RAN_FAILED
         self.duration = run_duration
-        self.errorString = error_string
+        self.error_string = error_string
 
     def check_expiration(self):
         """
@@ -516,11 +528,12 @@ class TrackJobRun(db.Model):
             return False
 
         time_delta = self.duration + ((
-            datetime.datetime.now() - self.ranOn
+            datetime.datetime.now() - self.ran_on
         ).total_seconds() * 1000)
 
-        if self.status == Constants.JOB_RAN_SUCCESS\
-                and time_delta > config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
+        if self.status == Constants.JOB_RAN_SUCCESS \
+                and time_delta > \
+                config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
             self.status = Constants.JOB_RESULT_EXPIRED
             return True
 
@@ -529,7 +542,7 @@ class TrackJobRun(db.Model):
     def __repr__(self):
         """Print the Job Tracker instance."""
         return '<Tracker {id}: Job Id {jobId} {status}>'.format(
-            id=self.id, jobId=self.jobId,
+            id=self.id, jobId=self.job_id,
             status=Constants.JOB_TRACKING_STATUSES_DICT[self.status]['name']
         )
 
@@ -538,8 +551,9 @@ class JobMailTo(db.Model):
     """Emails which the result will be sent to."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    jobId = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    emailAddress = db.Column(db.String(100), nullable=False)
+    job_id = db.Column('jobId', db.Integer,
+                       db.ForeignKey('job.id'), nullable=False)
+    email_address = db.Column('emailAddress', db.String(100), nullable=False)
     enable = db.Column(db.Boolean, default=True, nullable=False)
 
     __table_args__ = (
@@ -555,13 +569,11 @@ class JobMailTo(db.Model):
         :param email_address:
             Email which will receive the results.
         """
-        self.jobId = job_id
-        self.emailAddress = email_address
+        self.job_id = job_id
+        self.email_address = email_address
 
     def __repr__(self):
         """Print the email."""
         return '{email_address}'.format(
-            email_address=self.emailAddress
+            email_address=self.email_address
         )
-
-# pylint: enable=C0103,R0902

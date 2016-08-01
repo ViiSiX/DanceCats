@@ -141,6 +141,11 @@ def sleep(seconds):
     time.sleep(seconds)
 
 
+def str2datetime(dt_string, format_string):
+    """Convert string to datetime object follow format string."""
+    return datetime.datetime.strptime(dt_string, format_string)
+
+
 class Timer(object):
     """
     Timer Class.

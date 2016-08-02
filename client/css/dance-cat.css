@@ -4,6 +4,10 @@
   margin-top: 10px;
 }
 
+.bot-margin-10 {
+  margin-bottom: 10px;
+}
+
 .top-margin-20 {
   margin-top: 20px;
 }
@@ -200,6 +204,14 @@
 .job-email-to-field-list .mail-to-add-more {
   display: inline-block;
   margin-bottom: 3px;
+}
+
+/* Schedules */
+.job-schedule-field-list {
+  display: block;
+  border-radius: 2px;
+  padding: 15px;
+  float: none;
 }
 
 /* End Job */

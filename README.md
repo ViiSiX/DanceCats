@@ -2,8 +2,7 @@
 -----------
 
 [![Code Health](https://landscape.io/github/scattm/DanceCat/master/landscape.svg?style=flat)](https://landscape.io/github/scattm/DanceCat/master)
-
-### [Project's Road Map](https://1drv.ms/x/s!AtdoGZ-ha3nacaZMSKh1SNS9vsA)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/a717f58a1b9f429f98f7814e6a34f509/badge.svg)](https://www.quantifiedcode.com/app/project/a717f58a1b9f429f98f7814e6a34f509)
 
 #### Installation
 
@@ -19,8 +18,8 @@ Install the rest of requirements. Then run `webpack` to package frontend things.
 virtualenv /path/to/your/virtualenv
 source /path/to/your/virtualenv/bin/activate
 pip install -r requirement.txt
+cp package.json.dist package.json
 npm install
-bower install
 webpack
 ```
 
@@ -37,6 +36,15 @@ export CONFIG_FILE=</path/to/config/file>
 python
 from DanceCat import db
 db.create_all()
+```
+
+#### DB Migration
+Run the following commands to upgrade your database version.
+
+```
+source /path/to/your/virtualenv/bin/activate
+export CONFIG_FILE=</path/to/config/file>
+python DanceCatDBMigrator.py db upgrade
 ```
 
 #### SSL

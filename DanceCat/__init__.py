@@ -7,7 +7,6 @@ from flask_login import LoginManager
 from flask_redislite import FlaskRedis
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-from . import FrequencyTaskChecker
 
 
 # pylint: disable=C0103
@@ -31,12 +30,5 @@ lm.login_message_category = "alert-danger"
 mail = Mail(app)
 
 socket_io = SocketIO(app)
-
-with app.app_context():
-    rdb.start_worker()
-
-FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
-
-from DanceCat import Views, ErrorViews, Socket
 
 # pylint: enable=C0103

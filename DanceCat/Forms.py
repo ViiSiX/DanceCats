@@ -8,7 +8,8 @@ WTForms. Used for template's forms rendering.
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
     SelectField, IntegerField, \
-    FieldList, \
+    BooleanField, HiddenField, \
+    FormField, FieldList, \
     validators
 from wtforms.compat import iteritems
 from . import Constants
@@ -42,13 +43,29 @@ class ConnectionForm(Form):
     port = IntegerField('DB Port', validators=[
         validators.optional()
     ])
-    userName = StringField('Username', validators=[
+    user_name = StringField('Username', validators=[
         validators.DataRequired()
     ])
     password = PasswordField('Password')
     database = StringField('Database', validators=[
         validators.DataRequired()
     ])
+
+
+class ScheduleForm(Form):
+    """Used to create/edit job's schedule."""
+
+    schedule_id = HiddenField(validators=[
+        validators.Optional()
+    ])
+    schedule_type = SelectField('Schedule Type',
+                                coerce=int,
+                                choices=Constants.SCHEDULE_TYPES_LIST)
+    next_run = StringField('Start On',
+                           validators=[
+                               validators.DataRequired()
+                           ])
+    is_active = BooleanField('Active')
 
 
 class QueryJobForm(Form):
@@ -65,9 +82,9 @@ class QueryJobForm(Form):
                                render_kw={
                                    'placeholder': 'Job\'s annotation'
                                })
-    connectionId = SelectField('Connection',
-                               coerce=int)
-    queryString = TextAreaField('Query', validators=[validators.DataRequired()])
+    connection_id = SelectField('Connection',
+                                coerce=int)
+    query_string = TextAreaField('Query', validators=[validators.DataRequired()])
     emails = FieldList(StringField('Email',
                                    render_kw={
                                        'placeholder': 'report_to@dancecat.com'
@@ -78,6 +95,8 @@ class QueryJobForm(Form):
                                    ]),
                        'Send Result To',
                        min_entries=1)
+    schedules = FieldList(FormField(ScheduleForm),
+                          'Job\'s schedules:')
 
     def populate_obj(self, obj):
         """
@@ -90,5 +109,5 @@ class QueryJobForm(Form):
         :param obj: Job Model object.
         """
         for name, field in iteritems(self._fields):
-            if name != 'emails':
+            if name not in ['emails', 'schedules']:
                 field.populate_obj(obj, name)

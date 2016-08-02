@@ -13,7 +13,8 @@ module.exports = [
       path: './DanceCat/static/bundle/',
       filename: 'DanceCat.[name].js',
       library: ['DanceCat', "[name]"],
-      libraryTarget: "umd"
+      libraryTarget: "umd",
+      publicPath: '/static/bundle/'
     },
     module: {
       loaders: [
@@ -21,7 +22,8 @@ module.exports = [
           test: /.\/client\/js\/\.js$/,
           loaders: ["babel"],
           query: {
-            presets: 'es2015'
+            presets: 'es2015',
+            compact: true
           }
         },
         {
@@ -38,13 +40,14 @@ module.exports = [
         },
         {
           test: /\.(eot|ttf|svg|gif|png|woff|woff2)$/,
-          loader: "file?name=/static/bundle/[hash].[ext]"
+          loader: "file?name=[hash].[ext]"
         },
         {
           test: /\.js$/,
           loader: 'babel',
           query: {
-            presets: ['es2015', 'react']
+            presets: ['es2015', 'react'],
+            compact: true
           }
         }
       ]
@@ -58,7 +61,6 @@ module.exports = [
       new webpack.ProvidePlugin({
         $: "jquery",
         jQuery: "jquery",
-        io: "socket.io-client",
         React: "react",
         ReactDOM: "react-dom"
       }),

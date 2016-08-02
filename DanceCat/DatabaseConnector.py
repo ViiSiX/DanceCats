@@ -127,7 +127,7 @@ class DatabaseConnector(object):
         except Exception as exception:
             traceback.print_exc()
             raise DatabaseConnectorException(
-                'Could not query "%s".' % query,
+                'Could not query "{query}".'.format(query=query),
                 self.type,
                 trace_back=exception
             )
@@ -180,6 +180,7 @@ class DatabaseConnector(object):
             )
 
     def _convert_dict_one(self, data_tuple):
+        """Convert one row of data from tuple type to dict type."""
         if len(self.columns_name) == 0:
             raise DatabaseConnectorException('Column(s) name is empty.', self.type)
 
@@ -195,6 +196,7 @@ class DatabaseConnector(object):
         return data_dict
 
     def _convert_dict_many(self, data_tuple_list):
+        """Convert many rows of data from tuple type to dict type."""
         if len(self.columns_name) == 0:
             raise DatabaseConnectorException('Column(s) name is empty.', self.type)
 
@@ -215,6 +217,7 @@ class DatabaseConnector(object):
         return data_dict_list
 
     def _tuple_process_one(self, data_tuple):
+        """Process one row of tuple data."""
         new_data_tuple = ()
 
         for i in range(0, len(data_tuple)):
@@ -229,6 +232,7 @@ class DatabaseConnector(object):
         return new_data_tuple
 
     def _tuple_process_many(self, data_tuple_list):
+        """Process many rows of tuple data."""
         new_data_tuple_list = []
 
         for i in range(0, len(data_tuple_list)):
@@ -237,16 +241,16 @@ class DatabaseConnector(object):
         return new_data_tuple_list
 
     def _password_field_coordinator(self):
+        """Coordinate password field and mark to ignore it."""
         if len(self.columns_name) == 0:
             raise DatabaseConnectorException('Column(s) name is empty.', self.type)
         for i in range(0, len(self.columns_name)):
-            if self.is_hiding_password:
-                if re.search(
-                        r'password|secret|userpass|confidential',
-                        self.columns_name[i],
-                        re.IGNORECASE
-                ) is not None:
-                    self.ignore_position.append(i)
+            if self.is_hiding_password and re.search(
+                    r'password|secret|userpass|confidential',
+                    self.columns_name[i],
+                    re.IGNORECASE
+            ) is not None:
+                self.ignore_position.append(i)
 
 
 class DatabaseConnectorException(Exception):

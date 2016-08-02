@@ -5,13 +5,14 @@ This module contains functions which will be called
 whenever the application receive the right url request.
 """
 
+from __future__ import print_function
 import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 import flask_excel as excel
 from DanceCat import app, db, lm, rdb
 from DanceCat.Models import User, AllowedEmail, Connection, \
-    QueryDataJob, TrackJobRun, JobMailTo, Job
+    QueryDataJob, TrackJobRun, JobMailTo, Job, Schedule
 from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from .JobWorker import job_worker
@@ -40,9 +41,9 @@ def job():
     job_lists = []
     for job_object in jobs:
         job_lists.append({
-            'id': job_object.id,
+            'id': job_object.job_id,
             'name': job_object.name,
-            'last_updated': job_object.lastUpdated,
+            'last_updated': job_object.last_updated,
             'user_email': job_object.User.email,
             'connection_name': job_object.Connection.name
         })
@@ -56,29 +57,47 @@ def job():
 def job_create():
     """Render and return Create New Job Page."""
     form = QueryJobForm(request.form)
-    form.connectionId.choices = \
-        Connection.query.with_entities(Connection.id, Connection.name).all()
+    form.connection_id.choices = \
+        Connection.query.with_entities(Connection.connection_id, Connection.name).all()
 
     if request.method == 'POST':
-        if request.form.has_key('add-email'):
+        if 'add-email' in request.form:
             form.emails.append_entry()
+
+        elif 'add-schedule' in request.form:
+            form.schedules.append_entry()
 
         elif form.validate_on_submit():
             new_job = QueryDataJob(name=request.form['name'],
                                    annotation=request.form['annotation'],
-                                   connection_id=request.form['connectionId'],
-                                   query_string=request.form['queryString'],
-                                   user_id=current_user.id)
+                                   connection_id=request.form['connection_id'],
+                                   query_string=request.form['query_string'],
+                                   user_id=current_user.user_id)
+
             db.session.add(new_job)
             db.session.commit()
 
             for mail_to in form.emails.entries:
                 if mail_to.data != '':
                     new_mail_to = JobMailTo(
-                        job_id=new_job.id,
+                        job_id=new_job.job_id,
                         email_address=mail_to.data
                     )
                     db.session.add(new_mail_to)
+                    db.session.commit()
+
+            for schedule in form.schedules.entries:
+                if schedule.data != '':
+                    start_dt = Helpers.str2datetime(schedule.next_run.data, "%Y-%m-%d %I:%M %p")
+                    new_schedule = Schedule(
+                        job_id=new_job.job_id,
+                        schedule_type=schedule.schedule_type.data,
+                        user_id=current_user.user_id,
+                        is_active=schedule.is_active.data,
+                        start_time=start_dt
+                    )
+
+                    db.session.add(new_schedule)
                     db.session.commit()
 
             return redirect(url_for('job'))
@@ -95,38 +114,72 @@ def job_edit(job_id):
     """Render and return Edit Job Page."""
     editing_job = QueryDataJob.query.get_or_404(job_id)
     form = QueryJobForm(request.form, editing_job)
-    form.connectionId.choices = \
-        Connection.query.with_entities(Connection.id, Connection.name).all()
-    if len(form.emails.entries) == 0:
-        form.emails.append_entry()
+    form.connection_id.choices = \
+        Connection.query.with_entities(Connection.connection_id, Connection.name).all()
+
     if request.method == 'POST':
-        if request.form.has_key('add-email'):
+        if 'add-email' in request.form:
             form.emails.append_entry()
+
+        elif 'add-schedule' in request.form:
+            form.schedules.append_entry()
 
         elif form.validate_on_submit():
             form.populate_obj(editing_job)
             db.session.commit()
 
             db.session.query(JobMailTo). \
-                filter_by(jobId=editing_job.id). \
+                filter_by(job_id=editing_job.job_id). \
                 update({JobMailTo.enable: False})
             db.session.commit()
+
             for mail_to in form.emails.entries:
                 if mail_to.data != '':
                     existing_mail_to = \
                         JobMailTo.query.filter_by(
-                            jobId=editing_job.id, emailAddress=mail_to.data
+                            job_id=editing_job.job_id, email_address=mail_to.data
                         ).first()
+
                     if existing_mail_to is None:
                         new_mail_to = JobMailTo(
-                            job_id=editing_job.id,
+                            job_id=editing_job.job_id,
                             email_address=mail_to.data
                         )
                         db.session.add(new_mail_to)
-                        db.session.commit()
+
                     else:
                         existing_mail_to.enable = True
-                        db.session.commit()
+
+                    db.session.commit()
+
+            for schedule in form.schedules.entries:
+                if schedule.data != '':
+                    existing_schedule = \
+                        Schedule.query.filter_by(
+                            job_id=editing_job.job_id,
+                            schedule_id=schedule.schedule_id.data
+                        ).first()
+                    start_dt = Helpers.str2datetime(
+                        schedule.next_run.data, "%Y-%m-%d %I:%M %p"
+                    )
+
+                    if existing_schedule is None:
+                        new_schedule = Schedule(
+                            job_id=editing_job.job_id,
+                            schedule_type=schedule.schedule_type.data,
+                            user_id=current_user.user_id,
+                            is_active=schedule.is_active.data,
+                            start_time=start_dt
+                        )
+                        db.session.add(new_schedule)
+
+                    else:
+                        existing_schedule.schedule_type = \
+                            schedule.schedule_type.data
+                        existing_schedule.is_active = schedule.is_active.data
+                        existing_schedule.update_start_time(start_dt)
+
+                    db.session.commit()
 
             return redirect(url_for('job'))
 
@@ -160,20 +213,20 @@ def job_delete():
 def job_run():
     """Trigger a job."""
     triggered_job = QueryDataJob.query.get_or_404(request.form['id'])
-    tracker = TrackJobRun(triggered_job.id)
+    tracker = TrackJobRun(triggered_job.job_id)
     db.session.add(tracker)
     db.session.commit()
     queue = rdb.queue
     queue.enqueue(
         f=job_worker, kwargs={
-            'job_id': triggered_job.id,
-            'tracker_id': tracker.id
+            'job_id': triggered_job.job_id,
+            'tracker_id': tracker.track_job_run_id
         },
         ttl=900,
         result_ttl=app.config.get('JOB_RESULT_VALID_SECONDS', 86400),
-        job_id="%d" % tracker.id
+        job_id="{tracker_id}".format(tracker_id=tracker.track_job_run_id)
     )
-    return jsonify({'ack': True, 'tracker_id': tracker.id})
+    return jsonify({'ack': True, 'tracker_id': tracker.track_job_run_id})
 
 
 @app.route('/job/result/<tracker_id>/<result_type>')
@@ -205,11 +258,11 @@ def job_result(tracker_id, result_type):
 def job_latest_result(job_id, result_type):
     """Download Job's latest result."""
     fetching_result_job = Job.query.get_or_404(job_id)
-    last_tracker = TrackJobRun.query.filter_by(jobId=fetching_result_job.id).\
-        order_by(TrackJobRun.ranOn.desc()).first()
+    last_tracker = TrackJobRun.query.filter_by(job_id=fetching_result_job.job_id).\
+        order_by(TrackJobRun.ran_on.desc()).first()
     if last_tracker is not None:
         queue = rdb.queue
-        result = queue.fetch_job(str(last_tracker.id)).result
+        result = queue.fetch_job(str(last_tracker.track_job_run_id)).result
         if result_type in ['csv', 'xls', 'xlsx', 'ods']:
             result_array = [list(result['header'])]
             for row in result['rows']:
@@ -218,7 +271,7 @@ def job_latest_result(job_id, result_type):
                 result_array,
                 result_type,
                 file_name="Result_tid_{tid}.{ext}".format(
-                    tid=last_tracker.id,
+                    tid=last_tracker.track_job_run_id,
                     ext=result_type
                 )
             )
@@ -239,7 +292,7 @@ def connection():
         if not connection_type:
             connection_type = 'Others'
         connections_list.append({
-            'id': connection_obj.id,
+            'id': connection_obj.connection_id,
             'name': connection_obj.name,
             'type': connection_type,
             'host': connection_obj.host,
@@ -255,20 +308,19 @@ def connection():
 def connection_create():
     """Render and return Create New Connection Page."""
     form = ConnectionForm(request.form)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_connection = Connection(name=request.form['name'],
-                                        db_type=int(request.form['type']),
-                                        database=request.form['database'],
-                                        host=request.form['host'],
-                                        port=Helpers.null_handler(request.form['port']),
-                                        user_name=request.form['userName'],
-                                        password=Helpers.null_handler(request.form['password']),
-                                        creator_user_id=current_user.id
-                                        )
-            db.session.add(new_connection)
-            db.session.commit()
-            return redirect(url_for('connection'))
+    if request.method == 'POST' and form.validate_on_submit():
+        new_connection = Connection(name=request.form['name'],
+                                    db_type=int(request.form['type']),
+                                    database=request.form['database'],
+                                    host=request.form['host'],
+                                    port=Helpers.null_handler(request.form['port']),
+                                    user_name=request.form['user_name'],
+                                    password=Helpers.null_handler(request.form['password']),
+                                    creator_user_id=current_user.user_id
+                                    )
+        db.session.add(new_connection)
+        db.session.commit()
+        return redirect(url_for('connection'))
     return render_template('connection/form.html',
                            title=Constants.PROJECT_NAME,
                            action='Create',
@@ -327,7 +379,7 @@ def connection_delete():
 def connection_get_mime(connection_id):
     """Get the mime of the Connection. Currently unused."""
     conn = Connection.query. \
-        with_entities(Connection.id,
+        with_entities(Connection.connection_id,
                       Connection.type
                       ).filter_by(id=connection_id).first()
     if conn is not None:
@@ -354,9 +406,9 @@ def connection_test(connection_id):
                                         database=request.form['database'],
                                         host=request.form['host'],
                                         port=Helpers.null_handler(request.form['port']),
-                                        user_name=request.form['userName'],
+                                        user_name=request.form['user_name'],
                                         password=Helpers.null_handler(request.form['password']),
-                                        creator_user_id=current_user.id
+                                        creator_user_id=current_user.user_id
                                         )
             testing_config = new_connection.db_config_generator()
         else:
@@ -413,7 +465,7 @@ def login():
         else:
             if Helpers.check_password(registered_user.password, user_password):
                 login_user(registered_user)
-                registered_user.lastLogin = datetime.datetime.now()
+                registered_user.last_login = datetime.datetime.now()
                 db.session.commit()
                 flash('You have been logged in successfully!', 'alert-success')
                 return redirect(request.args.get('next') or url_for('job'))

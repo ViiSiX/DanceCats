@@ -16,6 +16,7 @@
   },
   "author": "Nguyen Trong Nghia <ntngh2712@gmail.com>",
   "license": "MIT",
+  "//": "revert css-loader to 0.18.0 if there are any issue",
   "devDependencies": {
     "babel-core": "^6.10.4",
     "babel-loader": "^6.2.4",
@@ -36,6 +37,7 @@
     "bootstrap": "^3.3.6",
     "browserify": "^13.0.1",
     "codemirror": "^5.16.0",
+    "flatpickr": "^1.9.1",
     "jquery": "^2.2.4",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",

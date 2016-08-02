@@ -70,7 +70,7 @@ def run_query(received_data):
                     'seq': runtime
                 })
             except DatabaseConnectorException as exception:
-                print exception
+                print(exception)
                 return emit(Constants.WS_QUERY_SEND, {
                     'status': -1,
                     'data': 'None',
@@ -101,25 +101,25 @@ def get_trackers():
     runtime = Helpers.generate_runtime()
 
     query = db.session.query(TrackJobRun, Job).join(Job)
-    trackers = query.order_by(TrackJobRun.id.desc()).limit(20).all()
+    trackers = query.order_by(TrackJobRun.track_job_run_id.desc()).limit(20).all()
     trackers_list = []
 
     for tracker in trackers:
         if tracker.TrackJobRun.check_expiration():
             db.session.commit()
         trackers_list.append({
-            'id': tracker.TrackJobRun.id,
+            'id': tracker.TrackJobRun.track_job_run_id,
             'jobName': tracker.Job.name,
             'database': tracker.Job.Connection.database,
             'status': Constants.JOB_TRACKING_STATUSES_DICT[tracker.TrackJobRun.status]['name'],
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ran_on),
             'duration': tracker.TrackJobRun.duration,
             'csv': url_for('job_result',
-                           tracker_id=tracker.TrackJobRun.id,
+                           tracker_id=tracker.TrackJobRun.track_job_run_id,
                            result_type='csv')
             if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
             'xlsx': url_for('job_result',
-                            tracker_id=tracker.TrackJobRun.id,
+                            tracker_id=tracker.TrackJobRun.track_job_run_id,
                             result_type='xlsx')
             if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
         })

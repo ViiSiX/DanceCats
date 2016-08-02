@@ -8,7 +8,7 @@ WTForms. Used for template's forms rendering.
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, TextAreaField, \
     SelectField, IntegerField, \
-    BooleanField, \
+    BooleanField, HiddenField, \
     FormField, FieldList, \
     validators
 from wtforms.compat import iteritems
@@ -55,6 +55,9 @@ class ConnectionForm(Form):
 class ScheduleForm(Form):
     """Used to create/edit job's schedule."""
 
+    schedule_id = HiddenField(validators=[
+        validators.Optional()
+    ])
     schedule_type = SelectField('Schedule Type',
                                 coerce=int,
                                 choices=Constants.SCHEDULE_TYPES_LIST)

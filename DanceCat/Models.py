@@ -23,7 +23,7 @@ class AllowedEmail(db.Model):
     will be allowed to register new user.
     """
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    allowed_email_id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
     version = db.Column(db.String(255), index=True, nullable=False)
 
@@ -51,7 +51,8 @@ class User(UserMixin, db.Model):
     contain a user's information.
     """
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column('id', db.Integer,
+                        primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     is_active = db.Column('isActive', db.Boolean,
@@ -87,13 +88,13 @@ class User(UserMixin, db.Model):
     def get_id(self):
         """Get the user id in unicode string."""
         try:
-            return unicode(self.id)
+            return unicode(self.user_id)
         except NameError:
-            return str(self.id)
+            return str(self.user_id)
 
     def __repr__(self):
         """Print the User instance."""
-        return '<User {email} - Id {id}>'.format(email=self.email, id=self.id)
+        return '<User {email} - Id {id}>'.format(email=self.email, id=self.user_id)
 
 
 class Connection(db.Model):
@@ -104,7 +105,8 @@ class Connection(db.Model):
     which is used to store the connections to the Databases.
     """
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    connection_id = db.Column('id', db.Integer,
+                              primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     type = db.Column(db.SmallInteger, nullable=False)
     host = db.Column(db.String(100), nullable=False)
@@ -187,7 +189,7 @@ class Connection(db.Model):
     def __repr__(self):
         """Print the Connection instance."""
         return '<Connection "{name}" - Id {id}>'.format(
-            name=self.name, id=self.id
+            name=self.name, id=self.connection_id
         )
 
 
@@ -201,7 +203,8 @@ class Job(db.Model):
 
     __tablename__ = 'job'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    job_id = db.Column('id', db.Integer,
+                       primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     annotation = db.Column(db.Text)
     connection_id = db.Column('connectionId', db.Integer,
@@ -223,7 +226,7 @@ class Job(db.Model):
     version = db.Column(db.Integer, index=True, nullable=False)
 
     emails = db.relationship('JobMailTo',
-                             primaryjoin="and_(Job.id==JobMailTo.job_id, "
+                             primaryjoin="and_(Job.job_id==JobMailTo.job_id, "
                                          "JobMailTo.enable==True)",
                              backref='Job',
                              lazy='joined')
@@ -280,7 +283,7 @@ class Job(db.Model):
     def __repr__(self):
         """Print the Job instance."""
         return '<Job "{name}" - Id {id}>'.format(
-            name=self.name, id=self.id
+            name=self.name, id=self.job_id
         )
 
 
@@ -335,7 +338,8 @@ class Schedule(db.Model):
         Run once: nextRun in the future
     """
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    schedule_id = db.Column('id', db.Integer,
+                            primary_key=True, autoincrement=True)
     job_id = db.Column('jobId', db.Integer,
                        db.ForeignKey('job.id'), nullable=False)
     is_active = db.Column('isActive', db.Boolean,
@@ -420,6 +424,17 @@ class Schedule(db.Model):
                 Helpers.validate_hour_of_day(self.hour_of_day) and \
                 Helpers.validate_day_of_week(self.day_of_month)
 
+    def update_start_time(self, start_time):
+        self.minute_of_hour = start_time.minute
+        self.hour_of_day = start_time.hour
+        self.day_of_week = start_time.weekday()
+        self.day_of_month = start_time.day
+
+        if start_time >= datetime.datetime.now() + relativedelta(minutes=1):
+            self.next_run = start_time
+        else:
+            self.update_next_run(True)
+
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
         # TODO: Better algorithm
@@ -467,14 +482,15 @@ class Schedule(db.Model):
     def __repr__(self):
         """Print the Schedule instance."""
         return '<Schedule Id {id} of Job Id {jobId}>'.format(
-            id=self.id, jobId=self.job_id
+            id=self.schedule_id, jobId=self.job_id
         )
 
 
 class TrackJobRun(db.Model):
     """Track status whenever a job is running."""
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    track_job_run_id = db.Column('id', db.Integer,
+                                 primary_key=True, autoincrement=True)
     job_id = db.Column('jobId', db.Integer,
                        db.ForeignKey('job.id'), nullable=False)
     schedule_id = db.Column('scheduleId', db.Integer,
@@ -544,7 +560,7 @@ class TrackJobRun(db.Model):
     def __repr__(self):
         """Print the Job Tracker instance."""
         return '<Tracker {id}: Job Id {jobId} {status}>'.format(
-            id=self.id, jobId=self.job_id,
+            id=self.track_job_run_id, jobId=self.job_id,
             status=Constants.JOB_TRACKING_STATUSES_DICT[self.status]['name']
         )
 
@@ -552,7 +568,8 @@ class TrackJobRun(db.Model):
 class JobMailTo(db.Model):
     """Emails which the result will be sent to."""
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    job_mail_to_id = db.Column('id', db.Integer,
+                               primary_key=True, autoincrement=True)
     job_id = db.Column('jobId', db.Integer,
                        db.ForeignKey('job.id'), nullable=False)
     email_address = db.Column('emailAddress', db.String(100), nullable=False)

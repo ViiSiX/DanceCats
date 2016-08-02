@@ -84,7 +84,7 @@ def job_worker(job_id, tracker_id):
             )
 
             message.attach(
-                "Result_tid_{tracker_id}.xlsx".format(tracker_id=tracker.id),
+                "Result_tid_{tracker_id}.xlsx".format(tracker_id=tracker.track_job_run_id),
                 content_type="application/"
                              "vnd.openxmlformats-officedocument."
                              "spreadsheetml.sheet",

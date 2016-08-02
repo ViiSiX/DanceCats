@@ -50,6 +50,8 @@ def frequency_checker(pid_path, feq=60):
         timer = Helpers.Timer()
 
         current_time = datetime.datetime.now()
+        if current_time.second < 2:
+            fq_sleep(2)
         print(
             "[FQ] Checking and scheduling at {start_time}".
             format(start_time=current_time)

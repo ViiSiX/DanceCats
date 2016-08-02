@@ -468,7 +468,7 @@ class Schedule(db.Model):
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(months=1)
 
-        self.next_run = next_run_time
+        self.next_run = next_run_time.replace(second=0)
 
     def __repr__(self):
         """Print the Schedule instance."""

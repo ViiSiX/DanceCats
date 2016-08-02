@@ -5,6 +5,7 @@ This module contains functions which will be called
 whenever the application receive the right url request.
 """
 
+from __future__ import print_function
 import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
@@ -131,22 +132,25 @@ def job_edit(job_id):
                 filter_by(job_id=editing_job.job_id). \
                 update({JobMailTo.enable: False})
             db.session.commit()
+
             for mail_to in form.emails.entries:
                 if mail_to.data != '':
                     existing_mail_to = \
                         JobMailTo.query.filter_by(
                             job_id=editing_job.job_id, email_address=mail_to.data
                         ).first()
+
                     if existing_mail_to is None:
                         new_mail_to = JobMailTo(
                             job_id=editing_job.job_id,
                             email_address=mail_to.data
                         )
                         db.session.add(new_mail_to)
-                        db.session.commit()
+
                     else:
                         existing_mail_to.enable = True
-                        db.session.commit()
+
+                    db.session.commit()
 
             for schedule in form.schedules.entries:
                 if schedule.data != '':
@@ -158,7 +162,7 @@ def job_edit(job_id):
                     start_dt = Helpers.str2datetime(
                         schedule.next_run.data, "%Y-%m-%d %I:%M %p"
                     )
-                    
+
                     if existing_schedule is None:
                         new_schedule = Schedule(
                             job_id=editing_job.job_id,
@@ -168,13 +172,14 @@ def job_edit(job_id):
                             start_time=start_dt
                         )
                         db.session.add(new_schedule)
-                        db.session.commit()
+
                     else:
                         existing_schedule.schedule_type = \
                             schedule.schedule_type.data
                         existing_schedule.is_active = schedule.is_active.data
                         existing_schedule.update_start_time(start_dt)
-                        db.session.commit()
+
+                    db.session.commit()
 
             return redirect(url_for('job'))
 

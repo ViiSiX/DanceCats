@@ -108,7 +108,7 @@ def validate_int_between(value, floor, cell):
     """
     if floor > cell:
         raise ValueError("Floor is larger than Cell in this comparison.")
-    return True if value <= floor <= cell else False
+    return True if floor <= value <= cell else False
 
 
 def validate_minute_of_hour(value):
@@ -182,3 +182,7 @@ class Timer(object):
     def get_total_milliseconds(self):
         """Return total runtime since class construction in milliseconds."""
         return time.time() * 1000 - self.start_time
+
+    def get_total_seconds(self):
+        """Return total runtime since class construction in seconds."""
+        return float(self.get_total_milliseconds()) / 1000

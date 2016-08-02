@@ -5,6 +5,7 @@ This module contains functions which will be called
     whenever the application receive the right socket event.
 """
 
+from __future__ import print_function
 import functools
 from flask import url_for
 from flask_login import current_user

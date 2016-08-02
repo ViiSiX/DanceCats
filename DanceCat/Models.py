@@ -181,7 +181,7 @@ class Connection(db.Model):
         # If no password leave it alone
         if self.password is not None:
             db_config['password'] = Helpers.db_credential_decrypt(
-                    self.password, config['DB_ENCRYPT_KEY']
+                self.password, config['DB_ENCRYPT_KEY']
             )
 
         return db_config
@@ -383,19 +383,9 @@ class Schedule(db.Model):
         self.job_id = job_id
         self.schedule_type = \
             kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
-        self.is_active = kwargs.get('is_active', 0)
-
-        self.minute_of_hour = start_time.minute
-        self.hour_of_day = start_time.hour
-        self.day_of_week = start_time.weekday()
-        self.day_of_month = start_time.day
+        self.is_active = kwargs.get('is_active', False)
+        self.update_start_time(start_time)
         self.user_id = user_id
-
-        if start_time >= datetime.datetime.now() + relativedelta(minutes=1):
-            self.next_run = start_time
-        else:
-            self.update_next_run(True)
-
         self.version = Constants.MODEL_SCHEDULE_VERSION
 
     def validate(self):
@@ -407,6 +397,7 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_ONCE:
             return self.next_run > datetime.datetime.now()
 
+        print(self.minute_of_hour)
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
             return Helpers.validate_minute_of_hour(self.minute_of_hour)
 
@@ -425,15 +416,15 @@ class Schedule(db.Model):
                 Helpers.validate_day_of_week(self.day_of_month)
 
     def update_start_time(self, start_time):
+        """Update next run time on schedule updating."""
         self.minute_of_hour = start_time.minute
         self.hour_of_day = start_time.hour
         self.day_of_week = start_time.weekday()
         self.day_of_month = start_time.day
+        self.next_run = start_time
 
-        if start_time >= datetime.datetime.now() + relativedelta(minutes=1):
-            self.next_run = start_time
-        else:
-            self.update_next_run(True)
+        if start_time < datetime.datetime.now() + relativedelta(minutes=1):
+            self.update_next_run(False)
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""

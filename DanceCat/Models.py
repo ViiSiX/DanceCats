@@ -397,7 +397,6 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_ONCE:
             return self.next_run > datetime.datetime.now()
 
-        print(self.minute_of_hour)
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
             return Helpers.validate_minute_of_hour(self.minute_of_hour)
 
@@ -435,6 +434,9 @@ class Schedule(db.Model):
 
         if not validated:
             raise ValueError('Schedule is not valid!')
+
+        if self.schedule_type == Constants.SCHEDULE_ONCE:
+            return
 
         cur_time = datetime.datetime.now()
         next_run_time = datetime.datetime.now()

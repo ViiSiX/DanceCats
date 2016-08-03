@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 """
 Docstring for DanceCat.JobWorker module.
 
@@ -7,6 +5,7 @@ This module contains the job's workers that will be
 passed to the RQ worker to run in the background.
 """
 
+from __future__ import print_function
 import traceback
 from flask_mail import Message
 from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException

@@ -1,4 +1,4 @@
-"""empty message
+"""Add lastUpdatedColumn to Schedule.
 
 Revision ID: b85f81a9f3cf
 Revises: None

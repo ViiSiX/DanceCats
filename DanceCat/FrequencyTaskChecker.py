@@ -66,7 +66,8 @@ def frequency_checker(pid_path, feq=60):
         with app.app_context():
             for next_schedule in next_schedules:
                 print(next_schedule.Job)
-                tracker = TrackJobRun(next_schedule.Job.job_id)
+                tracker = TrackJobRun(job_id=next_schedule.Job.job_id,
+                                      schedule_id=next_schedule.schedule_id)
                 db.session.add(tracker)
                 db.session.commit()
 

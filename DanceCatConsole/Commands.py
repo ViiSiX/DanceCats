@@ -5,11 +5,13 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from __init__ import app, db, Models, Constants
+from DanceCatConsole import app, db, Models, Constants
 
 
+# pylint: disable=C0103
 migrate = Migrate(app, db)
 manager = Manager(app)
+# pylint: enable=C0103
 
 
 @manager.command

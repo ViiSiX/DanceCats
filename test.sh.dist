@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source </path/to/your/virtualenv>/bin/activate
+export CONFIG_FILE=</path/to/config/file>
+export PYTHONPATH=</path/to/your/DanceCat>:${PYTHONPATH}
+
+cd </path/to/your/DanceCat>
+py.test DanceCatTest/test_dance_cat_console.py --pep8 DanceCatConsole -v --cov DanceCatConsole --cov-report term-missing

@@ -8,6 +8,7 @@ SQLAlchemy's Base Model.
 import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import UserMixin
+from sqlalchemy import and_, not_
 from sqlalchemy.ext.hybrid import hybrid_property
 from DanceCat import db, config
 from . import Helpers
@@ -404,6 +405,10 @@ class Schedule(db.Model):
     def is_active(self, is_active):
         """Set Schedule's active status."""
         self._is_active = is_active
+
+    @is_active.expression
+    def is_active(self):
+        return and_(self._is_active, not_(self.is_deleted))
 
     def validate(self):
         """

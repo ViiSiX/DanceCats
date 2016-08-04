@@ -6,6 +6,7 @@ DanceCat.iml
 
 DanceCatBooter.py
 start.sh
+test.sh
 package.json
 
 .coverage

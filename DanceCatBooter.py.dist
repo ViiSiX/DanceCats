@@ -19,8 +19,6 @@ from DanceCat import app, socket_io, rdb, \
 # app.wsgi_app = ProxyFix(app.wsgi_app)
 
 if __name__ == '__main__':
-    app.config.from_envvar('CONFIG_FILE')
-
     FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
 
     with app.app_context():

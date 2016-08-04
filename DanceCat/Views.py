@@ -37,7 +37,7 @@ def index():
 @login_required
 def job():
     """Render and return Job Listing Page."""
-    jobs = QueryDataJob.query.all()
+    jobs = QueryDataJob.query.filter_by(is_deleted=False).all()
     job_lists = []
     for job_object in jobs:
         job_lists.append({
@@ -113,6 +113,9 @@ def job_create():
 def job_edit(job_id):
     """Render and return Edit Job Page."""
     editing_job = QueryDataJob.query.get_or_404(job_id)
+    if editing_job.is_deleted:
+        abort(404)
+
     form = QueryJobForm(request.form, editing_job)
     form.connection_id.choices = \
         Connection.query.with_entities(Connection.connection_id, Connection.name).all()
@@ -152,6 +155,11 @@ def job_edit(job_id):
 
                     db.session.commit()
 
+            db.session.query(Schedule). \
+                filter_by(job_id=editing_job.job_id). \
+                update({Schedule.is_deleted: True})
+            db.session.commit()
+
             for schedule in form.schedules.entries:
                 if schedule.data != '':
                     existing_schedule = \
@@ -174,6 +182,7 @@ def job_edit(job_id):
                         db.session.add(new_schedule)
 
                     else:
+                        existing_schedule.is_deleted = False
                         existing_schedule.schedule_type = \
                             schedule.schedule_type.data
                         existing_schedule.is_active = schedule.is_active.data
@@ -196,7 +205,10 @@ def job_delete():
     """Delete a Job."""
     deleting_job = Job.query.get(request.form['id'])
     if deleting_job is not None:
-        db.session.delete(deleting_job)
+        Schedule.query.filter_by(job_id=deleting_job.job_id).\
+            update({Schedule.is_deleted: True})
+
+        deleting_job.is_deleted = True
         db.session.commit()
 
         return jsonify({
@@ -213,6 +225,9 @@ def job_delete():
 def job_run():
     """Trigger a job."""
     triggered_job = QueryDataJob.query.get_or_404(request.form['id'])
+    if triggered_job.is_deleted:
+        abort(404)
+
     tracker = TrackJobRun(triggered_job.job_id)
     db.session.add(tracker)
     db.session.commit()

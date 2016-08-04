@@ -8,18 +8,51 @@ passed to the RQ worker to run in the background.
 from __future__ import print_function
 import traceback
 from flask_mail import Message
-from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
 from StringIO import StringIO
 from pyexcel.sheets import Sheet
+from DanceCat.DatabaseConnector \
+    import DatabaseConnector, DatabaseConnectorException
 from .Helpers import Timer
+
+
+def job_worker_send_mail(job, tracker_id, job_result, mailer):
+    """Use to send email to user after job run success."""
+
+    results_file = StringIO()
+
+    results_file_data = [list(job_result['header'])]
+    for row in job_result['rows']:
+        results_file_data.append(list(row))
+
+    Sheet(results_file_data).save_to_memory("xlsx", results_file)
+
+    message = Message(
+        "Job {job_name} ran successfully on DanceCat!".format(job_name=job.name),
+        recipients=job.recipients,
+        body="Dear users,\n\nPlease kindly notice that "
+             "the job \"{job_name}\" ran successfully.\n"
+             "We attached the result in this email "
+             "for your later check.\n\n"
+             "DanceCat.".format(job_name=job.name)
+    )
+
+    message.attach(
+        "Result_tid_{tracker_id}.xlsx".format(tracker_id=tracker_id),
+        content_type="application/"
+                     "vnd.openxmlformats-officedocument."
+                     "spreadsheetml.sheet",
+        data=results_file.getvalue()
+    )
+
+    mailer.send(message)
 
 
 def job_worker(job_id, tracker_id):
     """
     For now only focus on execute and save results to redis.
 
-    :param job_id: Job object create from Model.Job
-    :param tracker_id: Job Tracker for tracking job status
+    :param job_id: Id of job that will be run.
+    :param tracker_id: Job tracker id of tracking object.
     :return: query result
     """
 
@@ -63,34 +96,7 @@ def job_worker(job_id, tracker_id):
         db.session.commit()
 
         if len(job.emails) > 0:
-            results_file = StringIO()
-
-            results_file_data = [list(results['header'])]
-            for row in results['rows']:
-                results_file_data.append(list(row))
-
-            results_file = Sheet(results_file_data).\
-                save_to_memory("xlsx", results_file)
-
-            message = Message(
-                "Job {job_name} ran successfully on DanceCat!".format(job_name=job.name),
-                recipients=job.recipients,
-                body="Dear users,\n\nPlease kindly notice that "
-                     "the job \"{job_name}\" ran successfully.\n"
-                     "We attached the result in this email "
-                     "for your later check.\n\n"
-                     "DanceCat.".format(job_name=job.name)
-            )
-
-            message.attach(
-                "Result_tid_{tracker_id}.xlsx".format(tracker_id=tracker.track_job_run_id),
-                content_type="application/"
-                             "vnd.openxmlformats-officedocument."
-                             "spreadsheetml.sheet",
-                data=results_file.getvalue()
-            )
-
-            mail.send(message)
+            job_worker_send_mail(job, tracker_id, results, mail)
 
         return results
 

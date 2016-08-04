@@ -8,12 +8,13 @@ SQLAlchemy's Base Model.
 import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import UserMixin
+from sqlalchemy.ext.hybrid import hybrid_property
 from DanceCat import db, config
 from . import Helpers
 from . import Constants
 
 
-# pylint: disable=C0103,R0902
+# pylint: disable=R0902
 
 class AllowedEmail(db.Model):
     """
@@ -223,6 +224,8 @@ class Job(db.Model):
     job_type = db.Column('jobType', db.SmallInteger,
                          default=Constants.JOB_NONE,
                          nullable=False)
+    is_deleted = db.Column('isDeleted', db.Boolean,
+                           default=False, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     emails = db.relationship('JobMailTo',
@@ -231,6 +234,8 @@ class Job(db.Model):
                              backref='Job',
                              lazy='joined')
     schedules = db.relationship('Schedule',
+                                primaryjoin="and_(Job.job_id==Schedule.job_id,"
+                                            "Schedule.is_deleted==False)",
                                 backref='Job',
                                 lazy='joined')
 
@@ -342,8 +347,8 @@ class Schedule(db.Model):
                             primary_key=True, autoincrement=True)
     job_id = db.Column('jobId', db.Integer,
                        db.ForeignKey('job.id'), nullable=False)
-    is_active = db.Column('isActive', db.Boolean,
-                          default=True, nullable=False)
+    _is_active = db.Column('isActive', db.Boolean,
+                           default=True, nullable=False)
     minute_of_hour = db.Column('minuteOfHour',
                                db.SmallInteger, default=0, nullable=False)
     hour_of_day = db.Column('hourOfDay', db.SmallInteger,
@@ -364,6 +369,8 @@ class Schedule(db.Model):
                              db.DateTime,
                              onupdate=datetime.datetime.now,
                              default=datetime.datetime.now)
+    is_deleted = db.Column('isDeleted', db.Boolean,
+                           default=False, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, job_id, start_time, user_id,
@@ -387,6 +394,16 @@ class Schedule(db.Model):
         self.update_start_time(start_time)
         self.user_id = user_id
         self.version = Constants.MODEL_SCHEDULE_VERSION
+
+    @hybrid_property
+    def is_active(self):
+        """Get Schedule's active status."""
+        return self._is_active and not self.is_deleted
+
+    @is_active.setter
+    def is_active(self, is_active):
+        """Set Schedule's active status."""
+        self._is_active = is_active
 
     def validate(self):
         """
@@ -590,4 +607,4 @@ class JobMailTo(db.Model):
             email_address=self.email_address
         )
 
-# pylint: disable=C0103,R0902
+# pylint: disable=R0902

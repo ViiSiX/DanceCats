@@ -17,7 +17,9 @@ app = Flask(__name__)
 Compress(app)
 
 config = app.config
-app.config.from_envvar('CONFIG_FILE')
+app.config.update({
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False
+})
 
 db = SQLAlchemy(app)
 rdb = FlaskRedis(app, collections=True, rq=True)

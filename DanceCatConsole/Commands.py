@@ -1,8 +1,8 @@
 """This module include commands for DanceCat."""
 
 from __future__ import print_function
-import time
 import datetime
+from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from __init__ import app, db, Models, Constants
@@ -35,13 +35,12 @@ def schedule_update():
                 )
             )
             schedule.update_next_run(True)
+            schedule.next_run += relativedelta(minutes=1)
             db.session.commit()
-
-        time.sleep(1)
 
         schedules = Models.Schedule.query.filter(
             Models.Schedule.is_active,
-            Models.Schedule.next_run <= datetime.datetime.now()
+            Models.Schedule.next_run < datetime.datetime.now()
         ).all()
 
     print("Finished!")

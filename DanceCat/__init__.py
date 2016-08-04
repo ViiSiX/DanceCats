@@ -9,13 +9,17 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 
+__version__ = '0.1.1'
+
 # pylint: disable=C0103
 app = Flask(__name__)
 
 Compress(app)
 
 config = app.config
-app.config.from_envvar('CONFIG_FILE')
+app.config.update({
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False
+})
 
 db = SQLAlchemy(app)
 rdb = FlaskRedis(app, collections=True, rq=True)

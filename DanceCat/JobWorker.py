@@ -53,7 +53,7 @@ def job_worker(job_id, tracker_id):
 
     :param job_id: Id of job that will be run.
     :param tracker_id: Job tracker id of tracking object.
-    :return: query result
+    :return: query result.
     """
 
     timer = Timer()

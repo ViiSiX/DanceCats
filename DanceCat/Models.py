@@ -391,7 +391,7 @@ class Schedule(db.Model):
         self.job_id = job_id
         self.schedule_type = \
             kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
-        self.is_active = kwargs.get('is_active', False)
+        self._is_active = kwargs.get('is_active', False)
         self.update_start_time(start_time)
         self.user_id = user_id
         self.version = Constants.MODEL_SCHEDULE_VERSION
@@ -408,6 +408,7 @@ class Schedule(db.Model):
 
     @is_active.expression
     def is_active(self):
+        """Get Schedule's active status expression."""
         return and_(self._is_active, not_(self.is_deleted))
 
     def validate(self):

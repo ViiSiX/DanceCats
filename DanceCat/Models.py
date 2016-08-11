@@ -25,7 +25,9 @@ class AllowedEmail(db.Model):
     will be allowed to register new user.
     """
 
-    allowed_email_id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    allowed_email_id = db.Column('id', db.Integer,
+                                 primary_key=True, autoincrement=True
+                                 )
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
     version = db.Column(db.String(255), index=True, nullable=False)
 
@@ -96,7 +98,10 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         """Print the User instance."""
-        return '<User {email} - Id {id}>'.format(email=self.email, id=self.user_id)
+        return '<User {email} - Id {id}>'.format(
+            email=self.email,
+            id=self.user_id
+        )
 
 
 class Connection(db.Model):

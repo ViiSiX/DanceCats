@@ -11,14 +11,15 @@ from flask import url_for
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 from DanceCat import socket_io, config, db
-from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
+from DanceCat.DatabaseConnector \
+    import DatabaseConnector, DatabaseConnectorException
 from DanceCat.Models import Connection, Job, TrackJobRun
 from . import Helpers
 from . import Constants
 
 
 def authenticated_only(func):
-    """Wrapper which ensure the user must be logged into call the functions."""
+    """Wrapper to ensure that user must be logged into call the functions."""
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         """Wrapper."""
@@ -55,14 +56,19 @@ def run_query(received_data):
         if running_connection is not None:
             try:
                 connector = DatabaseConnector(running_connection.type,
-                                              running_connection.db_config_generator(),
+                                              running_connection.
+                                              db_config_generator(),
                                               sql_data_style=True,
                                               dict_format=True,
-                                              timeout=config.get('DB_TIMEOUT', 60))
+                                              timeout=config.get(
+                                                  'DB_TIMEOUT', 60
+                                              ))
                 connector.connection_test(10)
                 connector.connect()
                 connector.execute(query)
-                ret_data = connector.fetch_many(size=config.get('QUERY_TEST_LIMIT', 10))
+                ret_data = connector.fetch_many(
+                    size=config.get('QUERY_TEST_LIMIT', 10)
+                )
                 connector.close()
                 return emit(Constants.WS_QUERY_SEND, {
                     'status': 0,
@@ -102,7 +108,9 @@ def get_trackers():
     runtime = Helpers.generate_runtime()
 
     query = db.session.query(TrackJobRun, Job).join(Job)
-    trackers = query.order_by(TrackJobRun.track_job_run_id.desc()).limit(20).all()
+    trackers = query.order_by(
+        TrackJobRun.track_job_run_id.desc()
+    ).limit(20).all()
     trackers_list = []
 
     for tracker in trackers:
@@ -112,17 +120,20 @@ def get_trackers():
             'id': tracker.TrackJobRun.track_job_run_id,
             'jobName': tracker.Job.name,
             'database': tracker.Job.Connection.database,
-            'status': Constants.JOB_TRACKING_STATUSES_DICT[tracker.TrackJobRun.status]['name'],
+            'status': Constants.
+            JOB_TRACKING_STATUSES_DICT[tracker.TrackJobRun.status]['name'],
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ran_on),
             'duration': tracker.TrackJobRun.duration,
             'csv': url_for('job_result',
                            tracker_id=tracker.TrackJobRun.track_job_run_id,
                            result_type='csv')
-            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
+            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS
+            else None,
             'xlsx': url_for('job_result',
                             tracker_id=tracker.TrackJobRun.track_job_run_id,
                             result_type='xlsx')
-            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS else None,
+            if tracker.TrackJobRun.status == Constants.JOB_RAN_SUCCESS
+            else None,
         })
 
     return emit(Constants.WS_TRACKERS_SEND, {

@@ -7,14 +7,17 @@ whenever the application receive the right url request.
 
 from __future__ import print_function
 import datetime
-from flask import render_template, request, redirect, url_for, flash, jsonify, abort
+from flask \
+    import render_template, request, redirect, \
+    url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 import flask_excel as excel
 from DanceCat import app, db, lm, rdb
 from DanceCat.Models import User, AllowedEmail, Connection, \
     QueryDataJob, TrackJobRun, JobMailTo, Job, Schedule
 from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
-from DanceCat.DatabaseConnector import DatabaseConnector, DatabaseConnectorException
+from DanceCat.DatabaseConnector \
+    import DatabaseConnector, DatabaseConnectorException
 from .JobWorker import job_worker
 from . import Helpers
 from . import Constants
@@ -58,7 +61,10 @@ def job_create():
     """Render and return Create New Job Page."""
     form = QueryJobForm(request.form)
     form.connection_id.choices = \
-        Connection.query.with_entities(Connection.connection_id, Connection.name).all()
+        Connection.query.with_entities(
+            Connection.connection_id,
+            Connection.name
+        ).all()
 
     if request.method == 'POST':
         if 'add-email' in request.form:
@@ -70,7 +76,8 @@ def job_create():
         elif form.validate_on_submit():
             new_job = QueryDataJob(name=request.form['name'],
                                    annotation=request.form['annotation'],
-                                   connection_id=request.form['connection_id'],
+                                   connection_id=request.
+                                   form['connection_id'],
                                    query_string=request.form['query_string'],
                                    user_id=current_user.user_id)
 
@@ -88,7 +95,10 @@ def job_create():
 
             for schedule in form.schedules.entries:
                 if schedule.data != '':
-                    start_dt = Helpers.str2datetime(schedule.next_run.data, "%Y-%m-%d %I:%M %p")
+                    start_dt = Helpers.str2datetime(
+                        schedule.next_run.data,
+                        "%Y-%m-%d %I:%M %p"
+                    )
                     new_schedule = Schedule(
                         job_id=new_job.job_id,
                         schedule_type=schedule.schedule_type.data,
@@ -118,7 +128,10 @@ def job_edit(job_id):
 
     form = QueryJobForm(request.form, editing_job)
     form.connection_id.choices = \
-        Connection.query.with_entities(Connection.connection_id, Connection.name).all()
+        Connection.query.with_entities(
+            Connection.connection_id,
+            Connection.name
+        ).all()
 
     if request.method == 'POST':
         if 'add-email' in request.form:
@@ -140,7 +153,8 @@ def job_edit(job_id):
                 if mail_to.data != '':
                     existing_mail_to = \
                         JobMailTo.query.filter_by(
-                            job_id=editing_job.job_id, email_address=mail_to.data
+                            job_id=editing_job.job_id,
+                            email_address=mail_to.data
                         ).first()
 
                     if existing_mail_to is None:
@@ -273,8 +287,9 @@ def job_result(tracker_id, result_type):
 def job_latest_result(job_id, result_type):
     """Download Job's latest result."""
     fetching_result_job = Job.query.get_or_404(job_id)
-    last_tracker = TrackJobRun.query.filter_by(job_id=fetching_result_job.job_id).\
-        order_by(TrackJobRun.ran_on.desc()).first()
+    last_tracker = TrackJobRun.query.filter_by(
+        job_id=fetching_result_job.job_id
+    ).order_by(TrackJobRun.ran_on.desc()).first()
     if last_tracker is not None:
         queue = rdb.queue
         result = queue.fetch_job(str(last_tracker.track_job_run_id)).result
@@ -303,7 +318,8 @@ def connection():
     connections = Connection.query.all()
     connections_list = []
     for connection_obj in connections:
-        connection_type = Constants.CONNECTION_TYPES_DICT[connection_obj.type]['name']
+        connection_type = \
+            Constants.CONNECTION_TYPES_DICT[connection_obj.type]['name']
         if not connection_type:
             connection_type = 'Others'
         connections_list.append({
@@ -328,9 +344,13 @@ def connection_create():
                                     db_type=int(request.form['type']),
                                     database=request.form['database'],
                                     host=request.form['host'],
-                                    port=Helpers.null_handler(request.form['port']),
+                                    port=Helpers.null_handler(
+                                        request.form['port']
+                                    ),
                                     user_name=request.form['user_name'],
-                                    password=Helpers.null_handler(request.form['password']),
+                                    password=Helpers.null_handler(
+                                        request.form['password']
+                                    ),
                                     creator_user_id=current_user.user_id
                                     )
         db.session.add(new_connection)
@@ -354,8 +374,14 @@ def connection_edit(connection_id):
         return render_template('connection/form.html',
                                title=Constants.PROJECT_NAME,
                                action='Edit',
-                               action_url=url_for('connection_edit', connection_id=connection_id),
-                               test_url=url_for('connection_test', connection_id=connection_id),
+                               action_url=url_for(
+                                   'connection_edit',
+                                   connection_id=connection_id
+                               ),
+                               test_url=url_for(
+                                   'connection_test',
+                                   connection_id=connection_id
+                               ),
                                form=form)
     else:
         if form.validate_on_submit():
@@ -408,7 +434,10 @@ def connection_get_mime(connection_id):
         }), 404
 
 
-@app.route('/connection/test', methods=['POST'], defaults={'connection_id': 0})
+@app.route(
+    '/connection/test', methods=['POST'],
+    defaults={'connection_id': 0}
+)
 @app.route('/connection/test/<connection_id>', methods=['POST'])
 @login_required
 def connection_test(connection_id):
@@ -420,9 +449,13 @@ def connection_test(connection_id):
                                         db_type=int(request.form['type']),
                                         database=request.form['database'],
                                         host=request.form['host'],
-                                        port=Helpers.null_handler(request.form['port']),
+                                        port=Helpers.null_handler(
+                                            request.form['port']
+                                        ),
                                         user_name=request.form['user_name'],
-                                        password=Helpers.null_handler(request.form['password']),
+                                        password=Helpers.null_handler(
+                                            request.form['password']
+                                        ),
                                         creator_user_id=current_user.user_id
                                         )
             testing_config = new_connection.db_config_generator()
@@ -437,7 +470,10 @@ def connection_test(connection_id):
                 testing_connection.password = old_password
             testing_config = testing_connection.db_config_generator()
 
-        db_connect = DatabaseConnector(int(request.form['type']), testing_config)
+        db_connect = DatabaseConnector(
+            int(request.form['type']),
+            testing_config
+        )
         try:
             db_connect.connection_test(10)
             return jsonify({
@@ -465,18 +501,29 @@ def login():
         user_email = request.form['email']
         user_password = request.form['password']
         registered_user = User.query.filter_by(email=user_email).first()
+
         if registered_user is None:
-            allowed_email = AllowedEmail.query.filter_by(email=user_email).first()
+            allowed_email = AllowedEmail.query.filter_by(
+                email=user_email
+            ).first()
+
             if allowed_email is None:
-                flash('You are not allowed to use this site!', 'alert-danger')
+                flash(
+                    'You are not allowed to use this site!',
+                    'alert-danger'
+                )
                 return redirect(url_for('login'))
             else:
                 new_user = User(user_email=user_email,
                                 user_password=user_password)
                 db.session.add(new_user)
                 db.session.commit()
-                flash('You have been register as new user! Please login again!', 'alert-info')
+                flash(
+                    'You have been register as new user! Please login again!',
+                    'alert-info'
+                )
                 return redirect(url_for('login'))
+
         else:
             if Helpers.check_password(registered_user.password, user_password):
                 login_user(registered_user)

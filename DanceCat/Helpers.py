@@ -160,7 +160,7 @@ class Timer(object):
 
     def __init__(self):
         """Timer constructor, set a time object."""
-        self.start_time = time.time() * 1000
+        self.start_time = generate_runtime()
 
     def get_total_time(self):
         """Return human readable total runtime since class construction."""

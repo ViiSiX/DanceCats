@@ -1,4 +1,4 @@
-### 0.0.1 - The very first release
+### 0.1.0 - The very first release
 *Date: Aug 2, 2016*
 
 **Changes:**

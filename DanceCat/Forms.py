@@ -84,7 +84,9 @@ class QueryJobForm(Form):
                                })
     connection_id = SelectField('Connection',
                                 coerce=int)
-    query_string = TextAreaField('Query', validators=[validators.DataRequired()])
+    query_string = TextAreaField('Query',
+                                 validators=[validators.DataRequired()]
+                                 )
     emails = FieldList(StringField('Email',
                                    render_kw={
                                        'placeholder': 'report_to@dancecat.com'

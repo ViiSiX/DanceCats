@@ -1,5 +1,5 @@
 """Main file for Console package."""
 
-from DanceCatConsole.Commands import manager
+from DanceCat.Console import manager
 
 manager.run()

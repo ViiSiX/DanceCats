@@ -182,7 +182,10 @@ class DatabaseConnector(object):
     def _convert_dict_one(self, data_tuple):
         """Convert one row of data from tuple type to dict type."""
         if len(self.columns_name) == 0:
-            raise DatabaseConnectorException('Column(s) name is empty.', self.type)
+            raise DatabaseConnectorException(
+                'Column(s) name is empty.',
+                self.type
+            )
 
         data_dict = {}
 
@@ -190,7 +193,9 @@ class DatabaseConnector(object):
             if i in self.ignore_position:
                 continue
             data_dict[self.columns_name[i]] = \
-                Helpers.py2sql_type_convert(data_tuple[i]) if self.is_sql_data_type \
+                Helpers.py2sql_type_convert(
+                    data_tuple[i]
+                ) if self.is_sql_data_type \
                 else data_tuple[i]
 
         return data_dict
@@ -198,7 +203,10 @@ class DatabaseConnector(object):
     def _convert_dict_many(self, data_tuple_list):
         """Convert many rows of data from tuple type to dict type."""
         if len(self.columns_name) == 0:
-            raise DatabaseConnectorException('Column(s) name is empty.', self.type)
+            raise DatabaseConnectorException(
+                'Column(s) name is empty.',
+                self.type
+            )
 
         data_dict_list = []
 
@@ -236,14 +244,19 @@ class DatabaseConnector(object):
         new_data_tuple_list = []
 
         for i in range(0, len(data_tuple_list)):
-            new_data_tuple_list.append(self._tuple_process_one(data_tuple_list[i]))
+            new_data_tuple_list.append(
+                self._tuple_process_one(data_tuple_list[i])
+            )
 
         return new_data_tuple_list
 
     def _password_field_coordinator(self):
         """Coordinate password field and mark to ignore it."""
         if len(self.columns_name) == 0:
-            raise DatabaseConnectorException('Column(s) name is empty.', self.type)
+            raise DatabaseConnectorException(
+                'Column(s) name is empty.',
+                self.type
+            )
         for i in range(0, len(self.columns_name)):
             if self.is_hiding_password and re.search(
                     r'password|secret|userpass|confidential',

@@ -1,17 +1,35 @@
-"""This module include commands for DanceCat."""
+"""This module include console commands for DanceCat."""
 
 from __future__ import print_function
 import datetime
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from DanceCatConsole import app, db, Models, Constants
+from DanceCat import app, db, Models, Constants
 
 
 # pylint: disable=C0103
 migrate = Migrate(app, db)
 manager = Manager(app)
 # pylint: enable=C0103
+
+
+@manager.command
+def list_all():
+    """List all commands."""
+    print('Init database:')
+    print('- db_create_all')
+
+    print('Migrate Database')
+    print('- db init')
+    print('- db migrate')
+    print('- db upgrade')
+    print('- db downgrade')
+
+    print('Scheduling')
+    print('- schedule_update')
+
+    return True
 
 
 @manager.command

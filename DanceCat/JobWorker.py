@@ -27,7 +27,9 @@ def job_worker_send_mail(job, tracker_id, job_result, mailer):
     Sheet(results_file_data).save_to_memory("xlsx", results_file)
 
     message = Message(
-        "Job {job_name} ran successfully on DanceCat!".format(job_name=job.name),
+        "Job {job_name} ran successfully on DanceCat!".format(
+            job_name=job.name
+        ),
         recipients=job.recipients,
         body="Dear users,\n\nPlease kindly notice that "
              "the job \"{job_name}\" ran successfully.\n"

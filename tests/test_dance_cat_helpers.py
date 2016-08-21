@@ -102,7 +102,10 @@ def test_str2datetime():
 def test_timer():
     """Test Timer class from Helper."""
     timer = Helpers.Timer()
+    assert timer.get_total_time().find("seconds") > 0
+
     Helpers.sleep(1)
     assert timer.get_total_milliseconds() > 1000
+    assert timer.get_total_time().find("seconds") > 0
     assert isinstance(timer.get_total_seconds(), float)
     assert timer.get_total_seconds() > 1

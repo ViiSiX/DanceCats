@@ -5,17 +5,48 @@ This module contains the Models which is extended from
 SQLAlchemy's Base Model.
 """
 
+from __future__ import unicode_literals
 import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import UserMixin
 from sqlalchemy import and_, not_
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.associationproxy import association_proxy
 from DanceCat import db, config
 from . import Helpers
 from . import Constants
 
 
 # pylint: disable=R0902
+
+class ProxiedDictMixin(object):
+    """Adds obj[key] access to a mapped class.
+
+    This class basically proxies dictionary access to an attribute
+    called ``_proxied``.  The class which inherits this class
+    should have an attribute called ``_proxied`` which points to a dictionary.
+
+    """
+
+    def __len__(self):
+        return len(self._proxied)
+
+    def __iter__(self):
+        return iter(self._proxied)
+
+    def __getitem__(self, key):
+        return self._proxied[key]
+
+    def __contains__(self, key):
+        return key in self._proxied
+
+    def __setitem__(self, key, value):
+        self._proxied[key] = value
+
+    def __delitem__(self, key):
+        del self._proxied[key]
+
 
 class AllowedEmail(db.Model):
     """
@@ -200,7 +231,7 @@ class Connection(db.Model):
         )
 
 
-class Job(db.Model):
+class Job(db.Model, ProxiedDictMixin):
     """
     Docstring for Job Model class.
 
@@ -240,10 +271,23 @@ class Job(db.Model):
                              backref='Job',
                              lazy='joined')
     schedules = db.relationship('Schedule',
-                                primaryjoin="and_(Job.job_id==Schedule.job_id,"
-                                            "Schedule.is_deleted==False)",
+                                primaryjoin="and_("
+                                            "Job.job_id==Schedule.job_id,"
+                                            "Schedule.is_deleted==False"
+                                            ")",
                                 backref='Job',
                                 lazy='joined')
+    features = \
+        db.relationship('JobFeature',
+                        collection_class=attribute_mapped_collection(
+                            'feature_name')
+                        )
+    _proxied = association_proxy("features",
+                                 "feature_value",
+                                 creator=lambda feature_name, feature_value:
+                                 JobFeature(feature_name=feature_name,
+                                            feature_value=feature_value)
+                                 )
 
     __mapper_args__ = {
         'polymorphic_on': job_type,
@@ -290,6 +334,12 @@ class Job(db.Model):
         for recipient in self.emails:
             recipients_list.append(str(recipient))
         return recipients_list
+
+    @classmethod
+    def with_feature(cls, feature_name, feature_value):
+        """Used to query job having given attribute."""
+        return cls.facts.any(feature_name=feature_name,
+                             feature_value=feature_value)
 
     def __repr__(self):
         """Print the Job instance."""
@@ -455,8 +505,6 @@ class Schedule(db.Model):
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
-        # TODO: Better algorithm
-
         if not validated:
             validated = self.validate()
 
@@ -499,6 +547,7 @@ class Schedule(db.Model):
                 next_run_time += relativedelta(months=1)
 
         self.next_run = next_run_time.replace(second=0)
+        # TODO: Better algorithm
 
     def __repr__(self):
         """Print the Schedule instance."""
@@ -616,6 +665,64 @@ class JobMailTo(db.Model):
         """Print the email."""
         return '{email_address}'.format(
             email_address=self.email_address
+        )
+
+
+class JobFeature(db.Model):
+    """Used to extend Job's table."""
+
+    job_id = db.Column('jobId', db.Integer,
+                       db.ForeignKey('job.id'),
+                       primary_key=True)
+    feature_name = db.Column('featureName', db.String(255),
+                             primary_key=True)
+    _feature_value = db.Column('featureValue', db.String(255),
+                               nullable=False)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
+
+    def __init__(self, feature_name, feature_value):
+        """
+        Docstring for JobFeature Model constructor.
+
+        :param feature_name:
+            Job's feature name, ref to Constants.
+        :param feature_value:
+            Job's feature value.
+        """
+        if feature_name in Constants.JOB_FEATURE_DICT:
+            self.feature_name = feature_name
+        else:
+            raise ValueError('Do not know feature name of "{feature_name}"'.
+                             format(feature_name=feature_name))
+        self.feature_value = feature_value
+
+    @hybrid_property
+    def feature_value(self):
+        """Convert feature value to it's type and return."""
+        return Constants.JOB_FEATURE_DICT[self.feature_name]['py_type'](
+            self._feature_value
+        )
+
+    @feature_value.setter
+    def feature_value(self, feature_value):
+        """Validate feature value and save to _feature_value."""
+        if isinstance(feature_value,
+                      Constants.JOB_FEATURE_DICT
+                      [self.feature_name]['py_type']):
+            self._feature_value = str(feature_value)
+        else:
+            raise ValueError('Invalid type of "{feature_name}"'.
+                             format(feature_name=self.feature_name))
+
+    def __repr__(self):
+        """Print feature value."""
+        return '<Job {job_id}\'s {feature_name}: {feature_value}>'.format(
+            job_id=self.job_id,
+            feature_name=self.feature_name,
+            feature_value=self.feature_value
         )
 
 # pylint: disable=R0902

@@ -8,5 +8,5 @@ install:
 script:
   - mkdir -p var
   - export PYTHONPATH=`pwd`:$PYTHONPATH
-  - py.test DanceCatTest --pep8 DanceCat -v --cov DanceCat --cov-report term-missing
+  - py.test tests --pep8 DanceCat -v --cov DanceCat --cov-report term-missing
 after_success: coveralls

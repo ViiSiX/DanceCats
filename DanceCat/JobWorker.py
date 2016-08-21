@@ -17,7 +17,6 @@ from .Helpers import Timer
 
 def job_worker_send_mail(job, tracker_id, job_result, mailer):
     """Use to send email to user after job run success."""
-
     results_file = StringIO()
 
     results_file_data = [list(job_result['header'])]
@@ -50,14 +49,13 @@ def job_worker_send_mail(job, tracker_id, job_result, mailer):
 
 
 def job_worker(job_id, tracker_id):
-    """
-    For now only focus on execute and save results to redis.
+    """Enqueue this function for querying database.
 
+    For now only focus on execute and save results to redis.
     :param job_id: Id of job that will be run.
     :param tracker_id: Job tracker id of tracking object.
     :return: query result.
     """
-
     timer = Timer()
 
     print(
@@ -66,7 +64,8 @@ def job_worker(job_id, tracker_id):
     )
 
     from .Models import QueryDataJob, TrackJobRun
-    from DanceCat import db, mail
+    from DanceCat import db, mail, config, \
+        Constants
 
     job = QueryDataJob.query.get(job_id)
     job.update_executed_times()
@@ -81,7 +80,9 @@ def job_worker(job_id, tracker_id):
             job.Connection.db_config_generator(),
             sql_data_style=False,
             dict_format=False,
-            timeout=120
+            timeout=job[Constants.JOB_FEATURE_QUERY_TIME_OUT]
+            if Constants.JOB_FEATURE_QUERY_TIME_OUT in job
+            else config.get('DB_TIMEOUT', 0)
         )
 
         db_connector.connect()

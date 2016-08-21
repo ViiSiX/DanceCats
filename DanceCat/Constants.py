@@ -69,6 +69,15 @@ JOB_TYPES_DICT = {
     }
 }
 
+# Job Feature name section
+JOB_FEATURE_QUERY_TIME_OUT = 'queryTimeOut'
+
+JOB_FEATURE_DICT = {
+    JOB_FEATURE_QUERY_TIME_OUT: {
+        'py_type': int
+    }
+}
+
 # Model versions section
 MODEL_ALLOWED_EMAIL_VERSION = 1
 MODEL_USER_VERSION = 1

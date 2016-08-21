@@ -80,7 +80,8 @@ def job_create():
                                    form['connection_id'],
                                    query_string=request.form['query_string'],
                                    user_id=current_user.user_id)
-
+            new_job[Constants.JOB_FEATURE_QUERY_TIME_OUT] = \
+                int(request.form['query_time_out'])
             db.session.add(new_job)
             db.session.commit()
 
@@ -132,6 +133,9 @@ def job_edit(job_id):
             Connection.connection_id,
             Connection.name
         ).all()
+    if Constants.JOB_FEATURE_QUERY_TIME_OUT in editing_job:
+        form.query_time_out.data = \
+            editing_job[Constants.JOB_FEATURE_QUERY_TIME_OUT]
 
     if request.method == 'POST':
         if 'add-email' in request.form:
@@ -142,6 +146,8 @@ def job_edit(job_id):
 
         elif form.validate_on_submit():
             form.populate_obj(editing_job)
+            editing_job[Constants.JOB_FEATURE_QUERY_TIME_OUT] = \
+                int(request.form['query_time_out'])
             db.session.commit()
 
             db.session.query(JobMailTo). \
@@ -344,13 +350,11 @@ def connection_create():
                                     db_type=int(request.form['type']),
                                     database=request.form['database'],
                                     host=request.form['host'],
-                                    port=Helpers.null_handler(
-                                        request.form['port']
-                                    ),
+                                    port=Helpers.null_handler
+                                    (request.form['port']),
                                     user_name=request.form['user_name'],
-                                    password=Helpers.null_handler(
-                                        request.form['password']
-                                    ),
+                                    password=Helpers.null_handler
+                                    (request.form['password']),
                                     creator_user_id=current_user.user_id
                                     )
         db.session.add(new_connection)
@@ -449,13 +453,11 @@ def connection_test(connection_id):
                                         db_type=int(request.form['type']),
                                         database=request.form['database'],
                                         host=request.form['host'],
-                                        port=Helpers.null_handler(
-                                            request.form['port']
-                                        ),
+                                        port=Helpers.null_handler
+                                        (request.form['port']),
                                         user_name=request.form['user_name'],
-                                        password=Helpers.null_handler(
-                                            request.form['password']
-                                        ),
+                                        password=Helpers.null_handler
+                                        (request.form['password']),
                                         creator_user_id=current_user.user_id
                                         )
             testing_config = new_connection.db_config_generator()

@@ -89,8 +89,8 @@ class QueryJobForm(Form):
                                  )
     query_time_out = IntegerField('Query Time Out',
                                   validators=[
-                                     validators.DataRequired(),
-                                     validators.NumberRange(min=0)
+                                      validators.DataRequired(),
+                                      validators.NumberRange(min=0)
                                   ],
                                   default=config.get('DB_TIMEOUT', 0))
     emails = FieldList(StringField('Email',

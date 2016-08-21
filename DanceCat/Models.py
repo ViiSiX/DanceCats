@@ -336,9 +336,10 @@ class Job(db.Model, ProxiedDictMixin):
         return recipients_list
 
     @classmethod
-    def with_feature(self, feature_name, feature_value):
-        return self.facts.any(feature_name=feature_name,
-                              feature_value=feature_value)
+    def with_feature(cls, feature_name, feature_value):
+        """Used to query job having given attribute."""
+        return cls.facts.any(feature_name=feature_name,
+                             feature_value=feature_value)
 
     def __repr__(self):
         """Print the Job instance."""

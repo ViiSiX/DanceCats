@@ -17,7 +17,6 @@ from .Helpers import Timer
 
 def job_worker_send_mail(job, tracker_id, job_result, mailer):
     """Use to send email to user after job run success."""
-
     results_file = StringIO()
 
     results_file_data = [list(job_result['header'])]
@@ -50,14 +49,13 @@ def job_worker_send_mail(job, tracker_id, job_result, mailer):
 
 
 def job_worker(job_id, tracker_id):
-    """
-    For now only focus on execute and save results to redis.
+    """Enqueue this function for querying database.
 
+    For now only focus on execute and save results to redis.
     :param job_id: Id of job that will be run.
     :param tracker_id: Job tracker id of tracking object.
     :return: query result.
     """
-
     timer = Timer()
 
     print(

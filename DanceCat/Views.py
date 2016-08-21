@@ -350,13 +350,11 @@ def connection_create():
                                     db_type=int(request.form['type']),
                                     database=request.form['database'],
                                     host=request.form['host'],
-                                    port=Helpers.null_handler(
-                                        request.form['port']
-                                    ),
+                                    port=Helpers.null_handler
+                                    (request.form['port']),
                                     user_name=request.form['user_name'],
-                                    password=Helpers.null_handler(
-                                        request.form['password']
-                                    ),
+                                    password=Helpers.null_handler
+                                    (request.form['password']),
                                     creator_user_id=current_user.user_id
                                     )
         db.session.add(new_connection)
@@ -455,13 +453,11 @@ def connection_test(connection_id):
                                         db_type=int(request.form['type']),
                                         database=request.form['database'],
                                         host=request.form['host'],
-                                        port=Helpers.null_handler(
-                                            request.form['port']
-                                        ),
+                                        port=Helpers.null_handler
+                                        (request.form['port']),
                                         user_name=request.form['user_name'],
-                                        password=Helpers.null_handler(
-                                            request.form['password']
-                                        ),
+                                        password=Helpers.null_handler
+                                        (request.form['password']),
                                         creator_user_id=current_user.user_id
                                         )
             testing_config = new_connection.db_config_generator()

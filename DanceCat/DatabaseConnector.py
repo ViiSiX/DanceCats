@@ -193,9 +193,8 @@ class DatabaseConnector(object):
             if i in self.ignore_position:
                 continue
             data_dict[self.columns_name[i]] = \
-                Helpers.py2sql_type_convert(
-                    data_tuple[i]
-                ) if self.is_sql_data_type \
+                Helpers.py2sql_type_convert(data_tuple[i]) \
+                if self.is_sql_data_type \
                 else data_tuple[i]
 
         return data_dict

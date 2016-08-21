@@ -12,7 +12,7 @@ from wtforms import StringField, PasswordField, TextAreaField, \
     FormField, FieldList, \
     validators
 from wtforms.compat import iteritems
-from . import Constants
+from . import Constants, config
 
 
 class RegisterForm(Form):
@@ -87,6 +87,12 @@ class QueryJobForm(Form):
     query_string = TextAreaField('Query',
                                  validators=[validators.DataRequired()]
                                  )
+    query_time_out = IntegerField('Query Time Out',
+                                  validators=[
+                                     validators.DataRequired(),
+                                     validators.NumberRange(min=0)
+                                  ],
+                                  default=config.get('DB_TIMEOUT', 0))
     emails = FieldList(StringField('Email',
                                    render_kw={
                                        'placeholder': 'report_to@dancecat.com'
@@ -111,5 +117,5 @@ class QueryJobForm(Form):
         :param obj: Job Model object.
         """
         for name, field in iteritems(self._fields):
-            if name not in ['emails', 'schedules']:
+            if name not in ['query_time_out', 'emails', 'schedules']:
                 field.populate_obj(obj, name)

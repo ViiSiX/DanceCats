@@ -66,7 +66,8 @@ def job_worker(job_id, tracker_id):
     )
 
     from .Models import QueryDataJob, TrackJobRun
-    from DanceCat import db, mail
+    from DanceCat import db, mail, config, \
+        Constants
 
     job = QueryDataJob.query.get(job_id)
     job.update_executed_times()
@@ -81,7 +82,9 @@ def job_worker(job_id, tracker_id):
             job.Connection.db_config_generator(),
             sql_data_style=False,
             dict_format=False,
-            timeout=120
+            timeout=job[Constants.JOB_FEATURE_QUERY_TIME_OUT]
+            if Constants.JOB_FEATURE_QUERY_TIME_OUT in job
+            else config.get('DB_TIMEOUT', 0)
         )
 
         db_connector.connect()

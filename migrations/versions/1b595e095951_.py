@@ -1,4 +1,4 @@
-"""Add is job and schedule isDeleted fields.
+"""Add job and schedule 's isDeleted fields.
 
 Revision ID: 1b595e095951
 Revises: b85f81a9f3cf

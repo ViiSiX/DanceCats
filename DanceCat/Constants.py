@@ -4,30 +4,41 @@
 PROJECT_NAME = 'Dance Cat - Data Report'
 
 # DB section
-MYSQL = 1
-SQLSERVER = 2
+DB_MYSQL = 1
+DB_SQLSERVER = 2
+DB_POSTGRESQL = 3
+
 
 CONNECTION_TYPES_DICT = {
-    MYSQL: {
+    DB_MYSQL: {
         'name': 'MySQL',
         'default_port': 3306,
         'mime': 'text/x-mysql'
     },
-    SQLSERVER: {
+    DB_SQLSERVER: {
         'name': 'SQL Server',
         'default_port': 1433,
         'mime': 'text/x-mssql'
+    },
+    DB_POSTGRESQL: {
+        'name': 'PostgreSQL',
+        'default_port': 5432,
+        'mime': 'text/x-pgsql'
     }
 }
 
 CONNECTION_TYPES_LIST = [
     (
-        MYSQL,
-        CONNECTION_TYPES_DICT[MYSQL]['name']
+        DB_MYSQL,
+        CONNECTION_TYPES_DICT[DB_MYSQL]['name']
     ),
     (
-        SQLSERVER,
-        CONNECTION_TYPES_DICT[SQLSERVER]['name']
+        DB_SQLSERVER,
+        CONNECTION_TYPES_DICT[DB_SQLSERVER]['name']
+    ),
+    (
+        DB_POSTGRESQL,
+        CONNECTION_TYPES_DICT[DB_POSTGRESQL]['name']
     )
 ]
 

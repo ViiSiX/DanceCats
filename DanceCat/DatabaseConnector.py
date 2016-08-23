@@ -8,6 +8,7 @@ which is used to wrap different DBMS Connector drivers.
 import traceback
 import re
 import pymssql
+import psycopg2
 import mysql.connector
 from . import Constants
 from . import Helpers
@@ -62,12 +63,16 @@ class DatabaseConnector(object):
         :return: raise DatabaseConnectorException on failed.
         """
         try:
-            if self.type == Constants.MYSQL:
+            if self.type == Constants.DB_MYSQL:
                 self.config['connection_timeout'] = \
                     self.timeout if timeout is None else timeout
                 self.connection = mysql.connector.connect(**self.config)
-            elif self.type == Constants.SQLSERVER:
+            elif self.type == Constants.DB_SQLSERVER:
                 self.connection = pymssql.connect(**self.config)
+            elif self.type == Constants.DB_POSTGRESQL:
+                self.config['connect_timeout'] = \
+                    self.timeout if timeout is None else timeout
+                self.connection = psycopg2.connect(**self.config)
         except Exception as exception:
             traceback.print_exc()
             raise DatabaseConnectorException(
@@ -80,7 +85,9 @@ class DatabaseConnector(object):
         """Close connection or Raise DatabaseConnectorException on failed."""
         try:
             if self.type in [
-                Constants.MYSQL, Constants.SQLSERVER
+                Constants.DB_MYSQL,
+                Constants.DB_SQLSERVER,
+                Constants.DB_POSTGRESQL
             ]:
                 self.connection.close()
         except Exception as exception:
@@ -107,14 +114,15 @@ class DatabaseConnector(object):
     def execute(self, query):
         """Execute the given query. Return True on success."""
         try:
-            if self.type == Constants.MYSQL:
+            if self.type == Constants.DB_MYSQL:
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(query)
                 self.columns_name = self.cursor.column_names
-                if self.is_hiding_password:
-                    self._password_field_coordinator()
 
-            elif self.type == Constants.SQLSERVER:
+            elif self.type in [
+                Constants.DB_SQLSERVER,
+                Constants.DB_POSTGRESQL
+            ]:
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(query)
 
@@ -122,8 +130,9 @@ class DatabaseConnector(object):
                 self.columns_name = ()
                 for i in range(0, len(self.cursor.description)):
                     self.columns_name += (self.cursor.description[i][0],)
-                if self.is_hiding_password:
-                    self._password_field_coordinator()
+
+            if self.is_hiding_password:
+                self._password_field_coordinator()
         except Exception as exception:
             traceback.print_exc()
             raise DatabaseConnectorException(
@@ -137,7 +146,9 @@ class DatabaseConnector(object):
     def fetch(self):
         """Fetch single row of the result."""
         try:
-            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
+            if self.type in [Constants.DB_MYSQL,
+                             Constants.DB_SQLSERVER,
+                             Constants.DB_POSTGRESQL]:
                 data = self.cursor.fetchone()
                 return self._convert_dict_one(data) \
                     if self.is_return_dict else self._tuple_process_one(data)
@@ -152,7 +163,9 @@ class DatabaseConnector(object):
     def fetch_many(self, size=1):
         """Fetch given number of rows of the result."""
         try:
-            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
+            if self.type in [Constants.DB_MYSQL,
+                             Constants.DB_SQLSERVER,
+                             Constants.DB_POSTGRESQL]:
                 data = self.cursor.fetchmany(size)
                 return self._convert_dict_many(data) \
                     if self.is_return_dict else self._tuple_process_many(data)
@@ -167,7 +180,9 @@ class DatabaseConnector(object):
     def fetch_all(self):
         """Fetch all result rows."""
         try:
-            if self.type in [Constants.MYSQL, Constants.SQLSERVER]:
+            if self.type in [Constants.DB_MYSQL,
+                             Constants.DB_SQLSERVER,
+                             Constants.DB_POSTGRESQL]:
                 data = self.cursor.fetchall()
                 return self._convert_dict_many(data) \
                     if self.is_return_dict else self._tuple_process_many(data)

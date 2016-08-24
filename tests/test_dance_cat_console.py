@@ -69,7 +69,7 @@ def test_schedule_update(app, user_email):
     assert user.user_id is not None
 
     connection = Console.Models.Connection(
-        Console.Constants.MYSQL,
+        Console.Constants.DB_MYSQL,
         'localhost',
         'test_db',
         user.user_id,

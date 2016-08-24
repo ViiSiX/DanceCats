@@ -44,6 +44,247 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>In this guide I use Debian for example setup. Supporting for Red Hat
+based OS will be added later.</p>
+<div class="section" id="environment-setup">
+<h2>Environment Setup<a class="headerlink" href="#environment-setup" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Add new user and prepare the locations for DanceCat:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>useradd dancecat
+
+sudo mkdir -p /opt/dancecat
+sudo chown dancecat.dancecat /opt/dancecat
+
+sudo mkdir -p /etc/dancecat
+sudo chown dancecat.dancecat /etc/dancecat
+
+sudo mkdir -p /var/run/dancecat
+sudo chown dancecat.dancecat /var/run/dancecat
+
+sudo mkdir -p /var/log/dancecat
+sudo chown dancecat.dancecat /var/log/dancecat
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Install git:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install git
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Pull the code from <a class="reference external" href="https://github.com/scattm/DanceCat">DanceCat&#8217;s repository</a>.</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt
+git clone https://github.com/scattm/DanceCat.git dancecat
+</pre></div>
+</div>
+<p>4. Install necessary packages to setup a virtual environment for Python.
+If you already done this, please skip to step 5.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install python-virtualenv
+
+su - dancecat
+
+<span class="nb">cd</span> /var/run/dancecat
+virtualenv venv
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>Install necessary modules for your Python virtual environment:</li>
+</ol>
+<p>Install packages which will be used to install Python modules:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install build-essential autoconf libtool
+sudo apt-get install libpq-dev python-dev
+</pre></div>
+</div>
+<p>Install Python modules:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
+pip install --upgrade setuptools
+pip install --upgrade pip
+pip install -r /opt/dancecat/requirements.txt
+</pre></div>
+</div>
+<p>Download and install <a class="reference external" href="https://dev.mysql.com/downloads/connector/python/">mysql-connector-python</a>.
+My version is 2.1.3.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
+
+tar zvfx mysql-connector-python-2.1.3.tar.gz
+<span class="nb">cd</span> mysql-connector-python-2.1.3
+python setup.py install
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li>Run for a simple test:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+mkdir var
+
+<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
+<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>:<span class="nv">$PYTHONPATH</span>
+py.test tests
+</pre></div>
+</div>
+<p>If the test work well then you are ready for the next step: <a class="reference external" href="install.html#config-dancecat">Config</a>.
+You can setup <em>dancecat</em> user <em>.bashrc</em> file for later convenience.
+Later in this document I will assume that you are already in the right environment.</p>
+<ol class="arabic simple" start="7">
+<li>Edit .bashrc</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">echo</span> <span class="s2">&quot;export PYTHONPATH=/opt/dancecat&quot;</span> &gt;&gt; ~/.bashrc
+<span class="nb">echo</span> <span class="s2">&quot;source /var/run/dancecat/venv/bin/activate&quot;</span> &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+</div>
+<div class="section" id="config-dancecat">
+<h2>Config DanceCat<a class="headerlink" href="#config-dancecat" title="Permalink to this headline">¶</a></h2>
+<p>Copy and edit configuration file:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /etc/dancecat
+cp /opt/dancecat/config.cfg.dist ./config.cfg
+</pre></div>
+</div>
+<p>Example configuration file&#8217;s content:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>WTF_CSRF_ENABLED = True
+SECRET_KEY = &#39;dance cat is dancing&#39;
+
+DB_ENCRYPT_KEY = &#39;dance cat is trying to dance&#39;
+DB_TIMEOUT = 120
+
+FREQUENCY_PID = &#39;/var/run/dancecat/frequency.pid&#39;
+
+QUERY_TEST_LIMIT = 100
+
+JOB_RESULT_VALID_SECONDS = 86400
+
+SQLALCHEMY_DATABASE_URI = &#39;sqlite:////var/run/dancecat/dancecat.db&#39;
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+REDISLITE_PATH = &#39;/var/run/dancecat/dancecat.rdb&#39;
+REDISLITE_WORKER_PID = &#39;/var/run/dancecat/rlworker.pid&#39;
+
+MAIL_SERVER = &#39;localhost&#39;
+MAIL_PORT = 465
+</pre></div>
+</div>
+<p><strong>Explain DanceCat&#8217;s config attribute</strong></p>
+<p><em>DB_ENCRYPT_KEY</em> Key which is used to encrypt connections credentials.</p>
+<p><em>DB_TIMEOUT</em> Default timeout for queries to run on a database connection.</p>
+<p><em>QUERY_TEST_LIMIT</em> Timeout for a connection to be tested.</p>
+<p><em>FREQUENCY_PID</em> Location for schedule worker PID file.</p>
+<p><em>JOB_RESULT_VALID_SECONDS</em> Time for a job&#8217;s result to remain available.</p>
+<p><em>REDISLITE_PATH</em> Location for RedisLite database file.</p>
+<p><em>REDISLITE_WORKER_PID</em> Location for RedisLite worker PID file.</p>
+<p>Other configuration: Please check on <em>Flask</em> and its extensions for further information.</p>
+</div>
+<div class="section" id="setup-database">
+<h2>Setup Database<a class="headerlink" href="#setup-database" title="Permalink to this headline">¶</a></h2>
+<p>There are 2 ways to setup database: create full database schema or migrate using
+generated migration scripts.</p>
+<ol class="arabic simple">
+<li>Create full database schema</li>
+</ol>
+<p>Using this methods, you will able to fully deploy DanceCat schema to your database with
+less bugs compare to the later method. However, for later upgrade, you must update your
+schema by yourself.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+python DanceCat/Console db_create_all
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Migrate your database schema using generated scripts</li>
+</ol>
+<p>Using this method, you don&#8217;t have to worry about updating your database schema to keep up
+with releases, but be careful because you may encounter bugs on some RDBMS like SQLite3.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+<span class="nb">cd</span> /opt/dancecat
+
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+
+<span class="c1"># Upgrading</span>
+python DanceCat/Console db upgrade
+
+<span class="c1"># Downgrading</span>
+python DanceCat/Console db downgrade
+</pre></div>
+</div>
+</div>
+<div class="section" id="bootstrap-and-run">
+<h2>Bootstrap and Run<a class="headerlink" href="#bootstrap-and-run" title="Permalink to this headline">¶</a></h2>
+<p>Copy the example Bootstrap file and edit it to suit yourself.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+<span class="nb">cd</span> /opt/dancecat
+
+cp DanceCatBootstrap.py.dist DanceCatBootstrap.py
+</pre></div>
+</div>
+<p>You don&#8217;t really have to edit much. Here is the example for you:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Running script for DanceCat</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c1"># Just in case proxy server do not work.</span>
+<span class="kn">from</span> <span class="nn">werkzeug.contrib.fixers</span> <span class="kn">import</span> <span class="n">ProxyFix</span>
+<span class="kn">from</span> <span class="nn">DanceCat</span> <span class="kn">import</span> <span class="n">app</span><span class="p">,</span> <span class="n">socket_io</span><span class="p">,</span> <span class="n">rdb</span><span class="p">,</span> \
+    <span class="n">Views</span><span class="p">,</span> <span class="n">ErrorViews</span><span class="p">,</span> <span class="n">Socket</span><span class="p">,</span> <span class="n">FrequencyTaskChecker</span>
+
+<span class="c1"># In case of `code 400, message Bad request`</span>
+<span class="n">os</span><span class="o">.</span><span class="n">putenv</span><span class="p">(</span><span class="s1">&#39;LANG&#39;</span><span class="p">,</span> <span class="s1">&#39;en_US.UTF-8&#39;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">putenv</span><span class="p">(</span><span class="s1">&#39;LC_ALL&#39;</span><span class="p">,</span> <span class="s1">&#39;en_US.UTF-8&#39;</span><span class="p">)</span>
+
+<span class="c1"># Just in case proxy server do not work.</span>
+<span class="n">app</span><span class="o">.</span><span class="n">wsgi_app</span> <span class="o">=</span> <span class="n">ProxyFix</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">wsgi_app</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">FrequencyTaskChecker</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;FREQUENCY_PID&#39;</span><span class="p">,</span> <span class="s1">&#39;frequency.pid&#39;</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+        <span class="n">rdb</span><span class="o">.</span><span class="n">start_worker</span><span class="p">()</span>
+
+    <span class="n">socket_io</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
+                  <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
+                  <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>
+                  <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                  <span class="p">)</span>
+</pre></div>
+</div>
+<p>Run it:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+python DanceCatBootstrap.py
+</pre></div>
+</div>
+<p>Go to your browser and start using DanceCat.</p>
+</div>
+<div class="section" id="using-with-nginx-and-wsgi">
+<h2>Using with Nginx and WSGI<a class="headerlink" href="#using-with-nginx-and-wsgi" title="Permalink to this headline">¶</a></h2>
+<p>For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
+to public DanceCat.</p>
+<p>[TO BE ADDED LATER]</p>
+</div>
+<div class="section" id="security">
+<h2>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h2>
+<p>Since DanceCat allows users to query again databases, you may be want to consider
+what permissions on your databases should be given to DanceCat before you public it.
+You should also limit network access to DanceCat server and enable other security methods
+that you have, ex &#8220;iptables&#8221; and &#8220;SELinux&#8221;.</p>
+</div>
 </div>
 
 
@@ -77,7 +318,15 @@
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-dancecat">Config DanceCat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-database">Setup Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bootstrap-and-run">Bootstrap and Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-with-nginx-and-wsgi">Using with Nginx and WSGI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#security">Security</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="manual.html">Usage Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changed log</a></li>

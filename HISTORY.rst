@@ -12,6 +12,12 @@
 - Add document by Sphinx.
 - PostgreSQL support.
 
+**Fixed bugs:**
+
+- Missing first part of migrating.
+- Missing schedule id in track table.
+
+
 0.1.0 - The very first release
 ------------------------------
 

@@ -4,7 +4,7 @@ DanceCat/static/bundle
 DanceCat/static/style/
 DanceCat.iml
 
-DanceCatBooter.py
+DanceCatBootstrap.py
 start.sh
 test.sh
 package.json

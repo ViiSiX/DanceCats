@@ -8,13 +8,15 @@ Also, please visit `Repo's Issue <https://github.com/scattm/DanceCat/issues>`_ p
 **Core features:**
 
 - User's roles and permissions.
+- Add console command to allow new user using DanceCat.
+- More testing and documentation.
 
 **Data collect:**
 
 - Getting data from NoSQL DBMS like *MongoDB*.
 - Getting data from Web and API.
 
-**Data summary and visualize:**
+**Data summary and visualization:**
 
 - Summary and draw chart base on the result of Data Collect Jobs.
 

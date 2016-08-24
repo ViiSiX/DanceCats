@@ -1,7 +1,8 @@
 Installation
 ============
 
-In this guide I use Debian for example setup. Supporting for Red Hat will be added later.
+In this guide I use Debian for example setup. Supporting for Red Hat
+based OS will be added later.
 
 Environment Setup
 -----------------
@@ -167,8 +168,17 @@ Example configuration file's content:
 Other configuration: Please check on *Flask* and its extensions for further information.
 
 
-Init Database
--------------
+Setup Database
+--------------
+
+There are 2 ways to setup database: create full database schema or migrate using
+generated migration scripts.
+
+1. Create full database schema
+
+Using this methods, you will able to fully deploy DanceCat schema to your database with
+less bugs compare to the later method. However, for later upgrade, you must update your
+schema by yourself.
 
 .. code-block:: bash
 
@@ -179,11 +189,10 @@ Init Database
    export CONFIG_FILE=/etc/dancecat/config.cfg
    python DanceCat/Console db_create_all
 
+2. Migrate your database schema using generated scripts
 
-Migrate Database
-----------------
-
-1. Upgrade database to new version of DanceCat:
+Using this method, you don't have to worry about updating your database schema to keep up
+with releases, but be careful because you may encounter bugs on some RDBMS like SQLite3.
 
 .. code-block:: bash
 
@@ -191,14 +200,82 @@ Migrate Database
    cd /opt/dancecat
 
    export CONFIG_FILE=/etc/dancecat/config.cfg
+
+   # Upgrading
    python DanceCat/Console db upgrade
 
-2. Downgrade database to previous version:
+   # Downgrading
+   python DanceCat/Console db downgrade
+
+
+Bootstrap and Run
+-----------------
+
+Copy the example Bootstrap file and edit it to suit yourself.
 
 .. code-block:: bash
 
    su - dancecat
    cd /opt/dancecat
 
+   cp DanceCatBootstrap.py.dist DanceCatBootstrap.py
+
+You don't really have to edit much. Here is the example for you:
+
+.. code-block:: python
+
+   """
+   Running script for DanceCat
+   """
+   import os
+   # Just in case proxy server do not work.
+   from werkzeug.contrib.fixers import ProxyFix
+   from DanceCat import app, socket_io, rdb, \
+       Views, ErrorViews, Socket, FrequencyTaskChecker
+
+   # In case of `code 400, message Bad request`
+   os.putenv('LANG', 'en_US.UTF-8')
+   os.putenv('LC_ALL', 'en_US.UTF-8')
+
+   # Just in case proxy server do not work.
+   app.wsgi_app = ProxyFix(app.wsgi_app)
+
+   if __name__ == '__main__':
+       FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
+
+       with app.app_context():
+           rdb.start_worker()
+
+       socket_io.run(app,
+                     host='0.0.0.0',
+                     port=8443,
+                     debug=True,
+                     )
+
+Run it:
+
+.. code-block:: bash
+
+   su - dancecat
+
+   cd /opt/dancecat
    export CONFIG_FILE=/etc/dancecat/config.cfg
-   python DanceCat/Console db downgrade
+   python DanceCatBootstrap.py
+
+Go to your browser and start using DanceCat.
+
+Using with Nginx and WSGI
+-------------------------
+
+For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
+to public DanceCat.
+
+[TO BE ADDED LATER]
+
+Security
+--------
+
+Since DanceCat allows users to query again databases, you may be want to consider
+what permissions on your databases should be given to DanceCat before you public it.
+You should also limit network access to DanceCat server and enable other security methods
+that you have, ex "iptables" and "SELinux".

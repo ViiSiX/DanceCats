@@ -13,19 +13,25 @@
       {{ render_field(form.annotation, class="form-control") }}
       {{ render_field(form.connection_id, class="form-control") }}
       {{ render_field(form.query_string, class="form-control") }}
+      {{ render_field(form.query_time_out, class="form-control") }}
       <label>{{ form.schedules.label }}</label>
       <hr/>
-      <div class="form-group job-schedule-field-list col-sm-8">
+      <div class="form-group job-schedule-field-list col-sm-7">
         <button class="btn btn-success bot-margin-10"
                 type="submit"
                 name="add-schedule">
           <span class="glyphicon glyphicon-plus"></span> New schedule
         </button>
         {% for e in form.schedules %}
-          {{ e.hidden_tag() }}
-          {{ render_field(e.schedule_type, class="form-control") }}
-          {{ render_field(e.next_run, class="form-control schedule-field") }}
-          {{ render_checkbox(e.is_active) }}
+          <div class="job-schedule-form">
+            {{ e.hidden_tag() }}
+            {{ render_field(e.schedule_type, class="form-control") }}
+            {{ render_field(e.next_run, class="form-control schedule-field") }}
+            {{ render_checkbox(e.is_active) }}
+            <span class="glyphicon glyphicon-remove delete link-pretender"
+                  onclick="DanceCat.Main.$(this).parent().remove()"
+            ></span>
+          </div>
         {% endfor %}
       </div>
       <label>{{ form.emails.label }}</label>

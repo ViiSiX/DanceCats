@@ -5,15 +5,48 @@ This module contains the Models which is extended from
 SQLAlchemy's Base Model.
 """
 
+from __future__ import unicode_literals
 import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import UserMixin
+from sqlalchemy import and_, not_
+from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.associationproxy import association_proxy
 from DanceCat import db, config
 from . import Helpers
 from . import Constants
 
 
-# pylint: disable=C0103,R0902
+# pylint: disable=R0902
+
+class ProxiedDictMixin(object):
+    """Adds obj[key] access to a mapped class.
+
+    This class basically proxies dictionary access to an attribute
+    called ``_proxied``.  The class which inherits this class
+    should have an attribute called ``_proxied`` which points to a dictionary.
+
+    """
+
+    def __len__(self):
+        return len(self._proxied)
+
+    def __iter__(self):
+        return iter(self._proxied)
+
+    def __getitem__(self, key):
+        return self._proxied[key]
+
+    def __contains__(self, key):
+        return key in self._proxied
+
+    def __setitem__(self, key, value):
+        self._proxied[key] = value
+
+    def __delitem__(self, key):
+        del self._proxied[key]
+
 
 class AllowedEmail(db.Model):
     """
@@ -23,7 +56,9 @@ class AllowedEmail(db.Model):
     will be allowed to register new user.
     """
 
-    allowed_email_id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    allowed_email_id = db.Column('id', db.Integer,
+                                 primary_key=True, autoincrement=True
+                                 )
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
     version = db.Column(db.String(255), index=True, nullable=False)
 
@@ -94,7 +129,10 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         """Print the User instance."""
-        return '<User {email} - Id {id}>'.format(email=self.email, id=self.user_id)
+        return '<User {email} - Id {id}>'.format(
+            email=self.email,
+            id=self.user_id
+        )
 
 
 class Connection(db.Model):
@@ -193,7 +231,7 @@ class Connection(db.Model):
         )
 
 
-class Job(db.Model):
+class Job(db.Model, ProxiedDictMixin):
     """
     Docstring for Job Model class.
 
@@ -223,6 +261,8 @@ class Job(db.Model):
     job_type = db.Column('jobType', db.SmallInteger,
                          default=Constants.JOB_NONE,
                          nullable=False)
+    is_deleted = db.Column('isDeleted', db.Boolean,
+                           default=False, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     emails = db.relationship('JobMailTo',
@@ -231,8 +271,23 @@ class Job(db.Model):
                              backref='Job',
                              lazy='joined')
     schedules = db.relationship('Schedule',
+                                primaryjoin="and_("
+                                            "Job.job_id==Schedule.job_id,"
+                                            "Schedule.is_deleted==False"
+                                            ")",
                                 backref='Job',
                                 lazy='joined')
+    features = \
+        db.relationship('JobFeature',
+                        collection_class=attribute_mapped_collection(
+                            'feature_name')
+                        )
+    _proxied = association_proxy("features",
+                                 "feature_value",
+                                 creator=lambda feature_name, feature_value:
+                                 JobFeature(feature_name=feature_name,
+                                            feature_value=feature_value)
+                                 )
 
     __mapper_args__ = {
         'polymorphic_on': job_type,
@@ -279,6 +334,12 @@ class Job(db.Model):
         for recipient in self.emails:
             recipients_list.append(str(recipient))
         return recipients_list
+
+    @classmethod
+    def with_feature(cls, feature_name, feature_value):
+        """Used to query job having given attribute."""
+        return cls.facts.any(feature_name=feature_name,
+                             feature_value=feature_value)
 
     def __repr__(self):
         """Print the Job instance."""
@@ -342,8 +403,8 @@ class Schedule(db.Model):
                             primary_key=True, autoincrement=True)
     job_id = db.Column('jobId', db.Integer,
                        db.ForeignKey('job.id'), nullable=False)
-    is_active = db.Column('isActive', db.Boolean,
-                          default=True, nullable=False)
+    _is_active = db.Column('isActive', db.Boolean,
+                           default=True, nullable=False)
     minute_of_hour = db.Column('minuteOfHour',
                                db.SmallInteger, default=0, nullable=False)
     hour_of_day = db.Column('hourOfDay', db.SmallInteger,
@@ -364,6 +425,8 @@ class Schedule(db.Model):
                              db.DateTime,
                              onupdate=datetime.datetime.now,
                              default=datetime.datetime.now)
+    is_deleted = db.Column('isDeleted', db.Boolean,
+                           default=False, nullable=False)
     version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, job_id, start_time, user_id,
@@ -383,10 +446,25 @@ class Schedule(db.Model):
         self.job_id = job_id
         self.schedule_type = \
             kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
-        self.is_active = kwargs.get('is_active', False)
+        self._is_active = kwargs.get('is_active', False)
         self.update_start_time(start_time)
         self.user_id = user_id
         self.version = Constants.MODEL_SCHEDULE_VERSION
+
+    @hybrid_property
+    def is_active(self):
+        """Get Schedule's active status."""
+        return self._is_active and not self.is_deleted
+
+    @is_active.setter
+    def is_active(self, is_active):
+        """Set Schedule's active status."""
+        self._is_active = is_active
+
+    @is_active.expression
+    def is_active(self):
+        """Get Schedule's active status expression."""
+        return and_(self._is_active, not_(self.is_deleted))
 
     def validate(self):
         """
@@ -397,7 +475,6 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_ONCE:
             return self.next_run > datetime.datetime.now()
 
-        print(self.minute_of_hour)
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
             return Helpers.validate_minute_of_hour(self.minute_of_hour)
 
@@ -428,13 +505,14 @@ class Schedule(db.Model):
 
     def update_next_run(self, validated=False):
         """Update the next time this job will be run."""
-        # TODO: Better algorithm
-
         if not validated:
             validated = self.validate()
 
         if not validated:
             raise ValueError('Schedule is not valid!')
+
+        if self.schedule_type == Constants.SCHEDULE_ONCE:
+            return
 
         cur_time = datetime.datetime.now()
         next_run_time = datetime.datetime.now()
@@ -469,6 +547,7 @@ class Schedule(db.Model):
                 next_run_time += relativedelta(months=1)
 
         self.next_run = next_run_time.replace(second=0)
+        # TODO: Better algorithm
 
     def __repr__(self):
         """Print the Schedule instance."""
@@ -588,4 +667,62 @@ class JobMailTo(db.Model):
             email_address=self.email_address
         )
 
-# pylint: disable=C0103,R0902
+
+class JobFeature(db.Model):
+    """Used to extend Job's table."""
+
+    job_id = db.Column('jobId', db.Integer,
+                       db.ForeignKey('job.id'),
+                       primary_key=True)
+    feature_name = db.Column('featureName', db.String(255),
+                             primary_key=True)
+    _feature_value = db.Column('featureValue', db.String(255),
+                               nullable=False)
+    last_updated = db.Column('lastUpdated',
+                             db.DateTime,
+                             onupdate=datetime.datetime.now,
+                             default=datetime.datetime.now)
+
+    def __init__(self, feature_name, feature_value):
+        """
+        Docstring for JobFeature Model constructor.
+
+        :param feature_name:
+            Job's feature name, ref to Constants.
+        :param feature_value:
+            Job's feature value.
+        """
+        if feature_name in Constants.JOB_FEATURE_DICT:
+            self.feature_name = feature_name
+        else:
+            raise ValueError('Do not know feature name of "{feature_name}"'.
+                             format(feature_name=feature_name))
+        self.feature_value = feature_value
+
+    @hybrid_property
+    def feature_value(self):
+        """Convert feature value to it's type and return."""
+        return Constants.JOB_FEATURE_DICT[self.feature_name]['py_type'](
+            self._feature_value
+        )
+
+    @feature_value.setter
+    def feature_value(self, feature_value):
+        """Validate feature value and save to _feature_value."""
+        if isinstance(feature_value,
+                      Constants.JOB_FEATURE_DICT
+                      [self.feature_name]['py_type']):
+            self._feature_value = str(feature_value)
+        else:
+            raise ValueError('Invalid type of "{feature_name}"'.
+                             format(feature_name=self.feature_name))
+
+    def __repr__(self):
+        """Print feature value."""
+        return '<Job {job_id}\'s {feature_name}: {feature_value}>'.format(
+            job_id=self.job_id,
+            feature_name=self.feature_name,
+            feature_value=self.feature_value
+        )
+
+# pylint: disable=R0902

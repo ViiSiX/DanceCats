@@ -209,9 +209,20 @@
 /* Schedules */
 .job-schedule-field-list {
   display: block;
-  border-radius: 2px;
-  padding: 15px;
   float: none;
+}
+
+.job-schedule-field-list .job-schedule-form {
+  border: 1px solid #ccc;
+  padding: 15px 15px 0;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.job-schedule-field-list .job-schedule-form .delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 /* End Job */

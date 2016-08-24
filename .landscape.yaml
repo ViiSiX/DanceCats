@@ -13,3 +13,4 @@ python-targets:
   - 2
 ignore-paths:
   - migrations
+  - docs

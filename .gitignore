@@ -14,3 +14,4 @@ package.json
 *.pyc
 
 var
+docs/_build/

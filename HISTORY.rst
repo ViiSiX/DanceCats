@@ -1,3 +1,17 @@
+0.1.1 - Documentation and Feature Improvement
+---------------------------------------------
+
+*Date: Aug 25, 2016*
+
+**Changes:**
+
+- Support timeout option for each job.
+- Test on Helpers function.
+- Logical delete schedule and job.
+- Add console commands to migrate database and update missed schedule.
+- Add document by Sphinx.
+- PostgreSQL support.
+
 0.1.0 - The very first release
 ------------------------------
 

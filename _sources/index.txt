@@ -1,3 +1,6 @@
+.. meta::
+   :keywords: data, report, database, python
+
 ===============================
 DanceCat: a Data Reporting tool
 ===============================

@@ -10,7 +10,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 # pylint: disable=C0103
 app = Flask(__name__)

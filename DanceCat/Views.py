@@ -57,6 +57,7 @@ def job():
 
 
 @app.route('/job/create', methods=['GET', 'POST'])
+@login_required
 def job_create():
     """Render and return Create New Job Page."""
     form = QueryJobForm(request.form)

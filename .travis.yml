@@ -9,4 +9,8 @@ script:
   - mkdir -p var
   - export PYTHONPATH=`pwd`:$PYTHONPATH
   - py.test tests --pep8 DanceCat -v --cov DanceCat --cov-report term-missing
+branches:
+  only:
+    - master
+    - dev
 after_success: coveralls

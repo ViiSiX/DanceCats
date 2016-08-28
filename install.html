@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Installation &#8212; DanceCat 0.1.1 documentation</title>
+    <title>Installation &#8212; DanceCat 0.1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.1',
+        VERSION:     '0.1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="DanceCat 0.1.1 documentation" href="index.html" />
+    <link rel="top" title="DanceCat 0.1.2 documentation" href="index.html" />
     <link rel="next" title="Usage Manual" href="manual.html" />
     <link rel="prev" title="DanceCat: a Data Reporting tool" href="index.html" />
    
@@ -51,7 +51,7 @@ based OS will be added later.</p>
 <ol class="arabic simple">
 <li>Add new user and prepare the locations for DanceCat:</li>
 </ol>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>useradd dancecat
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo useradd dancecat
 
 sudo mkdir -p /opt/dancecat
 sudo chown dancecat.dancecat /opt/dancecat
@@ -67,8 +67,22 @@ sudo chown dancecat.dancecat /var/log/dancecat
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li>Install git:</li>
+<li>Install packages which will be used later</li>
 </ol>
+<p>Build essential used for install Python&#8217;s modules:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install build-essential autoconf libtool
+sudo apt-get install libpq-dev python-dev
+</pre></div>
+</div>
+<p><a class="reference external" href="https://nodejs.org/en/download/package-manager/">Node.js</a> for packing client&#8217;s scripts:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Run this if your system does not have curl</span>
+sudo apt-get install curl
+
+curl -sL https://deb.nodesource.com/setup_6.x <span class="p">|</span> sudo -E bash -
+sudo apt-get install -y nodejs
+</pre></div>
+</div>
+<p>Git to pull and deploy codes:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install git
 </pre></div>
 </div>
@@ -87,36 +101,20 @@ If you already done this, please skip to step 5.</p>
 
 su - dancecat
 
-<span class="nb">cd</span> /var/run/dancecat
+<span class="nb">cd</span> ~
 virtualenv venv
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
 <li>Install necessary modules for your Python virtual environment:</li>
 </ol>
-<p>Install packages which will be used to install Python modules:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install build-essential autoconf libtool
-sudo apt-get install libpq-dev python-dev
-</pre></div>
-</div>
 <p>Install Python modules:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
-<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
+<span class="nb">source</span> ~/venv/bin/activate
 pip install --upgrade setuptools
 pip install --upgrade pip
 pip install -r /opt/dancecat/requirements.txt
-</pre></div>
-</div>
-<p>Download and install <a class="reference external" href="https://dev.mysql.com/downloads/connector/python/">mysql-connector-python</a>.
-My version is 2.1.3.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
-
-<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
-
-tar zvfx mysql-connector-python-2.1.3.tar.gz
-<span class="nb">cd</span> mysql-connector-python-2.1.3
-python setup.py install
 </pre></div>
 </div>
 <ol class="arabic simple" start="6">
@@ -127,7 +125,7 @@ python setup.py install
 <span class="nb">cd</span> /opt/dancecat
 mkdir var
 
-<span class="nb">source</span> /var/run/dancecat/venv/bin/activate
+<span class="nb">source</span> ~/venv/bin/activate
 <span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>:<span class="nv">$PYTHONPATH</span>
 py.test tests
 </pre></div>
@@ -136,12 +134,24 @@ py.test tests
 You can setup <em>dancecat</em> user <em>.bashrc</em> file for later convenience.
 Later in this document I will assume that you are already in the right environment.</p>
 <ol class="arabic simple" start="7">
+<li>Packing client&#8217;s codes:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+
+npm install
+
+node node_modules/webpack/bin/webpack.js
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
 <li>Edit .bashrc</li>
 </ol>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
 <span class="nb">echo</span> <span class="s2">&quot;export PYTHONPATH=/opt/dancecat&quot;</span> &gt;&gt; ~/.bashrc
-<span class="nb">echo</span> <span class="s2">&quot;source /var/run/dancecat/venv/bin/activate&quot;</span> &gt;&gt; ~/.bashrc
+<span class="nb">echo</span> <span class="s2">&quot;source ~/venv/bin/activate&quot;</span> &gt;&gt; ~/.bashrc
 </pre></div>
 </div>
 </div>
@@ -249,17 +259,16 @@ cp DanceCatBootstrap.py.dist DanceCatBootstrap.py
 <span class="c1"># Just in case proxy server do not work.</span>
 <span class="n">app</span><span class="o">.</span><span class="n">wsgi_app</span> <span class="o">=</span> <span class="n">ProxyFix</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">wsgi_app</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">FrequencyTaskChecker</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;FREQUENCY_PID&#39;</span><span class="p">,</span> <span class="s1">&#39;frequency.pid&#39;</span><span class="p">))</span>
+<span class="n">FrequencyTaskChecker</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;FREQUENCY_PID&#39;</span><span class="p">,</span> <span class="s1">&#39;frequency.pid&#39;</span><span class="p">))</span>
 
-    <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
-        <span class="n">rdb</span><span class="o">.</span><span class="n">start_worker</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+    <span class="n">rdb</span><span class="o">.</span><span class="n">start_worker</span><span class="p">()</span>
 
-    <span class="n">socket_io</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
-                  <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
-                  <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>
-                  <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                  <span class="p">)</span>
+<span class="c1"># Remove the following block if you use gunicorn.</span>
+<span class="n">socket_io</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
+              <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
+              <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>
+              <span class="p">)</span>
 </pre></div>
 </div>
 <p>Run it:</p>
@@ -276,14 +285,115 @@ python DanceCatBootstrap.py
 <h2>Using with Nginx and WSGI<a class="headerlink" href="#using-with-nginx-and-wsgi" title="Permalink to this headline">¶</a></h2>
 <p>For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
 to public DanceCat.</p>
-<p>[TO BE ADDED LATER]</p>
+<ol class="arabic simple">
+<li>Install Nginx</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install nginx
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Install Gunicorn</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+pip install gunicorn
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Create a script to start the app with gunicorn</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+vim /opt/dancecat/start.sh
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+
+<span class="c1"># Please change log level to one that suite your environment.</span>
+gunicorn --worker-class eventlet <span class="se">\</span>
+  -w <span class="m">1</span> DanceCatBootstrap:app <span class="se">\</span>
+  -p /var/run/dancecat/dancecat.pid <span class="se">\</span>
+  -D --bind unix:/var/run/dancecat/dancecat.sock <span class="se">\</span>
+  --log-file /var/log/dancecat/dancecat.log <span class="se">\</span>
+  --log-level debug <span class="se">\</span>
+  --timeout<span class="o">=</span><span class="m">90</span> <span class="se">\</span>
+  --graceful-timeout<span class="o">=</span><span class="m">10</span> -m 007
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>chmod u+x /opt/dancecat/start.sh
+</pre></div>
+</div>
+<p>4. Edit your <a class="reference external" href="install.html#bootstrap-and-run">DanceCatBootstrap.py</a>, remove the
+following lines since gunicorn will run it for you.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">socket_io</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
+              <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
+              <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>
+              <span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>Start your application</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+/opt/dancecat/start.sh
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li>Config Nginx</li>
+</ol>
+<p>Create a config file that allow Nginx to act as a proxy to publish your DanceCat:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo vim /etc/nginx/site-available/dancecat.localdomain.conf
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre><span></span>server {
+  listen       80;
+  server_name  dancecat.localdomain;
+
+  access_log /var/log/nginx/dancecat.localdomain_access.log main;
+  error_log  /var/log/nginx/dancecat.localdomain_error.log;
+
+  location / {
+    proxy_pass http://unix:/var/run/dancecat/dancecat.sock;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location /socket.io {
+    proxy_pass       http://unix:/var/run/dancecat/dancecat.sock;
+    proxy_buffering  off;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection &quot;Upgrade&quot;;
+  }
+}
+</pre></div>
+</div>
+<p>Restart Nginx</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo service nginx configtest
+
+sudo service nginx restart
+</pre></div>
+</div>
+<p>Go to your browser and start using DanceCat.</p>
 </div>
 <div class="section" id="security">
 <h2>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h2>
 <p>Since DanceCat allows users to query again databases, you may be want to consider
 what permissions on your databases should be given to DanceCat before you public it.
 You should also limit network access to DanceCat server and enable other security methods
-that you have, ex &#8220;iptables&#8221; and &#8220;SELinux&#8221;.</p>
+that you have, ex &#8220;iptables&#8221;, &#8220;SELinux&#8221; and enable SSL on your site.</p>
 </div>
 </div>
 

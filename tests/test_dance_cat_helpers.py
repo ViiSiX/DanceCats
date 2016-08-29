@@ -103,3 +103,7 @@ def test_timer():
     assert timer.get_total_time().find("seconds") > 0
     assert isinstance(timer.get_total_seconds(), float)
     assert timer.get_total_seconds() > 1
+
+    timer.spend(1)
+    assert timer.get_total_time().find("minutes") > 0
+    assert timer.get_total_seconds() > 60

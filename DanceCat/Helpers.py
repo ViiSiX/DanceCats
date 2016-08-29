@@ -179,6 +179,15 @@ class Timer(object):
             return "{milliseconds} milliseconds".\
                 format(milliseconds=total_time)
 
+    def spend(self, minutes):
+        """
+        Simulate of spending a number of minutes.
+
+        :param minutes: number of minutes that has already spent.
+        :return: Set the initial time of this class.
+        """
+        self.start_time -= 60000 * minutes
+
     def get_total_milliseconds(self):
         """Return total runtime since class construction in milliseconds."""
         return time.time() * 1000 - self.start_time

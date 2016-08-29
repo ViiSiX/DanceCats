@@ -41,7 +41,6 @@ def test_list_commands():
 
 def test_db_create_all(app):
     """Test db_create_all command."""
-    print(app)
     assert app.config.get('SQLALCHEMY_DATABASE_URI') is not None
 
     Console.db_create_all()
@@ -50,6 +49,26 @@ def test_db_create_all(app):
 
     for table in Console.db.metadata.tables.items():
         assert table[0] in tables_list
+
+
+def test_add_allowed_user(app, user_email, capfd):
+    """Test add_allowed_user command."""
+    assert app.config.get('SQLALCHEMY_DATABASE_URI') is not None
+
+    Console.db_create_all()
+
+    Console.add_allowed_user(user_email)
+    out, err = capfd.readouterr()
+    assert out == "Added \"{email}\" to allowed users list.\n".format(
+        email=user_email
+    )
+
+    Console.add_allowed_user(user_email)
+    out, err = capfd.readouterr()
+    assert out == "\"{email}\" was already in the allowed users list.\n".\
+        format(
+            email=user_email
+        )
 
 
 def test_schedule_update(app, user_email):

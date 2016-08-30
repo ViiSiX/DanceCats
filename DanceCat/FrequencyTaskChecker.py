@@ -65,28 +65,29 @@ def frequency_checker(pid_path, feq=60):
 
         with app.app_context():
             for next_schedule in next_schedules:
-                print(next_schedule.Job)
-                tracker = TrackJobRun(job_id=next_schedule.Job.job_id,
-                                      schedule_id=next_schedule.schedule_id)
-                db.session.add(tracker)
-                db.session.commit()
+                if next_schedule.Job.is_active:
+                    tracker = TrackJobRun(job_id=next_schedule.Job.job_id,
+                                          schedule_id=next_schedule.schedule_id
+                                          )
+                    db.session.add(tracker)
+                    db.session.commit()
 
-                queue = rdb.queue
-                queue.enqueue(
-                    f=job_worker, kwargs={
-                        'job_id': next_schedule.Job.job_id,
-                        'tracker_id': tracker.track_job_run_id
-                    },
-                    ttl=900,
-                    result_ttl=app.config.get(
-                        'JOB_RESULT_VALID_SECONDS', 86400
-                    ),
-                    job_id="{tracker_id}".format(
-                        tracker_id=tracker.track_job_run_id
+                    queue = rdb.queue
+                    queue.enqueue(
+                        f=job_worker, kwargs={
+                            'job_id': next_schedule.Job.job_id,
+                            'tracker_id': tracker.track_job_run_id
+                        },
+                        ttl=900,
+                        result_ttl=app.config.get(
+                            'JOB_RESULT_VALID_SECONDS', 86400
+                        ),
+                        job_id="{tracker_id}".format(
+                            tracker_id=tracker.track_job_run_id
+                        )
                     )
-                )
 
-                next_schedule.update_next_run(True)
+                next_schedule.update_next_run(True, feq)
                 db.session.commit()
 
         fq_sleep(feq - timer.get_total_seconds())

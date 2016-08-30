@@ -33,7 +33,7 @@ DanceCat source code is always available on `GitHub <https://github.com/scattm/D
 Contents
 --------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :glob:
 
    install

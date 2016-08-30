@@ -4,15 +4,21 @@ from __future__ import print_function
 import datetime
 from decimal import Decimal, getcontext as dicimal_get_context
 from DanceCat import Helpers
+import pytest
+import time
 
 
-def test_password_encrypt():
+def test_encrypt_password():
     """Test password encrypting and checking function."""
     password = 'some_thing_nice_to !see'
 
     hashed_password = Helpers.encrypt_password(password)
     assert hashed_password
     assert hashed_password != password
+
+    with pytest.raises(AttributeError) as exec_info:
+        Helpers.encrypt_password(True)
+    assert "'bool' object has no attribute 'encode'" in exec_info.value
 
     assert Helpers.check_password(hashed_password, password)
     assert not Helpers.check_password(hashed_password, 'inj3ct   ')
@@ -72,25 +78,32 @@ def test_time_checkers():
     assert not Helpers.validate_day_of_month(0)
 
 
-def test_validate_int_between():
-    """Test validate_int_between function."""
-    assert Helpers.validate_int_between(1, 0, 1)
-    assert Helpers.validate_int_between(1, 0, 2)
-    assert not Helpers.validate_int_between(4, 1, 3)
-    assert not Helpers.validate_int_between(0, 1, 3)
+def test_is_in_range():
+    """Test is_in_range function."""
+    assert Helpers.is_in_range(1, 0, 1)
+    assert Helpers.is_in_range(1, 0, 2)
+    assert not Helpers.is_in_range(4, 1, 3)
+    assert not Helpers.is_in_range(0, 1, 3)
     try:
-        Helpers.validate_int_between(3, 5, 2)
+        Helpers.is_in_range(3, 5, 2)
         assert False
     except ValueError:
         pass
 
 
 def test_str2datetime():
-    """Test test_str2datetime function."""
+    """Test str2datetime function."""
     assert Helpers.str2datetime(
         '2016-08-11 10:36:30',
         '%Y-%m-%d %H:%M:%S'
     ) == datetime.datetime(2016, 8, 11, 10, 36, 30)
+
+
+def test_generate_runtime():
+    """ Test generate_runtime function. """
+    runtime = Helpers.generate_runtime()
+    now = int(time.time()*1000)
+    assert round(now - runtime) == 0
 
 
 def test_timer():

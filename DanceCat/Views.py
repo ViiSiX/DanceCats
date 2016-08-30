@@ -49,6 +49,9 @@ def job():
             'last_updated': job_object.last_updated,
             'user_email': job_object.User.email,
             'connection_name': job_object.Connection.name
+            if job_object.Connection is not None
+            else "Connection Deleted",
+            'is_active': job_object.is_active
         })
     return render_template('query_job/list.html',
                            title=Constants.PROJECT_NAME,
@@ -246,7 +249,7 @@ def job_delete():
 def job_run():
     """Trigger a job."""
     triggered_job = QueryDataJob.query.get_or_404(request.form['id'])
-    if triggered_job.is_deleted:
+    if triggered_job.is_deleted or not triggered_job.is_active:
         abort(404)
 
     tracker = TrackJobRun(triggered_job.job_id)

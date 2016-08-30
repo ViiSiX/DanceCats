@@ -119,7 +119,9 @@ def get_trackers():
         trackers_list.append({
             'id': tracker.TrackJobRun.track_job_run_id,
             'jobName': tracker.Job.name,
-            'database': tracker.Job.Connection.database,
+            'database': tracker.Job.Connection.database
+            if tracker.Job.Connection is not None
+            else "Connection Deleted",
             'status': Constants.
             JOB_TRACKING_STATUSES_DICT[tracker.TrackJobRun.status]['name'],
             'ranOn': Helpers.py2sql_type_convert(tracker.TrackJobRun.ran_on),

@@ -384,6 +384,11 @@ class QueryDataJob(Job):
         """Setter for commands property."""
         self._commands = query_string
 
+    @hybrid_property
+    def is_active(self):
+        """Check if the job is active or not."""
+        return not not self.connection_id
+
 
 class Schedule(db.Model):
     """
@@ -503,7 +508,7 @@ class Schedule(db.Model):
         if start_time < datetime.datetime.now() + relativedelta(minutes=1):
             self.update_next_run(False)
 
-    def update_next_run(self, validated=False):
+    def update_next_run(self, validated=False, frequency=60):
         """Update the next time this job will be run."""
         if not validated:
             validated = self.validate()
@@ -518,7 +523,10 @@ class Schedule(db.Model):
         next_run_time = datetime.datetime.now()
 
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
-            next_run_time += relativedelta(minute=self.minute_of_hour)
+            next_run_time += relativedelta(
+                minute=self.minute_of_hour, seconds=-1
+            )
+            cur_time -= relativedelta(minutes=-1)
 
             if cur_time >= next_run_time:
                 next_run_time += relativedelta(hours=1)

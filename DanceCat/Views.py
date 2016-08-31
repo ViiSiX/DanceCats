@@ -18,7 +18,7 @@ from DanceCat.Models import User, AllowedEmail, Connection, \
 from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
 from DanceCat.DatabaseConnector \
     import DatabaseConnector, DatabaseConnectorException
-from .JobWorker import job_worker
+from .JobWorker import job_worker_query
 from . import Helpers
 from . import Constants
 
@@ -255,9 +255,9 @@ def job_run():
     tracker = TrackJobRun(triggered_job.job_id)
     db.session.add(tracker)
     db.session.commit()
-    queue = rdb.queue
+    queue = rdb.queue['default']
     queue.enqueue(
-        f=job_worker, kwargs={
+        f=job_worker_query, kwargs={
             'job_id': triggered_job.job_id,
             'tracker_id': tracker.track_job_run_id
         },
@@ -272,7 +272,7 @@ def job_run():
 @login_required
 def job_result(tracker_id, result_type):
     """Download Job's result."""
-    queue = rdb.queue
+    queue = rdb.queue['default']
     result = queue.fetch_job(tracker_id).result
     if result_type in ['csv', 'xls', 'xlsx', 'ods']:
         result_array = [list(result['header'])]
@@ -301,7 +301,7 @@ def job_latest_result(job_id, result_type):
         job_id=fetching_result_job.job_id
     ).order_by(TrackJobRun.ran_on.desc()).first()
     if last_tracker is not None:
-        queue = rdb.queue
+        queue = rdb.queue['default']
         result = queue.fetch_job(str(last_tracker.track_job_run_id)).result
         if result_type in ['csv', 'xls', 'xlsx', 'ods']:
             result_array = [list(result['header'])]

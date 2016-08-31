@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import datetime
+import sqlalchemy.exc
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
@@ -64,6 +65,30 @@ def schedule_update():
         ).all()
 
     print("Finished!")
+
+
+@manager.command
+def add_allowed_user(email):
+    """
+    Add given email to allowed_email table.
+
+    :param email: Given email that will be allowed to create new user.
+    :return: None.
+    """
+    try:
+        allowed_email = Models.AllowedEmail(email)
+        db.session.add(allowed_email)
+        db.session.commit()
+
+        print("Added \"{email}\" to allowed users list.".format(
+            email=email
+        ))
+    except sqlalchemy.exc.IntegrityError:
+        print("\"{email}\" was already in the allowed users list.".format(
+            email=email
+        ))
+
+    db.session.close()
 
 
 # Add Migrate commands.

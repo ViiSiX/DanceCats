@@ -10,7 +10,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 # pylint: disable=C0103
 app = Flask(__name__)
@@ -25,7 +25,9 @@ if os.environ.get('CONFIG_FILE') is not None:
     app.config.from_envvar('CONFIG_FILE')
 
 db = SQLAlchemy(app)
-rdb = FlaskRedis(app, collections=True, rq=True)
+rdb = FlaskRedis(app,
+                 collections=True,
+                 rq=True, rq_queues=['default', 'mailer'])
 
 lm = LoginManager()
 lm.init_app(app)

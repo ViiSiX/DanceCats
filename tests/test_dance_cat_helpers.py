@@ -11,17 +11,15 @@ def test_password_encrypt():
     password = 'some_thing_nice_to !see'
 
     hashed_password = Helpers.encrypt_password(password)
-    assert hashed_password is not None
-    assert hashed_password != ''
+    assert hashed_password
     assert hashed_password != password
 
-    assert Helpers.check_password(hashed_password, password) is True
-    assert Helpers.check_password(hashed_password, 'inj3ct   ') is False
-    assert Helpers.check_password(hashed_password, '') is False
+    assert Helpers.check_password(hashed_password, password)
+    assert not Helpers.check_password(hashed_password, 'inj3ct   ')
+    assert not Helpers.check_password(hashed_password, '')
 
     hashed_empty_password = Helpers.encrypt_password('')
-    assert hashed_empty_password is not None
-    assert hashed_empty_password != ''
+    assert hashed_empty_password
     assert hashed_empty_password != password
 
 
@@ -34,8 +32,7 @@ def test_db_password_encrypt():
         db_password,
         key
     )
-    assert encrypted_config is not None
-    assert encrypted_config != ''
+    assert encrypted_config
 
     assert Helpers.db_credential_decrypt(
         encrypted_config,
@@ -45,11 +42,8 @@ def test_db_password_encrypt():
 
 def test_null_handler():
     """Test null_handler function."""
-    assert Helpers.null_handler(0) is None
-    assert Helpers.null_handler(0.0) is None
-    assert Helpers.null_handler('') is None
-    assert Helpers.null_handler(None) is None
-    assert Helpers.null_handler(False) is None
+    for value in [0, 0.0, '', None, False]:
+        assert not Helpers.null_handler(value)
 
 
 def test_py2sql_type_convert():
@@ -109,3 +103,7 @@ def test_timer():
     assert timer.get_total_time().find("seconds") > 0
     assert isinstance(timer.get_total_seconds(), float)
     assert timer.get_total_seconds() > 1
+
+    timer.spend(1)
+    assert timer.get_total_time().find("minutes") > 0
+    assert timer.get_total_seconds() > 60

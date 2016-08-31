@@ -8,8 +8,8 @@ Also, please visit `Repo's Issue <https://github.com/scattm/DanceCat/issues>`_ p
 **Core features:**
 
 - User's roles and permissions.
-- Add console command to allow new user using DanceCat.
-- More testing and documentation.
+- More coverage test.
+- Job plugins.
 
 **Data collect:**
 

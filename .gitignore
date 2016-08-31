@@ -7,7 +7,6 @@ DanceCat.iml
 DanceCatBootstrap.py
 start.sh
 test.sh
-package.json
 
 .coverage
 .cache

@@ -1,3 +1,19 @@
+0.1.2 - Documentation (cont) and Fix Bug
+----------------------------------------
+
+*Data: Aug 31, 2016*
+
+**Change:**
+
+- Add console command to `add allowed user <user_management.html#add-user-to-the-system>`_.
+- Document for WSGI and Nginx
+- User Manual
+
+**Fixed bugs:**
+
+- Critical error after delete connections that having jobs
+- Corrupted results of jobs when mailing failed
+
 0.1.1 - Documentation and Feature Improvement
 ---------------------------------------------
 

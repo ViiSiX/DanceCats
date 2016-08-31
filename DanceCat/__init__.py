@@ -25,7 +25,9 @@ if os.environ.get('CONFIG_FILE') is not None:
     app.config.from_envvar('CONFIG_FILE')
 
 db = SQLAlchemy(app)
-rdb = FlaskRedis(app, collections=True, rq=True)
+rdb = FlaskRedis(app,
+                 collections=True,
+                 rq=True, rq_queues=['default', 'mailer'])
 
 lm = LoginManager()
 lm.init_app(app)

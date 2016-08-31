@@ -33,7 +33,7 @@ def frequency_checker(pid_path, feq=60):
 
     from DanceCat import app, db, rdb
     from .Models import Schedule, TrackJobRun
-    from .JobWorker import job_worker
+    from .JobWorker import job_worker_query
 
     def exit_handler(*args):
         """Clean up before quiting the process."""
@@ -72,9 +72,9 @@ def frequency_checker(pid_path, feq=60):
                     db.session.add(tracker)
                     db.session.commit()
 
-                    queue = rdb.queue
+                    queue = rdb.queue['default']
                     queue.enqueue(
-                        f=job_worker, kwargs={
+                        f=job_worker_query, kwargs={
                             'job_id': next_schedule.Job.job_id,
                             'tracker_id': tracker.track_job_run_id
                         },

@@ -82,6 +82,7 @@ Install Python modules:
    source ~/venv/bin/activate
    pip install --upgrade setuptools
    pip install --upgrade pip
+   pip install --upgrade wheel
    pip install -r /opt/dancecat/requirements.txt
 
 6. Run for a simple test:

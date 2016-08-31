@@ -1,12 +1,12 @@
 Usage Manual
 ============
 
-Connection Management
----------------------
+**Table of content**
 
-[TO BE ADDED LATER]
+.. toctree::
+   :maxdepth: 2
+   :glob:
 
-Job and Schedule
-----------------
-
-[TO BE ADDED LATER]
+   user_management
+   connection_management
+   job_and_schedule

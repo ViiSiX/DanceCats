@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Manual &#8212; DanceCat 0.1.2 documentation</title>
+    <title>User Management &#8212; DanceCat 0.1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,8 +25,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="top" title="DanceCat 0.1.2 documentation" href="index.html" />
-    <link rel="next" title="User Management" href="user_management.html" />
-    <link rel="prev" title="Installation" href="install.html" />
+    <link rel="up" title="Usage Manual" href="manual.html" />
+    <link rel="next" title="Connection Management" href="connection_management.html" />
+    <link rel="prev" title="Usage Manual" href="manual.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,24 +43,29 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="usage-manual">
-<h1>Usage Manual<a class="headerlink" href="#usage-manual" title="Permalink to this headline">¶</a></h1>
-<p><strong>Table of content</strong></p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="user_management.html">User Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_management.html#add-user-to-the-system">Add user to the system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_management.html#sign-up-and-log-in">Sign Up and Log In</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="connection_management.html">Connection Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="job_and_schedule.html">Jobs and Scheduling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#create-a-new-job">Create a new Job</a></li>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#retrieving-results">Retrieving results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#scheduling">Scheduling</a></li>
-</ul>
-</li>
-</ul>
+  <div class="section" id="user-management">
+<h1>User Management<a class="headerlink" href="#user-management" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="add-user-to-the-system">
+<h2>Add user to the system<a class="headerlink" href="#add-user-to-the-system" title="Permalink to this headline">¶</a></h2>
+<p>To be able to use DanceCat, firstly user must have been allowed by administrators.
+Follow that concept, user&#8217;s emails must exist in <strong>allowed_user</strong> table before they can
+process any further step. There is one console command allow you adding those email
+to that that table.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+python DanceCat/Console add_allowed_user example@localdomain.com
+</pre></div>
+</div>
+</div>
+<div class="section" id="sign-up-and-log-in">
+<h2>Sign Up and Log In<a class="headerlink" href="#sign-up-and-log-in" title="Permalink to this headline">¶</a></h2>
+<p>Following the above step, allowed users can now Sign Up new account on DanceCat.
+For convenience, <em>Sign Up</em> and <em>Log In</em> using the same page. Just go to your DanceCat site,
+enter user email and password to <em>Log In</em> form, press <strong>Log In</strong> button to sign up.</p>
+<p>Wonderful! Now you can start using DanceCat. Follow <a class="reference external" href="connection_management.html">next step</a>
+to manage your connections.</p>
 </div>
 </div>
 
@@ -95,8 +101,12 @@
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Manual</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_management.html">User Management</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="manual.html">Usage Manual</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">User Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#add-user-to-the-system">Add user to the system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sign-up-and-log-in">Sign Up and Log In</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="connection_management.html">Connection Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html">Jobs and Scheduling</a></li>
 </ul>
@@ -129,7 +139,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/manual.txt"
+      <a href="_sources/user_management.txt"
           rel="nofollow">Page source</a>
     </div>
 

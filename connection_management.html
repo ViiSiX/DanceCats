@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Usage Manual &#8212; DanceCat 0.1.2 documentation</title>
+    <title>Connection Management &#8212; DanceCat 0.1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,8 +25,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="top" title="DanceCat 0.1.2 documentation" href="index.html" />
-    <link rel="next" title="User Management" href="user_management.html" />
-    <link rel="prev" title="Installation" href="install.html" />
+    <link rel="up" title="Usage Manual" href="manual.html" />
+    <link rel="next" title="Jobs and Scheduling" href="job_and_schedule.html" />
+    <link rel="prev" title="User Management" href="user_management.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,25 +43,27 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="usage-manual">
-<h1>Usage Manual<a class="headerlink" href="#usage-manual" title="Permalink to this headline">¶</a></h1>
-<p><strong>Table of content</strong></p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="user_management.html">User Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_management.html#add-user-to-the-system">Add user to the system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_management.html#sign-up-and-log-in">Sign Up and Log In</a></li>
+  <div class="section" id="connection-management">
+<h1>Connection Management<a class="headerlink" href="#connection-management" title="Permalink to this headline">¶</a></h1>
+<p>To be able to get data from databases, you have to provide your
+databases&#8217; credentials for DanceCat. Currently DanceCat support following
+RDBMS:</p>
+<ul class="simple">
+<li>MySQL</li>
+<li>SQL Server</li>
+<li>PostgreSQL</li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="connection_management.html">Connection Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="job_and_schedule.html">Jobs and Scheduling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#create-a-new-job">Create a new Job</a></li>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#retrieving-results">Retrieving results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html#scheduling">Scheduling</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<p>In your DanceCat site please click on the <strong>DB Connection</strong> tab. You will see
+the list of connections, including actions (Edit, Delete):</p>
+<img alt="_images/connections-1.png" src="_images/connections-1.png" />
+<p>To add a new connection, click on the <strong>New Connection</strong> button, to edit any connection,
+click on the <strong>Edit</strong> link of that connection.</p>
+<img alt="_images/connections-2.png" src="_images/connections-2.png" />
+<p>Fill connection information into the form, click on <strong>Test Connection</strong> to test it,
+then save it to Database by click on <strong>Save</strong>.</p>
+<img alt="_images/connections-3.png" src="_images/connections-3.png" />
+<p>Next, once you have your own connections on DanceCat, time to create a
+<a class="reference external" href="job_and_schedule.html#create-a-new-job">new job</a>.</p>
 </div>
 
 
@@ -95,9 +98,9 @@
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Manual</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="manual.html">Usage Manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="user_management.html">User Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="connection_management.html">Connection Management</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Connection Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="job_and_schedule.html">Jobs and Scheduling</a></li>
 </ul>
 </li>
@@ -129,7 +132,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/manual.txt"
+      <a href="_sources/connection_management.txt"
           rel="nofollow">Page source</a>
     </div>
 

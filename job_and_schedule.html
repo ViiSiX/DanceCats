@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Jobs and Scheduling &#8212; DanceCat 0.1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="DanceCat 0.1.2 documentation" href="index.html" />
+    <link rel="up" title="Usage Manual" href="manual.html" />
+    <link rel="next" title="Roadmap" href="roadmap.html" />
+    <link rel="prev" title="Connection Management" href="connection_management.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="jobs-and-scheduling">
+<h1>Jobs and Scheduling<a class="headerlink" href="#jobs-and-scheduling" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-a-new-job">
+<h2>Create a new Job<a class="headerlink" href="#create-a-new-job" title="Permalink to this headline">¶</a></h2>
+<p>In your DanceCat site, go to <strong>Job</strong> tab.</p>
+<img alt="_images/jobs-1.png" src="_images/jobs-1.png" />
+<p>Here you will see a list of Jobs and their trackers. Firstly, add a new job by click on
+<strong>New Job</strong> button. You will see a <em>Creating Job</em> form. Begin with filling in the
+necessary information include job&#8217;s name, query statement and annotation (if needed),
+choose the right connection like this example:</p>
+<img alt="_images/jobs-2.png" src="_images/jobs-2.png" />
+<p>Your job is now can be saved, but just wait a moment, try out your query by click on
+<strong>Run</strong> button. DanceCat will start querying your statement against the chosen connection,
+just for the first <em>100 lines</em>. Remember this number? You can <a class="reference external" href="install.html#config-dancecat">config</a>
+it by the value of <em>QUERY_TEST_LIMIT</em>.</p>
+<img alt="_images/jobs-3.png" src="_images/jobs-3.png" />
+<p><strong>Note:</strong> You won&#8217;t be able to get password, secret or related data, DanceCat will detect
+and get rid of them before they reach your hand.</p>
+</div>
+<div class="section" id="retrieving-results">
+<h2>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this headline">¶</a></h2>
+<p>Save your new Job and return to the Job list page. On the line of your new job, click on the <strong>Run</strong>
+link to trigger that job. You will notice that there will be a new tracker line after a short moment.
+Wait for your job to finish with links to download result file in <em>CSV</em> and <em>XLSX</em> format.</p>
+<ul class="simple">
+<li>Twos in the job line which allow you to download latest result.</li>
+<li>Twos in the tracker lines which allow you to download that execution&#8217;s result.</li>
+</ul>
+<img alt="_images/jobs-4.png" src="_images/jobs-4.png" />
+<p>You can event get results in JSON format, simplify go to the URL like this example:</p>
+<img alt="_images/jobs-5.png" src="_images/jobs-5.png" />
+<p>Finally, you can edit your jobs, add an email so that DanceCat can send you result every time that job
+finish.</p>
+<p><strong>Note:</strong> Job&#8217;s results have a limited time to live. After spending the given time, they will be expired
+and you won&#8217;t be able to retrieve them. <a class="reference external" href="install.html#config-dancecat">Config</a> this number
+by setting the value of <em>JOB_RESULT_VALID_SECONDS</em></p>
+</div>
+<div class="section" id="scheduling">
+<h2>Scheduling<a class="headerlink" href="#scheduling" title="Permalink to this headline">¶</a></h2>
+<p>Scheduling allow you to run your job once, hourly, daily, weekly and monthly. With this, you don&#8217;t
+have to go to your DanceCat site every time you need to get reports.</p>
+<p>To scheduling your job, go to the Jobs list page, click on <strong>Edit</strong> link to edit it. Next, on the Job&#8217;s
+editing form, click on <strong>New schedule</strong> button to add new schedule. Edit information that suite your needs,
+then check in <strong>Active</strong> check box to active it. If you want to remove a schedule, just click on &#8220;X&#8221; sign
+in the top-right of the schedule&#8217;s form.</p>
+<img alt="_images/schedules-1.png" src="_images/schedules-1.png" />
+<p>After finished, the schedule look like this:</p>
+<img alt="_images/schedules-2.png" src="_images/schedules-2.png" />
+<p>Click <strong>Save</strong> to save your changes.</p>
+<p><strong>How schedules work?</strong></p>
+<p>There are a process querying the DanceCat database for every <em>n interval seconds</em>
+(default n = 60) to check if there is any schedule is set to run on next n seconds. Those scheduled jobs will
+be run and the schedules&#8217; next run time will be update.</p>
+<p><strong>Update outdated schedules</strong></p>
+<p>For some reason your DanceCat was shutdown, after restart, you need to run
+following commands to update the outdated schedules:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
+
+<span class="nb">cd</span> /opt/dancecat
+<span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
+python DanceCat/Console schedule_update
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/270808.png" alt="Logo"/>
+    
+    <h1 class="logo logo-name">DanceCat</h1>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=scattm&repo=DanceCat&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="manual.html">Usage Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="user_management.html">User Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="connection_management.html">Connection Management</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Jobs and Scheduling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-new-job">Create a new Job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#retrieving-results">Retrieving results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduling">Scheduling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changed log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Trong-Nghia Nguyen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/job_and_schedule.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-76194783-3']);
+      _gaq.push(['_setDomainName', 'none']);
+      _gaq.push(['_setAllowLinker', true]);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    
+  </body>
+</html>

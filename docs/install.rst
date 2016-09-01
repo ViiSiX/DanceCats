@@ -134,8 +134,7 @@ Copy and edit configuration file:
 
    su - dancecat
 
-   cd /etc/dancecat
-   cp /opt/dancecat/config.cfg.dist ./config.cfg
+   cp /opt/dancecat/config.cfg.dist /etc/dancecat/config.cfg
 
 Example configuration file's content:
 

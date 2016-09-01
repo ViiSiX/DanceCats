@@ -1,7 +1,7 @@
 0.1.2 - Documentation (cont) and Fix Bug
 ----------------------------------------
 
-*Data: Aug 31, 2016*
+*Date: Aug 31, 2016*
 
 **Change:**
 

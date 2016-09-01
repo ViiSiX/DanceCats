@@ -10,7 +10,7 @@ QUERY_TEST_LIMIT = 100
 
 JOB_RESULT_VALID_SECONDS = 86400
 
-SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://dancecat:dancecat_password@127.0.0.1/dancecat'
+SQLALCHEMY_DATABASE_URI = '<your_data_base_uri>'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 REDISLITE_PATH = '<path/to/redis/file.db>'

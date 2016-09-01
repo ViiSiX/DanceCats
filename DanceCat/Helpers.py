@@ -100,7 +100,7 @@ def py2sql_type_convert(obj):
     return obj
 
 
-def validate_int_between(value, floor, cell):
+def is_in_range(value, floor, cell):
     """
     Given three integer number x, n, m with n <= m.
 
@@ -113,22 +113,22 @@ def validate_int_between(value, floor, cell):
 
 def validate_minute_of_hour(value):
     """Validate if a number is minute of an hour."""
-    return validate_int_between(value, 0, 59)
+    return is_in_range(value, 0, 59)
 
 
 def validate_hour_of_day(value):
     """Validate if a number is hour of a day."""
-    return validate_int_between(value, 0, 23)
+    return is_in_range(value, 0, 23)
 
 
 def validate_day_of_week(value):
     """Validate if a number is day of a week."""
-    return validate_int_between(value, 0, 6)
+    return is_in_range(value, 0, 6)
 
 
 def validate_day_of_month(value):
     """Validate if a number is minute of hour."""
-    return validate_int_between(value, 1, 31)
+    return is_in_range(value, 1, 31)
 
 
 def generate_runtime():

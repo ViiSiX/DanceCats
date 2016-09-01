@@ -18,12 +18,14 @@ def upgrade():
     with op.batch_alter_table('job') as batch_op:
         batch_op.add_column(sa.Column('isDeleted',
                                       sa.Boolean(),
-                                      nullable=False))
+                                      nullable=False,
+                                      server_default='false'))
 
     with op.batch_alter_table('schedule') as batch_op:
         batch_op.add_column(sa.Column('isDeleted',
                                       sa.Boolean(),
-                                      nullable=False))
+                                      nullable=False,
+                                      server_default='false'))
 
 
 def downgrade():

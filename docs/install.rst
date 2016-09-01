@@ -1,7 +1,7 @@
 Installation
 ============
 
-In this guide I use Debian for example setup. Supporting for Red Hat
+In this guide we use Debian for example setup. Supporting for Red Hat
 based OS will be added later.
 
 Environment Setup
@@ -92,7 +92,6 @@ Install Python modules:
    su - dancecat
 
    cd /opt/dancecat
-   mkdir var
 
    source ~/venv/bin/activate
    export PYTHONPATH=`pwd`:$PYTHONPATH
@@ -100,7 +99,7 @@ Install Python modules:
 
 If the test work well then you are ready for the next step: `Config <install.html#config-dancecat>`_.
 You can setup *dancecat* user *.bashrc* file for later convenience.
-Later in this document I will assume that you are already in the right environment.
+Later in this document we will assume that you are already in the right environment.
 
 7. Packing client's codes:
 
@@ -278,7 +277,7 @@ Go to your browser and start using DanceCat.
 Using with Nginx and WSGI
 -------------------------
 
-For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
+For this guide, we will use Gunicorn as WSGI web server and Nginx as a proxy server
 to public DanceCat.
 
 1. Install Nginx
@@ -395,7 +394,7 @@ Go to your browser and start using DanceCat.
 Security
 --------
 
-Since DanceCat allows users to query again databases, you may be want to consider
+Since DanceCat allows users to query against databases, you may be want to consider
 what permissions on your databases should be given to DanceCat before you public it.
 You should also limit network access to DanceCat server and enable other security methods
 that you have, ex "iptables", "SELinux" and enable SSL on your site.

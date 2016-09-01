@@ -189,7 +189,8 @@ def job_edit(job_id):
                     existing_schedule = \
                         Schedule.query.filter_by(
                             job_id=editing_job.job_id,
-                            schedule_id=schedule.schedule_id.data
+                            schedule_id=0 if not schedule.schedule_id.data
+                            else schedule.schedule_id.data
                         ).first()
                     start_dt = Helpers.str2datetime(
                         schedule.next_run.data, "%Y-%m-%d %I:%M %p"

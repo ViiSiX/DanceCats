@@ -44,13 +44,18 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>In this guide I use Debian for example setup. Supporting for Red Hat
+<p>In this guide we use Debian for example setup. Supporting for Red Hat
 based OS will be added later.</p>
 <div class="section" id="environment-setup">
 <h2>Environment Setup<a class="headerlink" href="#environment-setup" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Add new user and prepare the locations for DanceCat:</li>
-</ol>
+<p>We will go through the following steps to set up the right environment for DanceCat.
+The application need Python to run and Node.js to package front-end code. To prevent any conflict
+on the system, we will use a Python virtual environment with latest installation modules
+and a dedicated system user. Also install required develop packages if
+your system have not had them yet as we will need them to build some modules on your
+Python virtual environment.</p>
+<p>1. Add new user <em>dancecat</em> for DanceCat and prepare the necessary locations for DanceCat
+which also belong to <em>dancecat</em> user.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo useradd dancecat
 
 sudo mkdir -p /opt/dancecat
@@ -67,7 +72,7 @@ sudo chown dancecat.dancecat /var/log/dancecat
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li>Install packages which will be used later</li>
+<li>Install packages which will be used to build and setup DanceCat</li>
 </ol>
 <p>Build essential used for install Python&#8217;s modules:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install build-essential autoconf libtool
@@ -82,12 +87,12 @@ curl -sL https://deb.nodesource.com/setup_6.x <span class="p">|</span> sudo -E b
 sudo apt-get install -y nodejs
 </pre></div>
 </div>
-<p>Git to pull and deploy codes:</p>
+<p>Install <em>git</em> which will be used for cloning source code and upgrade your DanceCat.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install git
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
-<li>Pull the code from <a class="reference external" href="https://github.com/scattm/DanceCat">DanceCat&#8217;s repository</a>.</li>
+<li>Pull the code from <a class="reference external" href="https://github.com/scattm/DanceCat">DanceCat&#8217;s repository</a></li>
 </ol>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
@@ -95,8 +100,12 @@ sudo apt-get install -y nodejs
 git clone https://github.com/scattm/DanceCat.git dancecat
 </pre></div>
 </div>
-<p>4. Install necessary packages to setup a virtual environment for Python.
-If you already done this, please skip to step 5.</p>
+<ol class="arabic simple" start="4">
+<li>Install necessary packages to setup a virtual environment for Python</li>
+</ol>
+<p><em>If you already done this, please skip to step 5.</em></p>
+<p>Virtual environment will create a directory which contains all the Python&#8217;s necessary
+executables to run DanceCat while does not make any change to your system&#8217;s Python modules.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install python-virtualenv
 
 su - dancecat
@@ -106,9 +115,11 @@ virtualenv venv
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
-<li>Install necessary modules for your Python virtual environment:</li>
+<li>Install necessary modules on your Python virtual environment</li>
 </ol>
-<p>Install Python modules:</p>
+<p>Latest <em>pip</em>, <em>wheel</em> and <em>setuptools</em> are required, you need to upgrade them
+in case your system&#8217;s Python is having the old ones. All other required modules
+are listed in <em>requirements.txt</em>.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
 <span class="nb">source</span> ~/venv/bin/activate
@@ -119,24 +130,24 @@ pip install -r /opt/dancecat/requirements.txt
 </pre></div>
 </div>
 <ol class="arabic simple" start="6">
-<li>Run for a simple test:</li>
+<li>Run a simple test to test you environment</li>
 </ol>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
 <span class="nb">cd</span> /opt/dancecat
-mkdir var
 
 <span class="nb">source</span> ~/venv/bin/activate
 <span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>:<span class="nv">$PYTHONPATH</span>
 py.test tests
 </pre></div>
 </div>
-<p>If the test work well then you are ready for the next step: <a class="reference external" href="install.html#config-dancecat">Config</a>.
-You can setup <em>dancecat</em> user <em>.bashrc</em> file for later convenience.
-Later in this document I will assume that you are already in the right environment.</p>
+<p>If the test work well then you are ready for the next step: <a class="reference external" href="install.html#config-dancecat">Config</a>.</p>
 <ol class="arabic simple" start="7">
-<li>Packing client&#8217;s codes:</li>
+<li>Packing client&#8217;s codes</li>
 </ol>
+<p>Client&#8217;s codes include CSS and Javascript files in <em>client</em> directory and their dependencies
+will be installed by <em>npm</em>. By doing this step, the Node.js <em>webpack</em> module will pack and
+put those code in <em>DanceCat/static/bundle</em> directory which will be publish to clients&#8217; browsers.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
 <span class="nb">cd</span> /opt/dancecat
@@ -149,9 +160,12 @@ node node_modules/webpack/bin/webpack.js
 <ol class="arabic simple" start="8">
 <li>Edit .bashrc</li>
 </ol>
+<p>Set up <em>dancecat</em> user&#8217;s <em>.bashrc</em> file will give you later convenience. Beside running
+the application, you have to switch to DanceCat&#8217;s Python&#8217;s virtual environment
+every time you use console command or testing the package.</p>
+<p>Later in this document we will assume that you have already done this step.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 
-<span class="nb">echo</span> <span class="s2">&quot;export PYTHONPATH=/opt/dancecat&quot;</span> &gt;&gt; ~/.bashrc
 <span class="nb">echo</span> <span class="s2">&quot;source ~/venv/bin/activate&quot;</span> &gt;&gt; ~/.bashrc
 </pre></div>
 </div>
@@ -199,7 +213,15 @@ MAIL_PORT = 465
 </div>
 <div class="section" id="setup-database">
 <h2>Setup Database<a class="headerlink" href="#setup-database" title="Permalink to this headline">¶</a></h2>
-<p>There are 2 ways to setup database: create full database schema or migrate using
+<p>DanceCat stores and manages it data on RDBMS via <a class="reference external" href="http://www.sqlalchemy.org/">SQLAlchemy</a>.
+Basically you can run it on whatever RDBMS that SQLAlchemy supports,
+although we have just tested it with SQLite, MySQL and PostgreSQL.
+Please feel free to try others and let us know if they work or not.</p>
+<p>To config your DanceCat database, set the value of <em>SQLALCHEMY_DATABASE_URI</em>
+in <em>/etc/dancecat/config.cfg</em> file to the right connection string. You can
+follow the example of connection strings <a class="reference external" href="http://docs.sqlalchemy.org/en/latest/core/engines.html">here</a>.</p>
+<p>After set up the connection string, you need to set up the database schema.
+There are 2 ways to do that: create full database schema or migrate using
 generated migration scripts.</p>
 <ol class="arabic simple">
 <li>Create full database schema</li>
@@ -212,26 +234,27 @@ schema by yourself.</p>
 <span class="nb">cd</span> /opt/dancecat
 
 <span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
-python DanceCat/Console db_create_all
+python -m DanceCat.Console db_create_all
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li>Migrate your database schema using generated scripts</li>
 </ol>
 <p>Using this method, you don&#8217;t have to worry about updating your database schema to keep up
-with releases, but be careful because you may encounter bugs on some RDBMS like SQLite3.</p>
+with releases, but be careful because you may encounter bugs on some RDBMS like SQLite.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>su - dancecat
 <span class="nb">cd</span> /opt/dancecat
 
 <span class="nb">export</span> <span class="nv">CONFIG_FILE</span><span class="o">=</span>/etc/dancecat/config.cfg
 
 <span class="c1"># Upgrading</span>
-python DanceCat/Console db upgrade
+python -m DanceCat.Console db upgrade
 
 <span class="c1"># Downgrading</span>
-python DanceCat/Console db downgrade
+python -m DanceCat.Console db downgrade
 </pre></div>
 </div>
+<p><strong>Note:</strong> Please upgrade your database schema whenever you upgrade DanceCat to new version.</p>
 </div>
 <div class="section" id="bootstrap-and-run">
 <h2>Bootstrap and Run<a class="headerlink" href="#bootstrap-and-run" title="Permalink to this headline">¶</a></h2>
@@ -267,7 +290,7 @@ cp DanceCatBootstrap.py.dist DanceCatBootstrap.py
 <span class="c1"># Remove the following block if you use gunicorn.</span>
 <span class="n">socket_io</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
               <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
-              <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>
+              <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span>
               <span class="p">)</span>
 </pre></div>
 </div>
@@ -279,11 +302,11 @@ cp DanceCatBootstrap.py.dist DanceCatBootstrap.py
 python DanceCatBootstrap.py
 </pre></div>
 </div>
-<p>Go to your browser and start using DanceCat.</p>
+<p>Go to your browser and start using DanceCat on port 8080. Example <a class="reference external" href="http://localhost:8080">http://localhost:8080</a></p>
 </div>
 <div class="section" id="using-with-nginx-and-wsgi">
 <h2>Using with Nginx and WSGI<a class="headerlink" href="#using-with-nginx-and-wsgi" title="Permalink to this headline">¶</a></h2>
-<p>For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
+<p>For this guide, we will use Gunicorn as WSGI web server and Nginx as a proxy server
 to public DanceCat.</p>
 <ol class="arabic simple">
 <li>Install Nginx</li>
@@ -386,11 +409,11 @@ following lines since gunicorn will run it for you.</p>
 sudo service nginx restart
 </pre></div>
 </div>
-<p>Go to your browser and start using DanceCat.</p>
+<p>Go to your browser and start using DanceCat. Ex: <a class="reference external" href="http://dancecat.your-domain.com">http://dancecat.your-domain.com</a></p>
 </div>
 <div class="section" id="security">
 <h2>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h2>
-<p>Since DanceCat allows users to query again databases, you may be want to consider
+<p>Since DanceCat allows users to query against databases, you may be want to consider
 what permissions on your databases should be given to DanceCat before you public it.
 You should also limit network access to DanceCat server and enable other security methods
 that you have, ex &#8220;iptables&#8221;, &#8220;SELinux&#8221; and enable SSL on your site.</p>

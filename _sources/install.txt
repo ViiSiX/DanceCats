@@ -1,13 +1,21 @@
 Installation
 ============
 
-In this guide I use Debian for example setup. Supporting for Red Hat
+In this guide we use Debian for example setup. Supporting for Red Hat
 based OS will be added later.
 
 Environment Setup
 -----------------
 
-1. Add new user and prepare the locations for DanceCat:
+We will go through the following steps to set up the right environment for DanceCat.
+The application need Python to run and Node.js to package front-end code. To prevent any conflict
+on the system, we will use a Python virtual environment with latest installation modules
+and a dedicated system user. Also install required develop packages if
+your system have not had them yet as we will need them to build some modules on your
+Python virtual environment.
+
+1. Add new user *dancecat* for DanceCat and prepare the necessary locations for DanceCat
+which also belong to *dancecat* user.
 
 .. code-block:: bash
 
@@ -25,7 +33,7 @@ Environment Setup
    sudo mkdir -p /var/log/dancecat
    sudo chown dancecat.dancecat /var/log/dancecat
 
-2. Install packages which will be used later
+2. Install packages which will be used to build and setup DanceCat
 
 Build essential used for install Python's modules:
 
@@ -44,13 +52,13 @@ Build essential used for install Python's modules:
    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
    sudo apt-get install -y nodejs
 
-Git to pull and deploy codes:
+Install *git* which will be used for cloning source code and upgrade your DanceCat.
 
 .. code-block:: bash
 
    sudo apt-get install git
 
-3. Pull the code from `DanceCat's repository <https://github.com/scattm/DanceCat>`_.
+3. Pull the code from `DanceCat's repository <https://github.com/scattm/DanceCat>`_
 
 .. code-block:: bash
 
@@ -59,8 +67,12 @@ Git to pull and deploy codes:
    cd /opt
    git clone https://github.com/scattm/DanceCat.git dancecat
 
-4. Install necessary packages to setup a virtual environment for Python.
-If you already done this, please skip to step 5.
+4. Install necessary packages to setup a virtual environment for Python
+
+*If you already done this, please skip to step 5.*
+
+Virtual environment will create a directory which contains all the Python's necessary
+executables to run DanceCat while does not make any change to your system's Python modules.
 
 .. code-block:: bash
 
@@ -71,9 +83,11 @@ If you already done this, please skip to step 5.
    cd ~
    virtualenv venv
 
-5. Install necessary modules for your Python virtual environment:
+5. Install necessary modules on your Python virtual environment
 
-Install Python modules:
+Latest *pip*, *wheel* and *setuptools* are required, you need to upgrade them
+in case your system's Python is having the old ones. All other required modules
+are listed in *requirements.txt*.
 
 .. code-block:: bash
 
@@ -85,24 +99,25 @@ Install Python modules:
    pip install --upgrade wheel
    pip install -r /opt/dancecat/requirements.txt
 
-6. Run for a simple test:
+6. Run a simple test to test you environment
 
 .. code-block:: bash
 
    su - dancecat
 
    cd /opt/dancecat
-   mkdir var
 
    source ~/venv/bin/activate
    export PYTHONPATH=`pwd`:$PYTHONPATH
    py.test tests
 
 If the test work well then you are ready for the next step: `Config <install.html#config-dancecat>`_.
-You can setup *dancecat* user *.bashrc* file for later convenience.
-Later in this document I will assume that you are already in the right environment.
 
-7. Packing client's codes:
+7. Packing client's codes
+
+Client's codes include CSS and Javascript files in *client* directory and their dependencies
+will be installed by *npm*. By doing this step, the Node.js *webpack* module will pack and
+put those code in *DanceCat/static/bundle* directory which will be publish to clients' browsers.
 
 .. code-block:: bash
 
@@ -117,11 +132,16 @@ Later in this document I will assume that you are already in the right environme
 
 8. Edit .bashrc
 
+Set up *dancecat* user's *.bashrc* file will give you later convenience. Beside running
+the application, you have to switch to DanceCat's Python's virtual environment
+every time you use console command or testing the package.
+
+Later in this document we will assume that you have already done this step.
+
 .. code-block:: bash
 
    su - dancecat
 
-   echo "export PYTHONPATH=/opt/dancecat" >> ~/.bashrc
    echo "source ~/venv/bin/activate" >> ~/.bashrc
 
 
@@ -183,7 +203,17 @@ Other configuration: Please check on *Flask* and its extensions for further info
 Setup Database
 --------------
 
-There are 2 ways to setup database: create full database schema or migrate using
+DanceCat stores and manages it data on RDBMS via `SQLAlchemy <http://www.sqlalchemy.org/>`_.
+Basically you can run it on whatever RDBMS that SQLAlchemy supports,
+although we have just tested it with SQLite, MySQL and PostgreSQL.
+Please feel free to try others and let us know if they work or not.
+
+To config your DanceCat database, set the value of *SQLALCHEMY_DATABASE_URI*
+in */etc/dancecat/config.cfg* file to the right connection string. You can
+follow the example of connection strings `here <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
+
+After set up the connection string, you need to set up the database schema.
+There are 2 ways to do that: create full database schema or migrate using
 generated migration scripts.
 
 1. Create full database schema
@@ -199,12 +229,12 @@ schema by yourself.
    cd /opt/dancecat
 
    export CONFIG_FILE=/etc/dancecat/config.cfg
-   python DanceCat/Console db_create_all
+   python -m DanceCat.Console db_create_all
 
 2. Migrate your database schema using generated scripts
 
 Using this method, you don't have to worry about updating your database schema to keep up
-with releases, but be careful because you may encounter bugs on some RDBMS like SQLite3.
+with releases, but be careful because you may encounter bugs on some RDBMS like SQLite.
 
 .. code-block:: bash
 
@@ -214,10 +244,12 @@ with releases, but be careful because you may encounter bugs on some RDBMS like 
    export CONFIG_FILE=/etc/dancecat/config.cfg
 
    # Upgrading
-   python DanceCat/Console db upgrade
+   python -m DanceCat.Console db upgrade
 
    # Downgrading
-   python DanceCat/Console db downgrade
+   python -m DanceCat.Console db downgrade
+
+**Note:** Please upgrade your database schema whenever you upgrade DanceCat to new version.
 
 
 Bootstrap and Run
@@ -260,7 +292,7 @@ You don't really have to edit much. Here is the example for you:
    # Remove the following block if you use gunicorn.
    socket_io.run(app,
                  host='0.0.0.0',
-                 port=8443,
+                 port=8080,
                  )
 
 Run it:
@@ -273,12 +305,12 @@ Run it:
    export CONFIG_FILE=/etc/dancecat/config.cfg
    python DanceCatBootstrap.py
 
-Go to your browser and start using DanceCat.
+Go to your browser and start using DanceCat on port 8080. Example http://localhost:8080
 
 Using with Nginx and WSGI
 -------------------------
 
-For this guide, I will use Gunicorn as WSGI web server and Nginx as a proxy server
+For this guide, we will use Gunicorn as WSGI web server and Nginx as a proxy server
 to public DanceCat.
 
 1. Install Nginx
@@ -390,12 +422,12 @@ Restart Nginx
 
    sudo service nginx restart
 
-Go to your browser and start using DanceCat.
+Go to your browser and start using DanceCat. Ex: http://dancecat.your-domain.com
 
 Security
 --------
 
-Since DanceCat allows users to query again databases, you may be want to consider
+Since DanceCat allows users to query against databases, you may be want to consider
 what permissions on your databases should be given to DanceCat before you public it.
 You should also limit network access to DanceCat server and enable other security methods
 that you have, ex "iptables", "SELinux" and enable SSL on your site.

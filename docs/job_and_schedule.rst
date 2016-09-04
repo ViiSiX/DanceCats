@@ -84,4 +84,4 @@ following commands to update the outdated schedules:
 
    cd /opt/dancecat
    export CONFIG_FILE=/etc/dancecat/config.cfg
-   python DanceCat/Console schedule_update
+   python -m DanceCat.Console schedule_update

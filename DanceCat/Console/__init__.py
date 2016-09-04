@@ -6,7 +6,7 @@ import sqlalchemy.exc
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from DanceCat import app, db, Models, Constants
+from .. import app, db, Models, Constants
 
 
 # pylint: disable=C0103

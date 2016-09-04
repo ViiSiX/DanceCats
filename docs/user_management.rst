@@ -15,14 +15,15 @@ to that that table.
 
    cd /opt/dancecat
    export CONFIG_FILE=/etc/dancecat/config.cfg
-   python DanceCat/Console add_allowed_user example@localdomain.com
+   python -m DanceCat.Console add_allowed_user example@localdomain.com
 
 Sign Up and Log In
 ------------------
 
 Following the above step, allowed users can now Sign Up new account on DanceCat.
 For convenience, *Sign Up* and *Log In* using the same page. Just go to your DanceCat site,
-enter user email and password to *Log In* form, press **Log In** button to sign up.
+enter user email and password to *Log In* form, press **Log In** button for setting up
+your password for the first time.
 
 Wonderful! Now you can start using DanceCat. Follow `next step <connection_management.html>`_
 to manage your connections.

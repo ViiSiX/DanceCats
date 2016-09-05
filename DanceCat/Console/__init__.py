@@ -96,24 +96,30 @@ def add_allowed_user(email):
 
 
 @manager.command
-def connection_update_encryption():
-    """Update password encryption of connections."""
+def connection_upgrade():
+    """Upgrade connections to new version."""
     old_connections = Models.Connection.query.filter(
-        Models.Connection.version < 2
+        Models.Connection.version < Constants.MODEL_CONNECTION_VERSION
     ).all()
+
     for old_connection in old_connections:
-        print('Update connection {connection}'.format(
-            connection=old_connection
-        ))
-        old_connection.password = Helpers.aes_encrypt(
-            Helpers.rc4_decrypt(
-                old_connection.password,
+        # Upgrade to version 2: Switch password encryption from
+        # RC4 to AES.
+        if old_connection.version < 2:
+            print('Update connection {connection} to version 2.'.format(
+                connection=old_connection
+            ))
+
+            old_connection.password = Helpers.aes_encrypt(
+                Helpers.rc4_decrypt(
+                    old_connection.password,
+                    config['DB_ENCRYPT_KEY']
+                ),
                 config['DB_ENCRYPT_KEY']
-            ),
-            config['DB_ENCRYPT_KEY']
-        )
-        old_connection.version = 2
-        db.session.commit()
+            )
+            old_connection.version = 2
+            db.session.commit()
+
     print('Finished!')
 
 

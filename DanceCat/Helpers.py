@@ -92,6 +92,9 @@ def aes_key_pad(key):
     :param key: A key string.
     :return: Padded key string.
     """
+    if not key:
+        raise ValueError('Key should not be empty!')
+
     aes_key_length = 32
     while len(key) < aes_key_length:
         key += key
@@ -105,6 +108,9 @@ def aes_raw_pad(raw):
     :param raw: Raw string that will be padded.
     :return: Padded raw string.
     """
+    if not isinstance(raw, str):
+        raise TypeError('Context should be a string!')
+
     if len(raw) > 999:
         raise ValueError('Encrypt context was too long (>999).')
 
@@ -113,10 +119,11 @@ def aes_raw_pad(raw):
         raw_string=raw
     )
 
-    while len(len_leaded_raw) % AES.block_size > 0:
-        len_leaded_raw += len_leaded_raw
+    len_leaded_raw += raw
+    while len(len_leaded_raw) < AES.block_size:
+        len_leaded_raw += str(Random.new().read(len(len_leaded_raw)))
 
-    return len_leaded_raw
+    return len_leaded_raw[:-(len(len_leaded_raw) % AES.block_size)]
 
 
 def aes_raw_unpad(padded_raw):
@@ -141,10 +148,10 @@ def aes_encrypt(credential_string, key):
         Base64 string of encrypted credential.
     """
     key = b'{key_string}'.format(key_string=aes_key_pad(key))
-    iv = Random.new().read(AES.block_size)
-    cipher = AES.new(key, AES.MODE_ECB, iv)
+    unq_iv = Random.new().read(AES.block_size)
+    cipher = AES.new(key, AES.MODE_ECB, unq_iv)
     return base64.b64encode(
-        iv + cipher.encrypt(b'{credential_string}'.format(
+        unq_iv + cipher.encrypt(b'{credential_string}'.format(
             credential_string=aes_raw_pad(credential_string)
         ))
     )
@@ -163,8 +170,8 @@ def aes_decrypt(b64_string, key):
     """
     key = b'{key_string}'.format(key_string=aes_key_pad(key))
     encrypted_string = base64.b64decode(b64_string)
-    iv = encrypted_string[:AES.block_size]
-    cipher = AES.new(key, AES.MODE_ECB, iv)
+    unq_iv = encrypted_string[:AES.block_size]
+    cipher = AES.new(key, AES.MODE_ECB, unq_iv)
     return aes_raw_unpad(cipher.decrypt(encrypted_string[AES.block_size:]))
 
 

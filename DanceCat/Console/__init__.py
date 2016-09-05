@@ -6,7 +6,8 @@ import sqlalchemy.exc
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from DanceCat import app, db, Models, Constants
+from DanceCat import app, db, config, \
+    Models, Constants, Helpers
 
 
 # pylint: disable=C0103
@@ -26,6 +27,9 @@ def list_all():
     print('- db migrate')
     print('- db upgrade')
     print('- db downgrade')
+
+    print('Connection')
+    print('- connection_update_encryption')
 
     print('Scheduling')
     print('- schedule_update')
@@ -89,6 +93,28 @@ def add_allowed_user(email):
         ))
 
     db.session.close()
+
+
+@manager.command
+def connection_update_encryption():
+    """Update password encryption of connections."""
+    old_connections = Models.Connection.query.filter(
+        Models.Connection.version < 2
+    ).all()
+    for old_connection in old_connections:
+        print('Update connection {connection}'.format(
+            connection=old_connection
+        ))
+        old_connection.password = Helpers.aes_encrypt(
+            Helpers.rc4_decrypt(
+                old_connection.password,
+                config['DB_ENCRYPT_KEY']
+            ),
+            config['DB_ENCRYPT_KEY']
+        )
+        old_connection.version = 2
+        db.session.commit()
+    print('Finished!')
 
 
 # Add Migrate commands.

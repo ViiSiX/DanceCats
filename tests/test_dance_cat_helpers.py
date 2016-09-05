@@ -34,13 +34,13 @@ def test_db_password_encrypt():
     key = '3ncr9p7 K3Y'
     db_password = 'h3r3 the passw0rD'
 
-    encrypted_config = Helpers.db_credential_encrypt(
+    encrypted_config = Helpers.rc4_encrypt(
         db_password,
         key
     )
     assert encrypted_config
 
-    assert Helpers.db_credential_decrypt(
+    assert Helpers.rc4_decrypt(
         encrypted_config,
         key
     ) == db_password

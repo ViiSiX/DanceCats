@@ -8,6 +8,7 @@ from DanceCat import db
 from DanceCat import Models
 from DanceCat import Console
 from DanceCat import Constants
+from DanceCat import Helpers
 
 
 def test_list_commands():
@@ -18,7 +19,9 @@ def test_list_commands():
 def test_db_create_all(app):
     """Test db_create_all command."""
     assert app.config.get('SQLALCHEMY_DATABASE_URI')
-    # db is implicitly created in `app` pytest.fixture
+
+    db.drop_all()
+    Console.db_create_all()
 
     tables_list = inspect(db.engine).get_table_names()
 
@@ -95,3 +98,45 @@ def test_schedule_update(app, user_email):
         outdated_schedule.schedule_id
     )
     assert updated_schedule.next_run >= datetime.datetime.now()
+
+
+def test_connection_upgrade(app, user_email):
+    """Test upgrading connections to new versions."""
+    allowed_email = Console.Models.AllowedEmail(user_email)
+    db.session.add(allowed_email)
+    db.session.commit()
+
+    user = Models.User(user_email, '123456')
+    db.session.add(user)
+    db.session.commit()
+
+    connection = Models.Connection(
+        Constants.DB_MYSQL,
+        'localhost',
+        'test_db',
+        user.user_id,
+        user_name='db_user'
+    )
+    db.session.add(connection)
+    db.session.commit()
+
+    # Provide test data.
+    connection_password = 'solar st0rm'
+    connection.version = 1
+    connection.password = Helpers.rc4_encrypt(
+        connection_password,
+        app.config.get('DB_ENCRYPT_KEY')
+    )
+    db.session.commit()
+
+    Console.connection_upgrade()
+
+    # Version 2
+    updated_connection = Models.Connection.query.get(
+        connection.connection_id
+    )
+    assert updated_connection.version >= 2
+    assert Helpers.aes_decrypt(
+        updated_connection.password,
+        app.config.get('DB_ENCRYPT_KEY')
+    ) == connection_password

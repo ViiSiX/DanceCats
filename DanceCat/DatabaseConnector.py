@@ -85,9 +85,9 @@ class DatabaseConnector(object):
         """Close connection or Raise DatabaseConnectorException on failed."""
         try:
             if self.type in [
-                Constants.DB_MYSQL,
-                Constants.DB_SQLSERVER,
-                Constants.DB_POSTGRESQL
+                    Constants.DB_MYSQL,
+                    Constants.DB_SQLSERVER,
+                    Constants.DB_POSTGRESQL
             ]:
                 self.connection.close()
         except Exception as exception:
@@ -120,8 +120,8 @@ class DatabaseConnector(object):
                 self.columns_name = self.cursor.column_names
 
             elif self.type in [
-                Constants.DB_SQLSERVER,
-                Constants.DB_POSTGRESQL
+                    Constants.DB_SQLSERVER,
+                    Constants.DB_POSTGRESQL
             ]:
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(query)

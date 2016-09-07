@@ -3,6 +3,8 @@
 from __future__ import print_function
 import datetime
 from decimal import Decimal, getcontext as dicimal_get_context
+from Crypto.Cipher.AES import block_size as AES_block_size
+from Crypto import Random
 from DanceCat import Helpers
 import pytest
 import time
@@ -29,21 +31,78 @@ def test_encrypt_password():
     assert hashed_empty_password != password
 
 
-def test_db_password_encrypt():
-    """Check DB config encrypting and decrypting function."""
+def test_rc4_encrypt_decrypt():
+    """Check RC4 crypto functions."""
     key = '3ncr9p7 K3Y'
     db_password = 'h3r3 the passw0rD'
 
-    encrypted_config = Helpers.db_credential_encrypt(
+    encrypted_config = Helpers.rc4_encrypt(
         db_password,
         key
     )
     assert encrypted_config
 
-    assert Helpers.db_credential_decrypt(
+    assert Helpers.rc4_decrypt(
         encrypted_config,
         key
     ) == db_password
+
+    with pytest.raises(TypeError) as except_info:
+        assert Helpers.rc4_encrypt(None, key)
+    assert 'argument must be string or read-only buffer, not None' \
+        in except_info.value
+
+
+def test_aes_helpers():
+    """Check AES helper functions."""
+    assert len(Helpers.aes_key_pad('A9ll j')) == 32
+    assert len(Helpers.aes_key_pad('0123-0123-0123-0123-0123-0123-01')) == 32
+    assert len(Helpers.aes_key_pad(
+        '0123-0123-0123-0123-0123-0123-0123'
+    )) == 32
+    assert len(Helpers.aes_key_pad(list('moo'))) == 32
+    with pytest.raises(ValueError) as except_info:
+        Helpers.aes_key_pad('')
+    assert 'Key should not be empty!' in except_info.value
+
+    assert len(Helpers.aes_raw_pad('')) % AES_block_size == 0
+    assert len(Helpers.aes_raw_pad('012 aj/')) % AES_block_size == 0
+    assert len(Helpers.aes_raw_pad('0123456789abcdef')) % AES_block_size == 0
+    assert len(Helpers.aes_raw_pad('0123456789abcdef=Z0/?')) \
+        % AES_block_size == 0
+    with pytest.raises(TypeError) as except_info:
+        Helpers.aes_raw_pad({'a': 'ops'})
+    assert 'Context should be a string!' in except_info.value
+    with pytest.raises(ValueError) as except_info:
+        raw = Random.new().read(1000)
+        Helpers.aes_raw_pad(raw)
+    assert 'Encrypt context was too long (>999).' in except_info.value
+
+    assert Helpers.aes_raw_unpad(
+        Helpers.aes_raw_pad("12K la0'V")
+    ) == "12K la0'V"
+
+
+def test_aes_password_encrypt_decrypt():
+    """Check AES crypto functions."""
+    key = '3ncr9p7 K3Y'
+    db_password = 'h3r3 the passw0rD'
+
+    encrypted_config = Helpers.aes_encrypt(
+        db_password,
+        key
+    )
+    assert encrypted_config
+
+    assert Helpers.aes_decrypt(
+        encrypted_config,
+        key
+    ) == db_password
+
+    with pytest.raises(TypeError) as except_info:
+        assert Helpers.aes_encrypt(None, key)
+    assert 'Context should be a string!' \
+        in except_info.value
 
 
 def test_null_handler():

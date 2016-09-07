@@ -195,7 +195,7 @@ class Connection(db.Model):
 
     def encrypt_password(self, password):
         """Encrypt the clear text password."""
-        self.password = Helpers.db_credential_encrypt(
+        self.password = Helpers.aes_encrypt(
             password, config['DB_ENCRYPT_KEY']
         ) if password else None
 
@@ -218,9 +218,26 @@ class Connection(db.Model):
 
         # If no password leave it alone
         if self.password is not None:
-            db_config['password'] = Helpers.db_credential_decrypt(
-                self.password, config['DB_ENCRYPT_KEY']
-            )
+            if self.version < 2:
+                # Should use condition like this for migrate
+                # and version check.
+                db_config['password'] = Helpers.rc4_decrypt(
+                    self.password, config['DB_ENCRYPT_KEY']
+                )
+
+                # Update password field to current version.
+                if not not self.connection_id:
+                    self.password = Helpers.aes_encrypt(
+                        db_config['password'], config['DB_ENCRYPT_KEY']
+                    )
+                    # Update to AES since version 2.
+                    self.version = 2
+                    db.session.commit()
+
+            else:
+                db_config['password'] = Helpers.aes_decrypt(
+                    self.password, config['DB_ENCRYPT_KEY']
+                )
 
         return db_config
 

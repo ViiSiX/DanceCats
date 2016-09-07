@@ -6,7 +6,8 @@ import sqlalchemy.exc
 from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from .. import app, db, Models, Constants
+from .. import app, db, config, \
+    Models, Constants, Helpers
 
 
 # pylint: disable=C0103
@@ -26,6 +27,9 @@ def list_all():
     print('- db migrate')
     print('- db upgrade')
     print('- db downgrade')
+
+    print('Connection')
+    print('- connection_update_encryption')
 
     print('Scheduling')
     print('- schedule_update')
@@ -89,6 +93,34 @@ def add_allowed_user(email):
         ))
 
     db.session.close()
+
+
+@manager.command
+def connection_upgrade():
+    """Upgrade connections to new version."""
+    old_connections = Models.Connection.query.filter(
+        Models.Connection.version < Constants.MODEL_CONNECTION_VERSION
+    ).all()
+
+    for old_connection in old_connections:
+        # Upgrade to version 2: Switch password encryption from
+        # RC4 to AES.
+        if old_connection.version < 2:
+            print('Update connection {connection} to version 2.'.format(
+                connection=old_connection
+            ))
+
+            old_connection.password = Helpers.aes_encrypt(
+                Helpers.rc4_decrypt(
+                    old_connection.password,
+                    config['DB_ENCRYPT_KEY']
+                ),
+                config['DB_ENCRYPT_KEY']
+            )
+            old_connection.version = 2
+            db.session.commit()
+
+    print('Finished!')
 
 
 # Add Migrate commands.

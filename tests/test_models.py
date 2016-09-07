@@ -32,6 +32,7 @@ class TestUserModels(object):
         user_1 = Models.User(**self.user_1)
         user_2 = Models.User(**self.user_2)
 
+        # db is implicitly created in `app` pytest.fixture
         db.session.add(user_1)
         db.session.commit()
         datetime_now = datetime.datetime.now()

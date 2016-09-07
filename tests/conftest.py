@@ -20,7 +20,8 @@ def app():
 
     dancecat_app.config.update({
         'SQLALCHEMY_DATABASE_URI': ('sqlite:///' + db_file_path),
-        'SQLALCHEMY_TRACK_MODIFICATIONS': False
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'DB_ENCRYPT_KEY': 'easy to guess!\\'
     })
 
     try:

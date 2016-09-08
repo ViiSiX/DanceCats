@@ -6,6 +6,7 @@ import time
 import base64
 import hashlib
 import uuid
+import re
 from Crypto import Random
 from Crypto.Cipher import ARC4, AES
 
@@ -286,3 +287,12 @@ class Timer(object):
     def get_total_seconds(self):
         """Return total runtime since class construction in seconds."""
         return float(self.get_total_milliseconds()) / 1000
+
+
+def is_valid_format_email(email):
+    try:
+        return bool(
+            re.search('^.*?@[\w-]+\.[\w-]+$', email, flags=re.IGNORECASE)
+        )
+    except TypeError:
+        raise TypeError('Email should be string, not %s' % type(email))

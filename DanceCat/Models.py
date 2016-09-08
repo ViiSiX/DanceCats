@@ -60,7 +60,7 @@ class AllowedEmail(db.Model):
                                  primary_key=True, autoincrement=True
                                  )
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
-    version = db.Column(db.String(255), index=True, nullable=False)
+    version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, allowed_email):
         """
@@ -70,7 +70,10 @@ class AllowedEmail(db.Model):
             The email that will be allow to
             register a new user.
         """
-        self.email = allowed_email
+        if Helpers.is_valid_format_email(allowed_email):
+            self.email = allowed_email
+        else:
+            raise ValueError('Email %s is not valid!' % allowed_email)
         self.version = Constants.MODEL_ALLOWED_EMAIL_VERSION
 
     def __repr__(self):
@@ -111,7 +114,10 @@ class User(UserMixin, db.Model):
         :param user_email: User's email.
         :param user_password: User's password in clear text.
         """
-        self.email = user_email
+        if Helpers.is_valid_format_email(user_email):
+            self.email = user_email
+        else:
+            raise ValueError('Email %s is not valid!' % user_email)
         self.password = Helpers.encrypt_password(user_password)
         self.version = Constants.MODEL_USER_VERSION
 

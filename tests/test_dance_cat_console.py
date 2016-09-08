@@ -47,7 +47,7 @@ def test_add_allowed_user(app, user_email, capfd):
 
 def test_schedule_update(app, user_email):
     """Test schedule_update command."""
-    allowed_email = Console.Models.AllowedEmail(user_email)
+    allowed_email = Models.AllowedEmail(user_email)
     db.session.add(allowed_email)
     db.session.commit()
     assert allowed_email.email
@@ -68,7 +68,7 @@ def test_schedule_update(app, user_email):
     db.session.commit()
     assert connection.connection_id
 
-    job = Models.Job(
+    job = Models.QueryDataJob(
         'test job',
         'select * from table_1',
         user.user_id
@@ -102,7 +102,7 @@ def test_schedule_update(app, user_email):
 
 def test_connection_upgrade(app, user_email):
     """Test upgrading connections to new versions."""
-    allowed_email = Console.Models.AllowedEmail(user_email)
+    allowed_email = Models.AllowedEmail(user_email)
     db.session.add(allowed_email)
     db.session.commit()
 

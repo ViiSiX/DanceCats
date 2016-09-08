@@ -14,7 +14,7 @@ class TestProxiedDictMixin(object):
     pass
 
 
-class TestUserModels(object):
+class TestUserModel(object):
     """ Unit tests for Models.User class. """
 
     user_1 = {
@@ -27,8 +27,6 @@ class TestUserModels(object):
     }
 
     def test_should_add_new_users(self, app):
-        """Test add_allowed_user command."""
-
         user_1 = Models.User(**self.user_1)
         user_2 = Models.User(**self.user_2)
 
@@ -121,3 +119,65 @@ class TestUserModels(object):
         assert user.last_updated
         assert round(datetime_delta_last_updated.total_seconds()) == 0
         assert user.last_updated != previous_last_updated
+
+    def test_user_is_active(self, app):
+        user = Models.User(**self.user_1)
+        db.session.add(user)
+        db.session.commit()
+
+        assert user.is_active is True
+        user.is_active = False
+        db.session.commit()
+        assert user.is_active is False
+
+    @pytest.mark.skip(reason='https://github.com/scattm/DanceCat/issues/83')
+    def test_should_get_user_version(self, app):
+        user = Models.User(**self.user_1)
+        db.session.add(user)
+        db.session.commit()
+
+        assert user.version == Constants.MODEL_USER_VERSION
+        user.version = 15
+        db.session.add(user)
+        db.session.commit()
+        assert user.version == 15
+        user.version = 'InvalidDataType'
+        db.session.add(user)
+        with pytest.raises(ValueError):
+            db.session.commit()
+
+    def test_should_print_user_instance(self, app, capfd):
+        user = Models.User(**self.user_1)
+        db.session.add(user)
+        db.session.commit()
+        print (user)
+        out, err = capfd.readouterr()
+        assert out == '<User test@test.test - Id 1>\n'
+        assert not err
+
+
+class TestAllowedEmailModel(object):
+    """ Unit tests for Models.AllowedEmail class. """
+
+    user_email = 'test@test.test'
+
+    def test_should_able_to_add(self, app, capfd):
+        allowed_email = Models.AllowedEmail(allowed_email=self.user_email)
+        db.session.add(allowed_email)
+        db.session.commit()
+        assert allowed_email.version == Constants.MODEL_ALLOWED_EMAIL_VERSION
+        assert allowed_email.email == self.user_email
+        assert allowed_email.allowed_email_id == 1
+
+    def test_should_not_add_dulicated_email(self, app):
+        allowed_email = Models.AllowedEmail(allowed_email=self.user_email)
+        db.session.add(allowed_email)
+        db.session.commit()
+        allowed_email_2 = Models.AllowedEmail(allowed_email=self.user_email)
+        db.session.add(allowed_email_2)
+        with pytest.raises(sqlalchemy_exc.IntegrityError):
+            db.session.commit()
+
+    def test_should_not_add_invalid_email_address(self, app):
+        with pytest.raises(ValueError):
+            Models.AllowedEmail(allowed_email='Invalid')

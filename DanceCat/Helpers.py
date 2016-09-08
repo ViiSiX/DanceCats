@@ -109,11 +109,14 @@ def aes_raw_pad(raw):
     :param raw: Raw string that will be padded.
     :return: Padded raw string.
     """
-    if not isinstance(raw, str):
+    if not isinstance(raw, (str, unicode)):
         raise TypeError('Context should be a string!')
 
     if len(raw) > 999:
         raise ValueError('Encrypt context was too long (>999).')
+
+    if isinstance(raw, unicode):
+        raw = raw.encode('utf-8')
 
     len_leaded_raw = '{raw_len:03d}{raw_string}'.format(
         raw_len=len(raw),
@@ -122,7 +125,9 @@ def aes_raw_pad(raw):
 
     len_leaded_raw += raw
     while len(len_leaded_raw) < AES.block_size:
-        len_leaded_raw += str(Random.new().read(len(len_leaded_raw)))
+        len_leaded_raw += base64.b64encode(
+            Random.new().read(len(len_leaded_raw))
+        )
 
     return len_leaded_raw[:-(len(len_leaded_raw) % AES.block_size)]
 
@@ -290,9 +295,10 @@ class Timer(object):
 
 
 def is_valid_format_email(email):
+    """Return if a given string is email or not."""
     try:
         return bool(
-            re.search('^.*?@[\w-]+\.[\w-]+$', email, flags=re.IGNORECASE)
+            re.search('^.*?@([\w\-]+\.)+[\w\-]+$', email, flags=re.IGNORECASE)
         )
     except TypeError:
         raise TypeError('Email should be string, not %s' % type(email))

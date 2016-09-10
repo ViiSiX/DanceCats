@@ -23,12 +23,12 @@ def fq_sleep(sleep_time):
     time.sleep(sleep_time)
 
 
-def frequency_checker(pid_path, feq=60):
+def frequency_checker(pid_path, interval=60):
     """FTC main function.
 
     This function will check and enqueue scheduled jobs
     when the running time will come. After that sleep
-    for `feq` seconds and repeat.
+    for `interval` seconds and repeat.
     """
 
     from DanceCat import app, db, rdb
@@ -60,7 +60,7 @@ def frequency_checker(pid_path, feq=60):
         next_schedules = Schedule.query.filter(
             Schedule.is_active,
             Schedule.next_run >= current_time,
-            Schedule.next_run < current_time + relativedelta(seconds=feq)
+            Schedule.next_run < current_time + relativedelta(seconds=interval)
         ).all()
 
         with app.app_context():
@@ -87,19 +87,21 @@ def frequency_checker(pid_path, feq=60):
                         )
                     )
 
-                next_schedule.update_next_run(True, feq)
+                next_schedule.update_next_run(
+                    validated=True,
+                    interval=interval)
                 db.session.commit()
 
-        fq_sleep(feq - timer.get_total_seconds())
+        fq_sleep(interval - timer.get_total_seconds())
 
     exit_handler()
 
 
-def start(feq=60, pid_path='frequency.pid'):
+def start(interval=60, pid_path='frequency.pid'):
     """
     Check and start frequency_checker process if it not started.
 
-    :param feq: Seconds the checker will sleep throughout idle time.
+    :param interval: Seconds the checker will sleep throughout idle time.
     :param pid_path: Location of the PID file.
     """
     try:
@@ -113,7 +115,7 @@ def start(feq=60, pid_path='frequency.pid'):
     except (IOError, TypeError):
         process = Process(
             target=frequency_checker,
-            kwargs={'pid_path': pid_path, 'feq': feq}
+            kwargs={'pid_path': pid_path, 'interval': interval}
         )
         process.start()
         pid_file = open(pid_path, 'w')

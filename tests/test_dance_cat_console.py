@@ -9,6 +9,7 @@ from DanceCat import Models
 from DanceCat import Console
 from DanceCat import Constants
 from DanceCat import Helpers
+import pytest
 
 
 def test_list_commands():
@@ -45,6 +46,7 @@ def test_add_allowed_user(app, user_email, capfd):
         )
 
 
+# @pytest.mark.skip(reason='Wait for schedule model test.')
 def test_schedule_update(app, user_email):
     """Test schedule_update command."""
     allowed_email = Models.AllowedEmail(user_email)
@@ -88,7 +90,7 @@ def test_schedule_update(app, user_email):
     db.session.commit()
     assert outdated_schedule.schedule_id
 
-    outdated_schedule.next_run -= relativedelta(hours=1)
+    outdated_schedule.next_run -= relativedelta(days=1)
     db.session.commit()
     assert outdated_schedule.next_run < datetime.datetime.now()
 
@@ -97,7 +99,7 @@ def test_schedule_update(app, user_email):
     updated_schedule = Models.Schedule.query.get(
         outdated_schedule.schedule_id
     )
-    assert updated_schedule.next_run >= datetime.datetime.now()
+    assert updated_schedule.next_run > datetime.datetime.now()
 
 
 def test_connection_upgrade(app, user_email):

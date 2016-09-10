@@ -1,9 +1,10 @@
 """Utils for DanceCat's unit tests ."""
 
 import os
+import datetime
 import pytest
 from DanceCat import app as dancecat_app
-from DanceCat import db
+from DanceCat import db, Constants, Models
 
 
 db_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/.unittest'
@@ -37,3 +38,62 @@ def app():
 def user_email():
     """Return test email."""
     return 'test@test.test'
+
+
+@pytest.fixture
+def freeze_datetime(monkeypatch):
+    """Patch datetime.now function to return fixed timestamp."""
+    original_datetime = datetime.datetime
+
+    class FrozenDateTimeMeta(type):
+        """Meta class for FrozenDateTime class."""
+        def __instancecheck__(self, instance):
+            return isinstance(instance, (original_datetime, FrozenDateTime))
+
+    class FrozenDateTime(datetime.datetime):
+        """Use freeze method to control result of datetime.datetime.now()."""
+        __metaclass__ = FrozenDateTimeMeta
+
+        @classmethod
+        def freeze(cls, freezing_timestamp):
+            """Freeze time at freezing_timestamp."""
+            cls.frozen_time = freezing_timestamp
+
+        @classmethod
+        def now(cls, tz=None):
+            """Return the frozen time."""
+            return cls.frozen_time
+
+    monkeypatch.setattr(datetime, 'datetime', FrozenDateTime)
+    FrozenDateTime.freeze(original_datetime.now())
+    return FrozenDateTime
+
+
+@pytest.fixture
+def setup_to_add_job(app, user_email):
+    """Setup data so we can test Schedule Model."""
+    allowed_email = Models.AllowedEmail(user_email)
+    db.session.add(allowed_email)
+    db.session.commit()
+
+    user = Models.User(user_email, '123456')
+    db.session.add(user)
+    db.session.commit()
+
+    connection = Models.Connection(
+        Constants.DB_MYSQL,
+        'localhost',
+        'test_db',
+        user.user_id,
+        user_name='db_user'
+    )
+    db.session.add(connection)
+    db.session.commit()
+
+    job = Models.QueryDataJob(
+        'test job',
+        'select * from table_1',
+        user.user_id
+    )
+    db.session.add(job)
+    db.session.commit()

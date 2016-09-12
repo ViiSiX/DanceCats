@@ -298,7 +298,7 @@ def is_valid_format_email(email):
     """Return if a given string is email or not."""
     try:
         return bool(
-            re.search('^.*?@([\w\-]+\.)+[\w\-]+$', email, flags=re.IGNORECASE)
+            re.search(r'^.*?@([\w\-]+\.)+[\w\-]+$', email, flags=re.IGNORECASE)
         )
     except TypeError:
         raise TypeError('Email should be string, not %s' % type(email))

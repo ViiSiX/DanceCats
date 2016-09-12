@@ -3,7 +3,6 @@
 from __future__ import print_function
 import datetime
 import sqlalchemy.exc
-from dateutil.relativedelta import relativedelta
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from .. import app, db, config, \
@@ -59,8 +58,12 @@ def schedule_update():
                     id=schedule.schedule_id
                 )
             )
-            schedule.update_next_run(True)
-            schedule.next_run += relativedelta(minutes=1)
+            schedule.update_next_run(
+                validated=True,
+                interval=app.config.get(
+                    'FREQUENCY_INTERVAL_SECONDS', 60
+                )
+            )
             db.session.commit()
 
         schedules = Models.Schedule.query.filter(

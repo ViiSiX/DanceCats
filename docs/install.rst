@@ -167,6 +167,7 @@ Example configuration file's content:
    DB_TIMEOUT = 120
 
    FREQUENCY_PID = '/var/run/dancecat/frequency.pid'
+   FREQUENCY_INTERVAL_SECONDS = 60
 
    QUERY_TEST_LIMIT = 100
 
@@ -190,6 +191,8 @@ Example configuration file's content:
 *QUERY_TEST_LIMIT* Timeout for a connection to be tested.
 
 *FREQUENCY_PID* Location for schedule worker PID file.
+
+*FREQUENCY_INTERVAL_SECONDS* Interval in seconds for frequency task checker to re-check the schedules.
 
 *JOB_RESULT_VALID_SECONDS* Time for a job's result to remain available.
 
@@ -284,7 +287,10 @@ You don't really have to edit much. Here is the example for you:
    # Just in case proxy server do not work.
    app.wsgi_app = ProxyFix(app.wsgi_app)
 
-   FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
+   FrequencyTaskChecker.start(
+       interval=app.config.get('FREQUENCY_INTERVAL_SECONDS', 60),
+       pid_path=app.config.get('FREQUENCY_PID', 'frequency.pid')
+   )
 
    with app.app_context():
        rdb.start_worker()

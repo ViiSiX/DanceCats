@@ -475,7 +475,8 @@ class Schedule(db.Model):
         self.schedule_type = \
             kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
         self._is_active = kwargs.get('is_active', False)
-        self.update_start_time(start_time)
+        interval = kwargs.get('interval', 60)
+        self.update_start_time(start_time, interval=interval)
         self.user_id = user_id
         self.version = Constants.MODEL_SCHEDULE_VERSION
 
@@ -518,20 +519,24 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_MONTHLY:
             return Helpers.validate_minute_of_hour(self.minute_of_hour) and \
                 Helpers.validate_hour_of_day(self.hour_of_day) and \
-                Helpers.validate_day_of_week(self.day_of_month)
+                Helpers.validate_day_of_month(self.day_of_month)
 
-    def update_start_time(self, start_time):
+    def update_start_time(self, start_time, interval=60):
         """Update next run time on schedule updating."""
+        if not isinstance(start_time, datetime.datetime):
+            raise TypeError("start_time should be a datetime object!")
+
         self.minute_of_hour = start_time.minute
         self.hour_of_day = start_time.hour
         self.day_of_week = start_time.weekday()
         self.day_of_month = start_time.day
         self.next_run = start_time
 
-        if start_time < datetime.datetime.now() + relativedelta(minutes=1):
-            self.update_next_run(False)
+        if start_time < \
+                datetime.datetime.now() + relativedelta(seconds=interval):
+            self.update_next_run(validated=False)
 
-    def update_next_run(self, validated=False, frequency=60):
+    def update_next_run(self, validated=False, interval=60):
         """Update the next time this job will be run."""
         if not validated:
             validated = self.validate()
@@ -542,23 +547,25 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_ONCE:
             return
 
-        cur_time = datetime.datetime.now()
-        next_run_time = datetime.datetime.now()
+        next_check = datetime.datetime.now() + relativedelta(seconds=interval)
+        if next_check <= self.next_run:
+            return
+
+        next_run_time = datetime.datetime.now().replace(second=0)
 
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
             next_run_time += relativedelta(
-                minute=self.minute_of_hour, seconds=-1
+                minute=self.minute_of_hour
             )
-            cur_time -= relativedelta(minutes=-1)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(hours=1)
 
         elif self.schedule_type == Constants.SCHEDULE_DAILY:
             next_run_time += relativedelta(minute=self.minute_of_hour,
                                            hour=self.hour_of_day)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(days=1)
 
         elif self.schedule_type == Constants.SCHEDULE_WEEKLY:
@@ -566,7 +573,7 @@ class Schedule(db.Model):
                                            hour=self.hour_of_day,
                                            weekday=self.day_of_week)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(weeks=1)
 
         elif self.schedule_type == Constants.SCHEDULE_MONTHLY:
@@ -574,11 +581,13 @@ class Schedule(db.Model):
                                            hour=self.hour_of_day,
                                            day=self.day_of_month)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(months=1)
 
-        self.next_run = next_run_time.replace(second=0)
+        if self.next_run < next_run_time:
+            self.next_run = next_run_time
         # TODO: Better algorithm
+        # TODO: Move to Helpers
 
     def __repr__(self):
         """Print the Schedule instance."""

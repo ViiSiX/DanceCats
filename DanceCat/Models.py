@@ -233,9 +233,7 @@ class Connection(db.Model):
 
                 # Update password field to current version.
                 if not not self.connection_id:
-                    self.password = Helpers.aes_encrypt(
-                        db_config['password'], config['DB_ENCRYPT_KEY']
-                    )
+                    self.encrypt_password(db_config['password'])
                     # Update to AES since version 2.
                     self.version = 2
                     db.session.commit()

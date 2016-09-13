@@ -56,24 +56,36 @@ def test_rc4_encrypt_decrypt():
 
 def test_aes_helpers():
     """Check AES helper functions."""
-    assert len(Helpers.aes_key_pad('A9ll j')) == 32
-    assert len(Helpers.aes_key_pad('0123-0123-0123-0123-0123-0123-01')) == 32
-    assert len(Helpers.aes_key_pad(
-        '0123-0123-0123-0123-0123-0123-0123'
-    )) == 32
-    assert len(Helpers.aes_key_pad(list('moo'))) == 32
+    keys_list = [
+        'A9ll j',
+        '0123-0123-0123-0123-0123-0123-01',
+        '0123-0123-0123-0123-0123-0123-0123',
+        list('moo')
+    ]
+    raw_lists = [
+        '', '012 aj/', '01234567890123',
+        '0123456789abcdef', '0123456789abcdef=Z0/?'
+    ]
+
+    # Valid
+    for key in keys_list:
+        assert len(Helpers.aes_key_pad(key)) == 32
+
+    # Should not be empty string
     with pytest.raises(ValueError) as except_info:
         Helpers.aes_key_pad('')
     assert 'Key should not be empty!' in except_info.value
 
-    assert len(Helpers.aes_raw_pad('')) % AES_block_size == 0
-    assert len(Helpers.aes_raw_pad('012 aj/')) % AES_block_size == 0
-    assert len(Helpers.aes_raw_pad('0123456789abcdef')) % AES_block_size == 0
-    assert len(Helpers.aes_raw_pad('0123456789abcdef=Z0/?')) \
-        % AES_block_size == 0
+    # Valid
+    for raw in raw_lists:
+        padded_raw = Helpers.aes_raw_pad(raw)
+        assert len(padded_raw) % AES_block_size == 0
+        assert raw in padded_raw
+
     with pytest.raises(TypeError) as except_info:
         Helpers.aes_raw_pad({'a': 'ops'})
     assert 'Context should be a string!' in except_info.value
+
     with pytest.raises(ValueError) as except_info:
         raw = Random.new().read(1000)
         Helpers.aes_raw_pad(raw)
@@ -87,19 +99,23 @@ def test_aes_helpers():
 def test_aes_password_encrypt_decrypt():
     """Check AES crypto functions."""
     key = '3ncr9p7 K3Y'
-    db_password = 'h3r3 the passw0rD'
+    valid_passwords = [
+        'h3r3 the passw0rD',
+        '01234567890123'
+    ]
     db_password_utf8 = u'trời ơi!'
 
-    encrypted_config = Helpers.aes_encrypt(
-        db_password,
-        key
-    )
-    assert encrypted_config
+    for password in valid_passwords:
+        encrypted_config = Helpers.aes_encrypt(
+            password,
+            key
+        )
+        assert encrypted_config
 
-    assert Helpers.aes_decrypt(
-        encrypted_config,
-        key
-    ) == db_password
+        assert Helpers.aes_decrypt(
+            encrypted_config,
+            key
+        ) == password
 
     assert Helpers.aes_decrypt(
         Helpers.aes_encrypt(

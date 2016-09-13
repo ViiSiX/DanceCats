@@ -123,13 +123,14 @@ def aes_raw_pad(raw):
         raw_string=raw
     )
 
-    len_leaded_raw += raw
-    while len(len_leaded_raw) < AES.block_size:
+    padded_string_len = len(len_leaded_raw)
+    while len(len_leaded_raw) % AES.block_size > 0:
         len_leaded_raw += base64.b64encode(
-            Random.new().read(len(len_leaded_raw))
-        )
+            Random.new().read(padded_string_len)
+        )[:padded_string_len]
+        padded_string_len = len(len_leaded_raw)
 
-    return len_leaded_raw[:-(len(len_leaded_raw) % AES.block_size)]
+    return len_leaded_raw
 
 
 def aes_raw_unpad(padded_raw):

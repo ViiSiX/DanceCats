@@ -10,57 +10,77 @@ import time
 import datetime
 import atexit
 import signal
-import sys
-from dateutil.relativedelta import relativedelta
-from multiprocessing import Process
-from os import remove
-from . import Helpers
+from setproctitle import setproctitle
+from dateutil.relativedelta import relativedelta as dateutil_relativedelta
+from DanceCat import Helpers
+from DanceCat import app, db, rdb
+from DanceCat.Models import Schedule, TrackJobRun
+from DanceCat.JobWorker import job_worker_query
 
 
-def fq_sleep(sleep_time):
-    """Print and sleep for <sleep_time> seconds."""
-    print("[FQ] Sleeping for {seconds} second(s).".format(seconds=sleep_time))
-    time.sleep(sleep_time)
+class FrequencyTaskChecker(Helpers.Daemonize):
+    """
+    Frequency Task Checker class.
 
-
-def frequency_checker(pid_path, interval=60):
-    """FTC main function.
-
-    This function will check and enqueue scheduled jobs
+    This class will check and enqueue scheduled jobs
     when the running time will come. After that sleep
     for `interval` seconds and repeat.
     """
 
-    from DanceCat import app, db, rdb
-    from .Models import Schedule, TrackJobRun
-    from .JobWorker import job_worker_query
+    PROCESS_TITLE = 'frequency task checker'
+    PROCESS_TITLE_SHORT = 'FTC'
 
-    def exit_handler(*args):
-        """Clean up before quiting the process."""
-        if len(args) > 0:
-            print("Exit py signal {signal}".format(signal=args[0]))
-        print(remove(pid_path))
-        sys.exit()
+    def __init__(self, pid_path='frequency.pid', interval=60):
+        """
+        Constructor for FrequencyTaskChecker class.
 
-    atexit.register(exit_handler)
-    signal.signal(signal.SIGINT, exit_handler)
-    signal.signal(signal.SIGTERM, exit_handler)
+        :param interval: Seconds the checker will sleep throughout idle time.
+        :type interval: int
+        """
+        Helpers.Daemonize.__init__(self, pid_path)
+        self.interval = interval
 
-    while True:
-        timer = Helpers.Timer()
+    def run(self):
+        """
+        This method will check and enqueue scheduled jobs
+        when the running time will come. After that sleep
+        for `interval` seconds and repeat.
+        """
+        atexit.register(self._exit_handler)
+        signal.signal(signal.SIGINT, self._exit_handler)
+        signal.signal(signal.SIGTERM, self._exit_handler)
+        setproctitle(self.PROCESS_TITLE_SHORT + ' ' + self.pid_path)
 
-        current_time = datetime.datetime.now()
-        if current_time.second < 2:
-            fq_sleep(2)
+        while True:
+            try:
+                self.task_checker()
+                Helpers.fq_sleep(
+                    self.interval - Helpers.Timer().get_total_seconds()
+                )
+            except Exception as e:
+                print('[{0}] {1}'.format(self.PROCESS_TITLE, e))
+                self._remove_zombie_process()
+                break
+        self._exit_handler()
+
+    def task_checker(self):
+        """
+        This method will check and enqueue scheduled jobs for run method.
+        """
+        cur_time = datetime.datetime.now()
+        if cur_time.second < 2:
+            time.sleep(2 - cur_time.second)
         print(
             "[FQ] Checking and scheduling at {start_time}".
-            format(start_time=current_time)
+            format(start_time=cur_time)
         )
 
         next_schedules = Schedule.query.filter(
             Schedule.is_active,
-            Schedule.next_run >= current_time,
-            Schedule.next_run < current_time + relativedelta(seconds=interval)
+            Schedule.next_run >= cur_time,
+            Schedule.next_run < cur_time + dateutil_relativedelta(
+                seconds=self.interval
+            )
         ).all()
 
         with app.app_context():
@@ -94,39 +114,5 @@ def frequency_checker(pid_path, interval=60):
 
                 next_schedule.update_next_run(
                     validated=True,
-                    interval=interval)
+                    interval=self.interval)
                 db.session.commit()
-
-        fq_sleep(interval - timer.get_total_seconds())
-
-    exit_handler()
-
-
-def start(interval=60, pid_path='frequency.pid'):
-    """
-    Check and start frequency_checker process if it not started.
-
-    :param interval: Seconds the checker will sleep throughout idle time.
-    :param pid_path: Location of the PID file.
-    """
-    try:
-        pid_file = open(pid_path, 'r')
-        pid = int(pid_file.read())
-        print(
-            "Frequency Task Checker is already started with pid {pid}".
-            format(pid=pid)
-        )
-        pid_file.close()
-    except (IOError, TypeError):
-        process = Process(
-            target=frequency_checker,
-            kwargs={'pid_path': pid_path, 'interval': interval}
-        )
-        process.start()
-        pid_file = open(pid_path, 'w')
-        pid_file.write("{pid}".format(pid=process.pid))
-        pid_file.close()
-        print(
-            "Start new Frequency Task Checker process with pid {pid}".
-            format(pid=process.pid)
-        )

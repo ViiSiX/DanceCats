@@ -172,6 +172,8 @@ Example configuration file's content:
    QUERY_TEST_LIMIT = 100
 
    JOB_RESULT_VALID_SECONDS = 86400
+   JOB_WORKER_EXECUTE_TIMEOUT = 3600
+   JOB_WORKER_ENQUEUE_TIMEOUT = 1800
 
    SQLALCHEMY_DATABASE_URI = 'sqlite:////var/run/dancecat/dancecat.db'
    SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -195,6 +197,10 @@ Example configuration file's content:
 *FREQUENCY_INTERVAL_SECONDS* Interval in seconds for frequency task checker to re-check the schedules.
 
 *JOB_RESULT_VALID_SECONDS* Time for a job's result to remain available.
+
+*JOB_WORKER_EXECUTE_TIMEOUT* Timeout in seconds for a job to execute.
+
+*JOB_WORKER_ENQUEUE_TIMEOUT* Time for a job to live waiting in the queue.
 
 *REDISLITE_PATH* Location for RedisLite database file.
 

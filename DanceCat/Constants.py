@@ -48,6 +48,7 @@ JOB_RUNNING = 1
 JOB_RAN_SUCCESS = 2
 JOB_RAN_FAILED = 3
 JOB_RESULT_EXPIRED = 4
+JOB_DIED_IN_QUEUE = 5
 
 JOB_TRACKING_STATUSES_DICT = {
     JOB_QUEUED: {
@@ -64,6 +65,9 @@ JOB_TRACKING_STATUSES_DICT = {
     },
     JOB_RESULT_EXPIRED: {
         'name': 'Result Expired'
+    },
+    JOB_DIED_IN_QUEUE: {
+        'name': 'Died in Queue'
     }
 }
 

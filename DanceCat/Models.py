@@ -652,18 +652,30 @@ class TrackJobRun(db.Model):
         :return: True if the result is expiring.
                  False if the result is still valid or expired.
         """
-        if self.status != Constants.JOB_RAN_SUCCESS:
+        if self.status not in [
+                Constants.JOB_RAN_SUCCESS,
+                Constants.JOB_QUEUED
+        ]:
             return False
 
-        time_delta = self.duration + ((
-            datetime.datetime.now() - self.ran_on
-        ).total_seconds() * 1000)
+        if self.status == Constants.JOB_RAN_SUCCESS:
+            time_delta = abs(self.duration - ((
+                datetime.datetime.now() - self.ran_on
+            ).total_seconds() * 1000))
 
-        if self.status == Constants.JOB_RAN_SUCCESS \
-                and time_delta > \
-                config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
-            self.status = Constants.JOB_RESULT_EXPIRED
-            return True
+            if time_delta > \
+                    config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
+                self.status = Constants.JOB_RESULT_EXPIRED
+                return True
+
+        else:
+            time_delta = (
+                datetime.datetime.now() - self.scheduled_on
+            ).total_seconds()
+
+            if time_delta > config.get('JOB_WORKER_ENQUEUE_TIMEOUT', 1800):
+                self.status = Constants.JOB_DIED_IN_QUEUE
+                return True
 
         return False
 

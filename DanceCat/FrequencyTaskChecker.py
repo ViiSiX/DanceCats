@@ -78,7 +78,12 @@ def frequency_checker(pid_path, interval=60):
                             'job_id': next_schedule.Job.job_id,
                             'tracker_id': tracker.track_job_run_id
                         },
-                        ttl=900,
+                        timeout=app.config.get(
+                            'JOB_WORKER_EXECUTE_TIMEOUT', 3600
+                        ),
+                        ttl=app.config.get(
+                            'JOB_WORKER_ENQUEUE_TIMEOUT', 1800
+                        ),
                         result_ttl=app.config.get(
                             'JOB_RESULT_VALID_SECONDS', 86400
                         ),

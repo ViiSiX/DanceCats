@@ -273,7 +273,8 @@ def job_run():
             'job_id': triggered_job.job_id,
             'tracker_id': tracker.track_job_run_id
         },
-        ttl=900,
+        timeout=app.config.get('JOB_WORKER_EXECUTE_TIMEOUT', 3600),
+        ttl=app.config.get('JOB_WORKER_ENQUEUE_TIMEOUT', 1800),
         result_ttl=app.config.get('JOB_RESULT_VALID_SECONDS', 86400),
         job_id="{tracker_id}".format(tracker_id=tracker.track_job_run_id)
     )

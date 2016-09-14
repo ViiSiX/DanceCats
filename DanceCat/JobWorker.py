@@ -112,6 +112,7 @@ def job_worker_query(job_id, tracker_id):
             'header': db_connector.columns_name,
             'rows': db_connector.fetch_all()
         }
+        db_connector.close()
 
         tracker.complete(
             is_success=True,
@@ -138,7 +139,11 @@ def job_worker_query(job_id, tracker_id):
         tracker.complete(
             is_success=False,
             run_duration=timer.get_total_milliseconds(),
-            error_string=exception.message
+            error_string='{0}\n{1}\n{2}'.format(
+                exception.message,
+                exception.trace_back,
+                traceback.format_exc()
+            )
         )
         db.session.commit()
 

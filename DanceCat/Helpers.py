@@ -7,6 +7,10 @@ import base64
 import hashlib
 import uuid
 import re
+import psutil
+import os
+from multiprocessing import Process
+import sys
 from Crypto import Random
 from Crypto.Cipher import ARC4, AES
 
@@ -303,3 +307,131 @@ def is_valid_format_email(email):
         )
     except TypeError:
         raise TypeError('Email should be string, not %s' % type(email))
+
+
+def get_process_list():
+    """
+    :return: A dictionary of (pid, process_name)
+    :rtype: dict
+    """
+    procs = dict()
+    for proc in psutil.process_iter():
+        try:
+            pinfo = proc.as_dict(attrs=['pid', 'cmdline'])
+            procs[pinfo['pid']] = pinfo['cmdline'][0]
+        except (psutil.NoSuchProcess, IndexError, TypeError):
+            pass
+    return procs
+
+
+def fq_sleep(sleep_time):
+    """Print and sleep for <sleep_time> seconds."""
+    print('[Helper] Sleeping for %s second(s).' % sleep_time)
+    time.sleep(sleep_time)
+
+
+class Daemonize(object):
+    """
+    Daemonize class.
+    Provide basic method for other daemon/worker classes.
+    """
+
+    PROCESS_TITLE = str()
+    PROCESS_TITLE_SHORT = str()
+    PROC_STOP = 0
+    PROC_RUNNING = 1
+    PROC_ERROR = 3
+
+    def __init__(self, pid_path='frequency.pid'):
+        """
+        Constructor for Daemonize class.
+
+        :param pid_path: Location of the PID file.
+        :type pid_path: str
+        """
+        self.pid_path = pid_path
+
+    def daemonize(self):
+        """Daemonize method."""
+        if self.get_status() is self.PROC_ERROR:
+            self._remove_zombie_process()
+
+        if self.get_status() is self.PROC_STOP:
+            process = Process(target=self.run)
+            process.start()
+            with open(self.pid_path, 'w') as fp:
+                fp.write(str(process.pid))
+            print(
+                'Start new {0} process with pid {1}'.format(
+                    self.PROCESS_TITLE, process.pid
+                )
+            )
+
+        elif self.get_status() is self.PROC_RUNNING:
+            pass
+        else:
+            raise OSError('Unknown reason')
+
+    def run(self):
+        """Dummy method."""
+        print(self.PROCESS_TITLE, 'Please implement your `run` method')
+
+    def get_status(self):
+        """
+        Get process's status and return status code.
+
+        :return: process's status.
+        """
+        if os.path.exists(self.pid_path):
+            with open(self.pid_path, 'r') as fp:
+                pid = int(fp.read())
+                if pid and pid in get_process_list().keys():
+                    return self.PROC_RUNNING
+                return self.PROC_ERROR
+        if self.get_pids():
+            return self.PROC_ERROR
+        return self.PROC_STOP
+
+    def get_pids(self):
+        """
+        Get running pid of instance base on process's name.
+
+        :return: running pids or empty list.
+        """
+        pids = list()
+        for pid, proc_name in get_process_list().iteritems():
+                if proc_name == self.PROCESS_TITLE + ' ' + self.pid_path:
+                    pids.append(int(pid))
+        return pids
+
+    def _exit_handler(self, *args):
+        """Clean up before quiting the process."""
+        if len(args) > 0:
+            print(
+                '[{proc_name}] Exited by signal {signal}'.format(
+                    proc_name=self.PROCESS_TITLE_SHORT,
+                    signal=args[0])
+            )
+        self._remove_zombie_process()
+        sys.exit()
+
+    def _remove_zombie_process(self):
+        """
+        Remove zombie process by killing process and removing pid file.
+        """
+        pids = self.get_pids()
+        if pids:
+            for pid in pids:
+                psutil.Process(pid).kill()
+                print(
+                    '[{0}] Orphan process with pid={1} killed'.format(
+                        self.PROCESS_TITLE_SHORT, pid
+                    )
+                )
+        if os.path.exists(self.pid_path):
+            os.remove(self.pid_path)
+            print(
+                '[%s] Orphan pid_file %s removed' % (
+                    self.PROCESS_TITLE_SHORT, self.pid_path
+                )
+            )

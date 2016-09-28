@@ -21,8 +21,6 @@ config = app.config
 app.config.update({
     'SQLALCHEMY_TRACK_MODIFICATIONS': False
 })
-if os.environ.get('CONFIG_FILE') is not None:
-    app.config.from_envvar('CONFIG_FILE')
 
 db = SQLAlchemy(app)
 rdb = FlaskRedis(app,

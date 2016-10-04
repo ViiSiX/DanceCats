@@ -70,8 +70,8 @@ def freeze_datetime(monkeypatch):
 
 
 @pytest.fixture
-def setup_to_add_job(app, user_email):
-    """Setup data so we can test Schedule Model."""
+def app_setup_to_add_user(app, user_email):
+    """Setup data to the point add new User."""
     allowed_email = Models.AllowedEmail(user_email)
     db.session.add(allowed_email)
     db.session.commit()
@@ -80,11 +80,20 @@ def setup_to_add_job(app, user_email):
     db.session.add(user)
     db.session.commit()
 
+    return {
+        'app': app,
+        'user_id': user.user_id
+    }
+
+
+@pytest.fixture
+def app_setup_to_add_job(app_setup_to_add_user):
+    """Setup data so we can test Schedule Model."""
     connection = Models.Connection(
         Constants.DB_MYSQL,
         'localhost',
         'test_db',
-        user.user_id,
+        app_setup_to_add_user['user_id'],
         user_name='db_user'
     )
     db.session.add(connection)
@@ -93,7 +102,11 @@ def setup_to_add_job(app, user_email):
     job = Models.QueryDataJob(
         'test job',
         'select * from table_1',
-        user.user_id
+        app_setup_to_add_user['user_id']
     )
     db.session.add(job)
     db.session.commit()
+
+    ret = app_setup_to_add_user
+    ret['job_id'] = job.job_id
+    return ret

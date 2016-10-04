@@ -186,17 +186,30 @@ class Connection(db.Model):
             user_name: User which is used to connect to the database.
             password: Password which is used to connect to the database.
         """
+        if not db_type:
+            raise TypeError("Connection's type cannot be empty or None.")
+        if db_type not in Constants.CONNECTION_TYPES_DICT:
+            raise ValueError("Invalid connection type.")
+        self.type = db_type
+        if not host:
+            raise TypeError("Host cannot be empty or None.")
+        self.host = host
+        if not database:
+            raise TypeError("Database name cannot be empty or None.")
+        self.database = database
+        if not creator_user_id:
+            raise TypeError("User Id cannot be empty or None.")
+        self.user_id = creator_user_id
+        self.user_name = kwargs.get('user_name')
+        if not self.user_name:
+            raise TypeError("Database user name cannot be empty or None.")
+
         self.name = kwargs.get(
             'name',
             "{host} - {db}".format(host=host, db=database)
         )
-        self.type = db_type
-        self.host = host
-        self.database = database
         self.port = kwargs.get('port')
-        self.user_name = kwargs.get('user_name')
         self.encrypt_password(kwargs.get('password'))
-        self.user_id = creator_user_id
         self.version = Constants.MODEL_CONNECTION_VERSION
 
     def encrypt_password(self, password):

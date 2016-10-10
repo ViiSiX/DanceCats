@@ -27,9 +27,7 @@ class TestScheduleModel(object):
         'is_active': False
     }
 
-    def test_should_add_new_schedules(self,
-                                      setup_to_add_job
-                                      ):
+    def test_would_add_new_schedules(self, app_setup_to_add_job):
         """Test if schedules should be added and should be active."""
         job = Models.QueryDataJob.query.get(1)
         assert job.job_id == 1
@@ -83,7 +81,7 @@ class TestScheduleModel(object):
 
         assert Models.Schedule.query.count() == 2
 
-    def test_would_schedule_active(self, setup_to_add_job):
+    def test_would_schedule_active(self, app_setup_to_add_job):
         """Test if schedules remain active setting it _is_active values."""
         schedule_1 = Models.Schedule(
             schedule_type=Constants.SCHEDULE_HOURLY,
@@ -119,7 +117,7 @@ class TestScheduleModel(object):
             Models.Schedule.is_active
         ).count() == 1
 
-    def test_would_schedule_init_raise_missing(self, setup_to_add_job):
+    def test_would_schedule_init_raise_missing(self, app_setup_to_add_job):
         """Test if schedule initialization raise error when missing args."""
         with pytest.raises(TypeError):
             schedule = Models.Schedule(
@@ -133,7 +131,7 @@ class TestScheduleModel(object):
                 **self.in_active_schedule_skeleton
             )
 
-    def test_would_schedule_init_raise_value_error(self, setup_to_add_job):
+    def test_would_schedule_init_raise_value_error(self, app_setup_to_add_job):
         """For Once type schedule, expect the start time is in the future."""
         with pytest.raises(ValueError):
             schedule = Models.Schedule(
@@ -143,7 +141,7 @@ class TestScheduleModel(object):
             )
 
     def test_would_delete_schedule(self,
-                                   setup_to_add_job
+                                   app_setup_to_add_job
                                    ):
         """Test if a schedule will be logically deleted."""
         schedule = Models.Schedule(
@@ -174,7 +172,7 @@ class TestScheduleModel(object):
         assert no_schedules == 1
 
     def test_would_once_schedule_validate_value_on_update(
-            self, setup_to_add_job
+            self, app_setup_to_add_job
     ):
         """Check if the Once schedule is valid or not."""
         schedule = Models.Schedule(
@@ -188,7 +186,7 @@ class TestScheduleModel(object):
         with pytest.raises(ValueError):
             schedule.update_start_time(self.start_time_ugly)
 
-    def test_would_hourly_schedule_validate_work(self, setup_to_add_job):
+    def test_would_hourly_schedule_validate_work(self, app_setup_to_add_job):
         """Check if Schedule.validate is working for Hourly type or not."""
         schedule = Models.Schedule(
             schedule_type=Constants.SCHEDULE_HOURLY,
@@ -209,7 +207,7 @@ class TestScheduleModel(object):
         schedule.day_of_month = -4
         assert schedule.validate()
 
-    def test_would_daily_schedule_validate_work(self, setup_to_add_job):
+    def test_would_daily_schedule_validate_work(self, app_setup_to_add_job):
         """Check if Schedule.validate is working for Daily type or not."""
         schedule = Models.Schedule(
             schedule_type=Constants.SCHEDULE_DAILY,
@@ -241,7 +239,7 @@ class TestScheduleModel(object):
         schedule.day_of_month = 8
         assert schedule.validate()
 
-    def test_would_weekly_schedule_validate_work(self, setup_to_add_job):
+    def test_would_weekly_schedule_validate_work(self, app_setup_to_add_job):
         """Check if Schedule.validate is working for Weekly type or not."""
         schedule = Models.Schedule(
             schedule_type=Constants.SCHEDULE_WEEKLY,
@@ -271,7 +269,7 @@ class TestScheduleModel(object):
         schedule.day_of_month = 999
         assert schedule.validate()
 
-    def test_would_monthly_schedule_validate_work(self, setup_to_add_job):
+    def test_would_monthly_schedule_validate_work(self, app_setup_to_add_job):
         """Check if Schedule.validate is working for Monthly type or not."""
         schedule = Models.Schedule(
             schedule_type=Constants.SCHEDULE_MONTHLY,
@@ -304,7 +302,7 @@ class TestScheduleModel(object):
 
     def test_would_add_once_schedule_with_current_time(
             self,
-            setup_to_add_job
+            app_setup_to_add_job
     ):
         with pytest.raises(ValueError):
             Models.Schedule(
@@ -314,7 +312,7 @@ class TestScheduleModel(object):
             )
 
     def test_would_schedule_once_update_next_run(
-            self, setup_to_add_job, freeze_datetime
+            self, app_setup_to_add_job, freeze_datetime
     ):
         """Test Models.Schedule.update_next_run of Once Schedule type.
 
@@ -333,7 +331,7 @@ class TestScheduleModel(object):
         assert schedule.next_run == self.start_time_ugly
 
     def test_would_schedule_hourly_update_next_run(
-            self, setup_to_add_job, freeze_datetime
+            self, app_setup_to_add_job, freeze_datetime
     ):
         """Test Models.Schedule.update_next_run of Hourly Schedule type."""
         freeze_datetime.freeze(self.start_time_beautifully)
@@ -419,7 +417,7 @@ class TestScheduleModel(object):
             assert schedule.next_run == expected_next_run
 
     def test_would_schedule_daily_update_next_run(
-            self, setup_to_add_job, freeze_datetime
+            self, app_setup_to_add_job, freeze_datetime
     ):
         """Test Models.Schedule.update_next_run of Daily Schedule type."""
         freeze_datetime.freeze(self.start_time_beautifully)
@@ -472,7 +470,7 @@ class TestScheduleModel(object):
             assert schedule.next_run == expected_next_run
 
     def test_would_schedule_weekly_update_next_run(
-            self, setup_to_add_job, freeze_datetime
+            self, app_setup_to_add_job, freeze_datetime
     ):
         """Test Models.Schedule.update_next_run of Weekly Schedule type."""
         freeze_datetime.freeze(self.start_time_beautifully)
@@ -530,7 +528,7 @@ class TestScheduleModel(object):
             assert schedule.next_run == expected_next_run
 
     def test_would_schedule_monthly_update_next_run(
-            self, setup_to_add_job, freeze_datetime
+            self, app_setup_to_add_job, freeze_datetime
     ):
         """Test Models.Schedule.update_next_run of Monthly Schedule type."""
         freeze_datetime.freeze(self.start_time_beautifully)

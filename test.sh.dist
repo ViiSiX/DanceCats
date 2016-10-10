@@ -5,4 +5,4 @@ export CONFIG_FILE=</path/to/config/file>
 export PYTHONPATH=</path/to/your/DanceCat>:${PYTHONPATH}
 
 cd </path/to/your/DanceCat>
-py.test DanceCatTest/test_dance_cat_console.py --pep8 DanceCatConsole -v --cov DanceCatConsole --cov-report term-missing
+py.test tests --pep8 DanceCat -v --cov DanceCat --cov-report term-missing

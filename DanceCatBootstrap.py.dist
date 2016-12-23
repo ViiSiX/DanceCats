@@ -1,9 +1,9 @@
 """
 Running script for DanceCat
 """
-import os
 # Just in case proxy server do not work.
 # from werkzeug.contrib.fixers import ProxyFix
+import os
 from DanceCat import app, socket_io, rdb, \
     Views, ErrorViews, Socket, FrequencyTaskChecker
 
@@ -18,7 +18,17 @@ from DanceCat import app, socket_io, rdb, \
 # Just in case proxy server do not work.
 # app.wsgi_app = ProxyFix(app.wsgi_app)
 
-FrequencyTaskChecker.start(60, app.config.get('FREQUENCY_PID', 'frequency.pid'))
+if os.environ.get('CONFIG_FILE'):
+    app.config.from_envvar('CONFIG_FILE')
+else:
+    raise OSError(
+        "Can't load configurations. Please specify configuration file"
+    )
+
+FrequencyTaskChecker.FrequencyTaskChecker(
+    interval=app.config.get('FREQUENCY_INTERVAL_SECONDS', 60),
+    pid_path=app.config.get('FREQUENCY_PID', 'frequency.pid')
+).daemonize()
 
 with app.app_context():
     rdb.start_worker()

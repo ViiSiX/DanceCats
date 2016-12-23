@@ -12,5 +12,5 @@ test.sh
 .cache
 *.pyc
 
-var
 docs/_build/
+.unittest/

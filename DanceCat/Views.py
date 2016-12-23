@@ -109,7 +109,10 @@ def job_create():
                         schedule_type=schedule.schedule_type.data,
                         user_id=current_user.user_id,
                         is_active=schedule.is_active.data,
-                        start_time=start_dt
+                        start_time=start_dt,
+                        interval=app.config.get(
+                            'FREQUENCY_INTERVAL_SECONDS', 60
+                        )
                     )
 
                     db.session.add(new_schedule)
@@ -202,7 +205,10 @@ def job_edit(job_id):
                             schedule_type=schedule.schedule_type.data,
                             user_id=current_user.user_id,
                             is_active=schedule.is_active.data,
-                            start_time=start_dt
+                            start_time=start_dt,
+                            interval=app.config.get(
+                                'FREQUENCY_INTERVAL_SECONDS', 60
+                            )
                         )
                         db.session.add(new_schedule)
 
@@ -211,7 +217,12 @@ def job_edit(job_id):
                         existing_schedule.schedule_type = \
                             schedule.schedule_type.data
                         existing_schedule.is_active = schedule.is_active.data
-                        existing_schedule.update_start_time(start_dt)
+                        existing_schedule.update_start_time(
+                            start_time=start_dt,
+                            interval=app.config.get(
+                                'FREQUENCY_INTERVAL_SECONDS', 60
+                            )
+                        )
 
                     db.session.commit()
 
@@ -262,7 +273,8 @@ def job_run():
             'job_id': triggered_job.job_id,
             'tracker_id': tracker.track_job_run_id
         },
-        ttl=900,
+        timeout=app.config.get('JOB_WORKER_EXECUTE_TIMEOUT', 3600),
+        ttl=app.config.get('JOB_WORKER_ENQUEUE_TIMEOUT', 1800),
         result_ttl=app.config.get('JOB_RESULT_VALID_SECONDS', 86400),
         job_id="{tracker_id}".format(tracker_id=tracker.track_job_run_id)
     )

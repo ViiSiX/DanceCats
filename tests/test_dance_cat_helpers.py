@@ -1,8 +1,11 @@
 """Test script for DanceCat.Helpers module."""
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 import datetime
 from decimal import Decimal, getcontext as dicimal_get_context
+from Crypto.Cipher.AES import block_size as AES_block_size
+from Crypto import Random
 from DanceCat import Helpers
 import pytest
 import time
@@ -29,21 +32,103 @@ def test_encrypt_password():
     assert hashed_empty_password != password
 
 
-def test_db_password_encrypt():
-    """Check DB config encrypting and decrypting function."""
+def test_rc4_encrypt_decrypt():
+    """Check RC4 crypto functions."""
     key = '3ncr9p7 K3Y'
     db_password = 'h3r3 the passw0rD'
 
-    encrypted_config = Helpers.db_credential_encrypt(
+    encrypted_config = Helpers.rc4_encrypt(
         db_password,
         key
     )
     assert encrypted_config
 
-    assert Helpers.db_credential_decrypt(
+    assert Helpers.rc4_decrypt(
         encrypted_config,
         key
     ) == db_password
+
+    with pytest.raises(TypeError) as except_info:
+        assert Helpers.rc4_encrypt(None, key)
+    assert 'argument must be string or read-only buffer, not None' \
+        in except_info.value
+
+
+def test_aes_helpers():
+    """Check AES helper functions."""
+    keys_list = [
+        'A9ll j',
+        '0123-0123-0123-0123-0123-0123-01',
+        '0123-0123-0123-0123-0123-0123-0123',
+        list('moo')
+    ]
+    raw_lists = [
+        '', '012 aj/', '01234567890123',
+        '0123456789abcdef', '0123456789abcdef=Z0/?'
+    ]
+
+    # Valid
+    for key in keys_list:
+        assert len(Helpers.aes_key_pad(key)) == 32
+
+    # Should not be empty string
+    with pytest.raises(ValueError) as except_info:
+        Helpers.aes_key_pad('')
+    assert 'Key should not be empty!' in except_info.value
+
+    # Valid
+    for raw in raw_lists:
+        padded_raw = Helpers.aes_raw_pad(raw)
+        assert len(padded_raw) % AES_block_size == 0
+        assert raw in padded_raw
+
+    with pytest.raises(TypeError) as except_info:
+        Helpers.aes_raw_pad({'a': 'ops'})
+    assert 'Context should be a string!' in except_info.value
+
+    with pytest.raises(ValueError) as except_info:
+        raw = Random.new().read(1000)
+        Helpers.aes_raw_pad(raw)
+    assert 'Encrypt context was too long (>999).' in except_info.value
+
+    assert Helpers.aes_raw_unpad(
+        Helpers.aes_raw_pad("12K la0'V")
+    ) == "12K la0'V"
+
+
+def test_aes_password_encrypt_decrypt():
+    """Check AES crypto functions."""
+    key = '3ncr9p7 K3Y'
+    valid_passwords = [
+        'h3r3 the passw0rD',
+        '01234567890123'
+    ]
+    db_password_utf8 = u'trời ơi!'
+
+    for password in valid_passwords:
+        encrypted_config = Helpers.aes_encrypt(
+            password,
+            key
+        )
+        assert encrypted_config
+
+        assert Helpers.aes_decrypt(
+            encrypted_config,
+            key
+        ) == password
+
+    assert Helpers.aes_decrypt(
+        Helpers.aes_encrypt(
+            db_password_utf8,
+            key
+        ),
+        key
+    ) == db_password_utf8.encode('utf-8')
+
+    with pytest.raises(TypeError) as except_info:
+        assert Helpers.aes_encrypt(None, key)
+    assert 'Context should be a string!' \
+        in except_info.value
 
 
 def test_null_handler():
@@ -120,3 +205,29 @@ def test_timer():
     timer.spend(1)
     assert timer.get_total_time().find("minutes") > 0
     assert timer.get_total_seconds() > 60
+
+
+def test_is_valid_format_email():
+    """Test is_valid_format_email function."""
+    valid_emails = [
+        'test@test.test',
+        'so.long.i.dont.care.test@te.te.te',
+        'iAmS0lesS_wAnNa@B3aUt1.Fu1.lol'
+    ]
+    invalid_emails = [
+        'invalid email bleh bleh',
+        'user@mail',
+        'usermail@',
+        '@usermail',
+        'user@mail.',
+        'user@.mail',
+        'user.mail@domain',
+        'user.@mail',
+        '.user@mail'
+    ]
+    for email in valid_emails:
+        assert Helpers.is_valid_format_email(email)
+    for email in invalid_emails:
+        assert not Helpers.is_valid_format_email(email)
+    with pytest.raises(TypeError):
+        Helpers.is_valid_format_email(list)

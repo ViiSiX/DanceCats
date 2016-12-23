@@ -60,7 +60,7 @@ class AllowedEmail(db.Model):
                                  primary_key=True, autoincrement=True
                                  )
     email = db.Column(db.String(255), index=True, unique=True, nullable=False)
-    version = db.Column(db.String(255), index=True, nullable=False)
+    version = db.Column(db.Integer, index=True, nullable=False)
 
     def __init__(self, allowed_email):
         """
@@ -70,7 +70,10 @@ class AllowedEmail(db.Model):
             The email that will be allow to
             register a new user.
         """
-        self.email = allowed_email
+        if Helpers.is_valid_format_email(allowed_email):
+            self.email = allowed_email
+        else:
+            raise ValueError('Email %s is not valid!' % allowed_email)
         self.version = Constants.MODEL_ALLOWED_EMAIL_VERSION
 
     def __repr__(self):
@@ -111,7 +114,10 @@ class User(UserMixin, db.Model):
         :param user_email: User's email.
         :param user_password: User's password in clear text.
         """
-        self.email = user_email
+        if Helpers.is_valid_format_email(user_email):
+            self.email = user_email
+        else:
+            raise ValueError('Email %s is not valid!' % user_email)
         self.password = Helpers.encrypt_password(user_password)
         self.version = Constants.MODEL_USER_VERSION
 
@@ -180,22 +186,35 @@ class Connection(db.Model):
             user_name: User which is used to connect to the database.
             password: Password which is used to connect to the database.
         """
+        if not db_type:
+            raise TypeError("Connection's type cannot be empty or None.")
+        if db_type not in Constants.CONNECTION_TYPES_DICT:
+            raise ValueError("Invalid connection type.")
+        self.type = db_type
+        if not host:
+            raise TypeError("Host cannot be empty or None.")
+        self.host = host
+        if not database:
+            raise TypeError("Database name cannot be empty or None.")
+        self.database = database
+        if not creator_user_id:
+            raise TypeError("User Id cannot be empty or None.")
+        self.user_id = creator_user_id
+        self.user_name = kwargs.get('user_name')
+        if not self.user_name:
+            raise TypeError("Database user name cannot be empty or None.")
+
         self.name = kwargs.get(
             'name',
             "{host} - {db}".format(host=host, db=database)
         )
-        self.type = db_type
-        self.host = host
-        self.database = database
         self.port = kwargs.get('port')
-        self.user_name = kwargs.get('user_name')
         self.encrypt_password(kwargs.get('password'))
-        self.user_id = creator_user_id
         self.version = Constants.MODEL_CONNECTION_VERSION
 
     def encrypt_password(self, password):
         """Encrypt the clear text password."""
-        self.password = Helpers.db_credential_encrypt(
+        self.password = Helpers.aes_encrypt(
             password, config['DB_ENCRYPT_KEY']
         ) if password else None
 
@@ -218,9 +237,24 @@ class Connection(db.Model):
 
         # If no password leave it alone
         if self.password is not None:
-            db_config['password'] = Helpers.db_credential_decrypt(
-                self.password, config['DB_ENCRYPT_KEY']
-            )
+            if self.version < 2:
+                # Should use condition like this for migrate
+                # and version check.
+                db_config['password'] = Helpers.rc4_decrypt(
+                    self.password, config['DB_ENCRYPT_KEY']
+                )
+
+                # Update password field to current version.
+                if not not self.connection_id:
+                    self.encrypt_password(db_config['password'])
+                    # Update to AES since version 2.
+                    self.version = 2
+                    db.session.commit()
+
+            else:
+                db_config['password'] = Helpers.aes_decrypt(
+                    self.password, config['DB_ENCRYPT_KEY']
+                )
 
         return db_config
 
@@ -452,7 +486,8 @@ class Schedule(db.Model):
         self.schedule_type = \
             kwargs.get('schedule_type', Constants.SCHEDULE_ONCE)
         self._is_active = kwargs.get('is_active', False)
-        self.update_start_time(start_time)
+        interval = kwargs.get('interval', 60)
+        self.update_start_time(start_time, interval=interval)
         self.user_id = user_id
         self.version = Constants.MODEL_SCHEDULE_VERSION
 
@@ -495,20 +530,24 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_MONTHLY:
             return Helpers.validate_minute_of_hour(self.minute_of_hour) and \
                 Helpers.validate_hour_of_day(self.hour_of_day) and \
-                Helpers.validate_day_of_week(self.day_of_month)
+                Helpers.validate_day_of_month(self.day_of_month)
 
-    def update_start_time(self, start_time):
+    def update_start_time(self, start_time, interval=60):
         """Update next run time on schedule updating."""
+        if not isinstance(start_time, datetime.datetime):
+            raise TypeError("start_time should be a datetime object!")
+
         self.minute_of_hour = start_time.minute
         self.hour_of_day = start_time.hour
         self.day_of_week = start_time.weekday()
         self.day_of_month = start_time.day
         self.next_run = start_time
 
-        if start_time < datetime.datetime.now() + relativedelta(minutes=1):
-            self.update_next_run(False)
+        if start_time < \
+                datetime.datetime.now() + relativedelta(seconds=interval):
+            self.update_next_run(validated=False)
 
-    def update_next_run(self, validated=False, frequency=60):
+    def update_next_run(self, validated=False, interval=60):
         """Update the next time this job will be run."""
         if not validated:
             validated = self.validate()
@@ -519,23 +558,25 @@ class Schedule(db.Model):
         if self.schedule_type == Constants.SCHEDULE_ONCE:
             return
 
-        cur_time = datetime.datetime.now()
-        next_run_time = datetime.datetime.now()
+        next_check = datetime.datetime.now() + relativedelta(seconds=interval)
+        if next_check <= self.next_run:
+            return
+
+        next_run_time = datetime.datetime.now().replace(second=0)
 
         if self.schedule_type == Constants.SCHEDULE_HOURLY:
             next_run_time += relativedelta(
-                minute=self.minute_of_hour, seconds=-1
+                minute=self.minute_of_hour
             )
-            cur_time -= relativedelta(minutes=-1)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(hours=1)
 
         elif self.schedule_type == Constants.SCHEDULE_DAILY:
             next_run_time += relativedelta(minute=self.minute_of_hour,
                                            hour=self.hour_of_day)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(days=1)
 
         elif self.schedule_type == Constants.SCHEDULE_WEEKLY:
@@ -543,7 +584,7 @@ class Schedule(db.Model):
                                            hour=self.hour_of_day,
                                            weekday=self.day_of_week)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(weeks=1)
 
         elif self.schedule_type == Constants.SCHEDULE_MONTHLY:
@@ -551,11 +592,13 @@ class Schedule(db.Model):
                                            hour=self.hour_of_day,
                                            day=self.day_of_month)
 
-            if cur_time >= next_run_time:
+            while next_check >= next_run_time:
                 next_run_time += relativedelta(months=1)
 
-        self.next_run = next_run_time.replace(second=0)
+        if self.next_run < next_run_time:
+            self.next_run = next_run_time
         # TODO: Better algorithm
+        # TODO: Move to Helpers
 
     def __repr__(self):
         """Print the Schedule instance."""
@@ -620,18 +663,30 @@ class TrackJobRun(db.Model):
         :return: True if the result is expiring.
                  False if the result is still valid or expired.
         """
-        if self.status != Constants.JOB_RAN_SUCCESS:
+        if self.status not in [
+                Constants.JOB_RAN_SUCCESS,
+                Constants.JOB_QUEUED
+        ]:
             return False
 
-        time_delta = self.duration + ((
-            datetime.datetime.now() - self.ran_on
-        ).total_seconds() * 1000)
+        if self.status == Constants.JOB_RAN_SUCCESS:
+            time_delta = abs(self.duration - ((
+                datetime.datetime.now() - self.ran_on
+            ).total_seconds() * 1000))
 
-        if self.status == Constants.JOB_RAN_SUCCESS \
-                and time_delta > \
-                config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
-            self.status = Constants.JOB_RESULT_EXPIRED
-            return True
+            if time_delta > \
+                    config.get('JOB_RESULT_VALID_SECONDS', 86400) * 1000:
+                self.status = Constants.JOB_RESULT_EXPIRED
+                return True
+
+        else:
+            time_delta = (
+                datetime.datetime.now() - self.scheduled_on
+            ).total_seconds()
+
+            if time_delta > config.get('JOB_WORKER_ENQUEUE_TIMEOUT', 1800):
+                self.status = Constants.JOB_DIED_IN_QUEUE
+                return True
 
         return False
 

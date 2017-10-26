@@ -25,7 +25,7 @@
           <td>
             <a href="{{ url_for('connection_edit', connection_id=connection.id) }}"
             >Edit</a> |
-            <span onclick="DanceCat.Main.delete_on_click(DanceCat.Main.$(this).parent().parent(),
+            <span onclick="DanceCats.Main.delete_on_click(DanceCats.Main.$(this).parent().parent(),
                 '{{ url_for('connection_delete') }}', {{ connection.id }})",
                   class="link-pretender"
             >Delete</span>

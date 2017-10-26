@@ -6,7 +6,7 @@
 - ~~Simple React~~
 - ~~Query test for SQL Server~~
 - ~~Save job~~
-- Run and export CSV
-- Send emails (Flask-Mail)
-- Scheduling job
+- ~~Run and export CSV~~
+- ~~Send emails (Flask-Mail)~~
+- ~~Scheduling job~~
 - Apply Markdown to annotation (Flask-Misaka)

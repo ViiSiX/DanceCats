@@ -29,7 +29,7 @@
             {{ render_field(e.next_run, class="form-control schedule-field") }}
             {{ render_checkbox(e.is_active) }}
             <span class="glyphicon glyphicon-remove delete link-pretender"
-                  onclick="DanceCat.Main.$(this).parent().remove()"
+                  onclick="DanceCats.Main.$(this).parent().remove()"
             ></span>
           </div>
         {% endfor %}
@@ -74,10 +74,10 @@
 {% endblock %}
 {% block post_script %}
   <script type="text/javascript">
-    var socket = DanceCat.Main.ws_connect('{{ url_for('index') }}');
-    DanceCat.Main.AutoSize(document.getElementById('annotation'));
+    var socket = DanceCats.Main.ws_connect('{{ url_for('index') }}');
+    DanceCats.Main.AutoSize(document.getElementById('annotation'));
     var queryTextArea = document.getElementById('query_string');
-    var queryCodeMirror = DanceCat.Main.CodeMirror.fromTextArea(
+    var queryCodeMirror = DanceCats.Main.CodeMirror.fromTextArea(
       queryTextArea, {
         mode: 'text/x-sql',
         indentWithTabs: true,
@@ -92,7 +92,7 @@
       queryTextArea.value = cm.getValue();
     });
 
-    var $runQueryBtn = DanceCat.Main.$(document.getElementById('run-query-btn'));
+    var $runQueryBtn = DanceCats.Main.$(document.getElementById('run-query-btn'));
     $runQueryBtn.click( function(){
       $runQueryBtn.addClass('disabled');
 
@@ -101,16 +101,16 @@
         connectionId: document.getElementById('connection_id').value
       };
 
-      socket.emit(DanceCat.Constants.WS_QUERY_SEND, sendingData);
+      socket.emit(DanceCats.Constants.WS_QUERY_SEND, sendingData);
     } );
 
-    var dateTimePickers = DanceCat.Main.$('.schedule-field');
-    DanceCat.Main.$.each(dateTimePickers, function() {
-      DanceCat.Main.Flatpickr(this, {enableTime: true});
+    var dateTimePickers = DanceCats.Main.$('.schedule-field');
+    DanceCats.Main.$.each(dateTimePickers, function() {
+      DanceCats.Main.Flatpickr(this, {enableTime: true});
     })
   </script>
   <script type="text/javascript"
-          src="{{ url_for('static', filename='bundle/DanceCat.QueryResults.js') }}"
+          src="{{ url_for('static', filename='bundle/DanceCats.QueryResults.js') }}"
           charset="UTF-8"
           ></script>
 {% endblock %}

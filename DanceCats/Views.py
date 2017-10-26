@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.Views module.
+Docstring for DanceCats.Views module.
 
 This module contains functions which will be called
 whenever the application receive the right url request.
@@ -12,11 +12,11 @@ from flask \
     url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 import flask_excel as excel
-from DanceCat import app, db, lm, rdb
-from DanceCat.Models import User, AllowedEmail, Connection, \
+from DanceCats import app, db, lm, rdb
+from DanceCats.Models import User, AllowedEmail, Connection, \
     QueryDataJob, TrackJobRun, JobMailTo, Job, Schedule
-from DanceCat.Forms import RegisterForm, ConnectionForm, QueryJobForm
-from DanceCat.DatabaseConnector \
+from DanceCats.Forms import RegisterForm, ConnectionForm, QueryJobForm
+from DanceCats.DatabaseConnector \
     import DatabaseConnector, DatabaseConnectorException
 from .JobWorker import job_worker_query
 from . import Helpers

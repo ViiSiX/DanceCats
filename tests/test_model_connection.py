@@ -1,10 +1,10 @@
-"""Unit tests for DanceCat.Models.Connection model."""
+"""Unit tests for DanceCats.Models.Connection model."""
 
 from __future__ import print_function
-from DanceCat import db
-from DanceCat import Models
-from DanceCat import Constants
-from DanceCat import Helpers
+from DanceCats import db
+from DanceCats import Models
+from DanceCats import Constants
+from DanceCats import Helpers
 import datetime
 import pytest
 

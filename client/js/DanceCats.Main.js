@@ -2,7 +2,7 @@
 require('../../node_modules/bootstrap/dist/js/bootstrap.min');
 require('../../node_modules/bootstrap/dist/css/bootstrap.min.css');
 require('../css/justified-nav.css');
-require('../css/dance-cat.css');
+require('../css/dancecats.css');
 require('../../node_modules/codemirror/lib/codemirror.css');
 require('../../node_modules/codemirror/theme/ttcn.css');
 require('../../node_modules/codemirror/addon/hint/show-hint.css');
@@ -12,7 +12,7 @@ require('../../node_modules/flatpickr/dist/flatpickr.confetti.min.css');
 var autosize = require('../../node_modules/autosize/dist/autosize.min');
 var CodeMirror = require('../../node_modules/codemirror/lib/codemirror');
 var Flatpickr = require('../../node_modules/flatpickr/src/flatpickr');
-var io = require('../../node_modules/socket.io-client/socket.io');
+var io = require('../../node_modules/socket.io-client/dist/socket.io');
 require('../../node_modules/codemirror/addon/hint/show-hint');
 require('../../node_modules/codemirror/addon/hint/sql-hint');
 require('../../node_modules/codemirror/mode/sql/sql');

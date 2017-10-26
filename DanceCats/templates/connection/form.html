@@ -10,9 +10,9 @@
     <div class="test-box">
       <div class="led led-off"></div>
       <a href="#" class="test-button btn btn-default"
-         onclick="DanceCat.Main.db_connect_test_on_click('{{ test_url }}',
-             DanceCat.Main.$('#connection-edit-form').serializeArray(),
-             DanceCat.Main.$('div.led'))">Test Connection</a>
+         onclick="DanceCats.Main.db_connect_test_on_click('{{ test_url }}',
+             DanceCats.Main.$('#connection-edit-form').serializeArray(),
+             DanceCats.Main.$('div.led'))">Test Connection</a>
     </div>
     {{ form.hidden_tag() }}
     <dl class="dl-horizontal">

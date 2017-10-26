@@ -1,11 +1,11 @@
-"""Unit tests for DanceCat.Models.Schedule model."""
+"""Unit tests for DanceCats.Models.Schedule model."""
 
 from __future__ import print_function
 import datetime
 from dateutil.relativedelta import relativedelta
-from DanceCat import db
-from DanceCat import Models
-from DanceCat import Constants
+from DanceCats import db
+from DanceCats import Models
+from DanceCats import Constants
 import pytest
 
 

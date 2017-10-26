@@ -10,17 +10,16 @@
 <body>
   <!-- script -->
   <script type="text/javascript"
-          src="{{ url_for('static', filename='bundle/DanceCat.Main.js') }}"
+          src="{{ url_for('static', filename='bundle/DanceCats.Main.js') }}"
           charset="utf-8"></script>
   <script type="text/javascript"
-          src="{{ url_for('static', filename='bundle/DanceCat.Constants.js') }}"
+          src="{{ url_for('static', filename='bundle/DanceCats.Constants.js') }}"
           charset="utf-8"></script>
   {% block pre_script %}{% endblock %}
   <div class="container">
     <div class="masthead">
       <nav>
         <ul class="nav nav-justified">
-
           {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('job') }}">Jobs</a></li>
             <li><a href="{{ url_for('connection') }}">DB Connection</a></li>

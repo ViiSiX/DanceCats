@@ -36,13 +36,13 @@
             {% if job.is_active %}
               <span id="job-run-btn"
                     class="link-pretender"
-                    onclick="DanceCat.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
+                    onclick="DanceCats.Main.job_trigger_on_click('{{ trigger_url }}', {{ job.id }})"
               >Run</span> |
             {% endif %}
             <a href="{{ url_for('job_edit', job_id=job.id) }}">
               Edit
             </a> |
-            <span onclick="DanceCat.Main.delete_on_click(DanceCat.Main.$(this).parent().parent(),
+            <span onclick="DanceCats.Main.delete_on_click(DanceCats.Main.$(this).parent().parent(),
                 '{{ url_for('job_delete') }}', {{ job.id }})"
                   class="link-pretender"
             >Delete</span>
@@ -55,11 +55,11 @@
 {% endblock %}
 {% block post_script %}
   <script type="text/javascript">
-    var socket = DanceCat.Main.ws_connect('{{ url_for('index') }}');
-    socket.emit(DanceCat.Constants.WS_TRACKERS_SEND);
+    var socket = DanceCats.Main.ws_connect('{{ url_for('index') }}');
+    socket.emit(DanceCats.Constants.WS_TRACKERS_SEND);
   </script>
   <script type="text/javascript"
-          src="{{ url_for('static', filename='bundle/DanceCat.Trackers.js') }}"
+          src="{{ url_for('static', filename='bundle/DanceCats.Trackers.js') }}"
           charset="UTF-8"
           ></script>
 {% endblock %}

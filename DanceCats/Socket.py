@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.Socket module.
+Docstring for DanceCats.Socket module.
 
 This module contains functions which will be called
     whenever the application receive the right socket event.
@@ -10,10 +10,10 @@ import functools
 from flask import url_for
 from flask_login import current_user
 from flask_socketio import disconnect, emit
-from DanceCat import socket_io, config, db
-from DanceCat.DatabaseConnector \
+from DanceCats import socket_io, config, db
+from DanceCats.DatabaseConnector \
     import DatabaseConnector, DatabaseConnectorException
-from DanceCat.Models import Connection, Job, TrackJobRun
+from DanceCats.Models import Connection, Job, TrackJobRun
 from . import Helpers
 from . import Constants
 

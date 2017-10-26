@@ -1,5 +1,5 @@
 {
-  "name": "dance_cat",
+  "name": "DanceCats",
   "version": "0.1.2",
   "description": "Data Reporting",
   "main": "index.js",
@@ -12,9 +12,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/scattm/DanceCat"
+    "url": "https://github.com/ViiSiX/DanceCats"
   },
-  "author": "Nguyen Trong Nghia <ntngh2712@gmail.com>",
+  "author": "ViiSiX <admin@viisix.space>",
   "license": "MIT",
   "//": "revert css-loader to 0.18.0 if there are any issue",
   "devDependencies": {

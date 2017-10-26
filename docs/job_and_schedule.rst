@@ -4,7 +4,7 @@ Jobs and Scheduling
 Create a new Job
 ----------------
 
-In your DanceCat site, go to **Job** tab.
+In your DanceCats site, go to **Job** tab.
 
 .. image:: _static/jobs-1.png
 
@@ -16,13 +16,13 @@ choose the right connection like this example:
 .. image:: _static/jobs-2.png
 
 Your job is now can be saved, but just wait a moment, try out your query by click on
-**Run** button. DanceCat will start querying your statement against the chosen connection,
-just for the first *100 lines*. Remember this number? You can `config <install.html#config-dancecat>`_
+**Run** button. DanceCats will start querying your statement against the chosen connection,
+just for the first *100 lines*. Remember this number? You can `config <install.html#config-dancecats>`_
 it by the value of *QUERY_TEST_LIMIT*.
 
 .. image:: _static/jobs-3.png
 
-**Note:** You won't be able to get password, secret or related data, DanceCat will detect
+**Note:** You won't be able to get password, secret or related data, DanceCats will detect
 and get rid of them before they reach your hand.
 
 Retrieving results
@@ -41,18 +41,18 @@ You can event get results in JSON format, simplify go to the URL like this examp
 
 .. image:: _static/jobs-5.png
 
-Finally, you can edit your jobs, add an email so that DanceCat can send you result every time that job
+Finally, you can edit your jobs, add an email so that DanceCats can send you result every time that job
 finish.
 
 **Note:** Job's results have a limited time to live. After spending the given time, they will be expired
-and you won't be able to retrieve them. `Config <install.html#config-dancecat>`_ this number
+and you won't be able to retrieve them. `Config <install.html#config-dancecats>`_ this number
 by setting the value of *JOB_RESULT_VALID_SECONDS*
 
 Scheduling
 ----------
 
 Scheduling allow you to run your job once, hourly, daily, weekly and monthly. With this, you don't
-have to go to your DanceCat site every time you need to get reports.
+have to go to your DanceCats site every time you need to get reports.
 
 To scheduling your job, go to the Jobs list page, click on **Edit** link to edit it. Next, on the Job's
 editing form, click on **New schedule** button to add new schedule. Edit information that suite your needs,
@@ -69,19 +69,19 @@ Click **Save** to save your changes.
 
 **How schedules work?**
 
-There are a process querying the DanceCat database for every *n interval seconds*
+There are a process querying the DanceCats database for every *n interval seconds*
 (default n = 60) to check if there is any schedule is set to run on next n seconds. Those scheduled jobs will
 be run and the schedules' next run time will be update.
 
 **Update outdated schedules**
 
-For some reason your DanceCat was shutdown, after restart, you need to run
+For some reason your DanceCats was shutdown, after restart, you need to run
 following commands to update the outdated schedules:
 
 .. code-block:: bash
 
-   su - dancecat
+   su - dancecats
 
-   cd /opt/dancecat
-   export CONFIG_FILE=/etc/dancecat/config.cfg
-   python -m DanceCat.Console schedule_update
+   cd /opt/dancecats
+   export CONFIG_FILE=/etc/dancecats/config.cfg
+   python -m DanceCats.Console schedule_update

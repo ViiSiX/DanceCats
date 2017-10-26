@@ -1,14 +1,14 @@
-"""Unit tests for DanceCatConsole."""
+"""Unit tests for DanceCatsConsole."""
 
 from __future__ import print_function
 import datetime
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import inspect
-from DanceCat import db
-from DanceCat import Models
-from DanceCat import Console
-from DanceCat import Constants
-from DanceCat import Helpers
+from DanceCats import db
+from DanceCats import Models
+from DanceCats import Console
+from DanceCats import Constants
+from DanceCats import Helpers
 import pytest
 
 

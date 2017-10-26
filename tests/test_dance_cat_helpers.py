@@ -1,4 +1,4 @@
-"""Test script for DanceCat.Helpers module."""
+"""Test script for DanceCats.Helpers module."""
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -6,7 +6,7 @@ import datetime
 from decimal import Decimal, getcontext as dicimal_get_context
 from Crypto.Cipher.AES import block_size as AES_block_size
 from Crypto import Random
-from DanceCat import Helpers
+from DanceCats import Helpers
 import pytest
 import time
 

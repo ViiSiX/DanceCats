@@ -1,7 +1,7 @@
 """Render special page like 404 or 500."""
 
 from flask import render_template
-from DanceCat import app, Constants
+from DanceCats import app, Constants
 
 
 @app.errorhandler(404)

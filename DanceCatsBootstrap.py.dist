@@ -1,10 +1,10 @@
 """
-Running script for DanceCat
+Running script for DanceCats
 """
 # Just in case proxy server do not work.
 # from werkzeug.contrib.fixers import ProxyFix
 import os
-from DanceCat import app, socket_io, rdb, \
+from DanceCats import app, socket_io, rdb, \
     Views, ErrorViews, Socket, FrequencyTaskChecker
 
 # In case of `code 400, message Bad request`

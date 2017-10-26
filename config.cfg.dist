@@ -1,7 +1,7 @@
 WTF_CSRF_ENABLED = True
-SECRET_KEY = 'dance cat is dancing'
+SECRET_KEY = 'dance cats is dancing'
 
-DB_ENCRYPT_KEY = 'dance cat is trying to dance'
+DB_ENCRYPT_KEY = 'dance cats is trying to dance'
 DB_TIMEOUT = 120
 
 FREQUENCY_PID = '<path/to/your/frequency.pid>'

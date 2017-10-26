@@ -4,15 +4,15 @@ module.exports = [
   {
     name: 'dance-cat-pre',
     entry: {
-      Main: './client/js/DanceCat.Main.js',
-      Constants: ['./client/js/DanceCat.Constants.js'],
-      QueryResults: './client/jsx/DanceCat.QueryResult.js',
-      Trackers: './client/jsx/DanceCat.Trackers.js'
+      Main: './client/js/DanceCats.Main.js',
+      Constants: ['./client/js/DanceCats.Constants.js'],
+      QueryResults: './client/jsx/DanceCats.QueryResult.js',
+      Trackers: './client/jsx/DanceCats.Trackers.js'
     },
     output: {
-      path: './DanceCat/static/bundle/',
-      filename: 'DanceCat.[name].js',
-      library: ['DanceCat', "[name]"],
+      path: './DanceCats/static/bundle/',
+      filename: 'DanceCats.[name].js',
+      library: ['DanceCats', "[name]"],
       libraryTarget: "umd",
       publicPath: '/static/bundle/'
     },

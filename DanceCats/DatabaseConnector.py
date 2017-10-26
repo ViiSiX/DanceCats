@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.DatabaseConnector module.
+Docstring for DanceCats.DatabaseConnector module.
 
 This module contain DatabaseConnector and DatabaseConnectorException class
 which is used to wrap different DBMS Connector drivers.

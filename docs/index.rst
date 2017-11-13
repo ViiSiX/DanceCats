@@ -2,22 +2,14 @@
    :keywords: data, report, database, python
 
 ===============================
-DanceCat: a Data Reporting tool
+DanceCats: a Data Reporting tool
 ===============================
 
-.. image:: https://travis-ci.org/scattm/DanceCat.svg?branch=master
-   :target: https://travis-ci.org/scattm/DanceCat
+.. image:: https://travis-ci.org/ViiSiX/DanceCats.svg?branch=master
+   :target: https://travis-ci.org/ViiSiX/DanceCats
 
-.. image:: https://coveralls.io/repos/github/scattm/DanceCat/badge.svg?branch=master
-   :target: https://coveralls.io/github/scattm/DanceCat?branch=master
-
-.. image:: https://landscape.io/github/scattm/DanceCat/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/scattm/DanceCat/master
-   :alt: Code Health
-
-.. image:: https://www.quantifiedcode.com/api/v1/project/a717f58a1b9f429f98f7814e6a34f509/badge.svg
-   :target: https://www.quantifiedcode.com/app/project/a717f58a1b9f429f98f7814e6a34f509
-   :alt: Code issues
+.. image:: https://coveralls.io/repos/github/ViiSiX/DanceCats/badge.svg?branch=master
+   :target: https://coveralls.io/github/ViiSiX/DanceCats?branch=master
 
 Introduction
 ------------
@@ -28,7 +20,13 @@ have some basic overview on it.
 Get the code
 ------------
 
-DanceCat source code is always available on `GitHub <https://github.com/scattm/DanceCat>`_.
+DanceCat source code is always available on `GitHub <https://github.com/ViiSiX/DanceCats>`_.
+
+Note
+----
+
+In this document we still use *DanceCat* instead of *DanceCats*, please append "s"
+yourself. We will update this document later.
 
 Contents
 --------

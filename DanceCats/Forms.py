@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.Forms module.
+Docstring for DanceCats.Forms module.
 
 Contains the forms classes which is extended from
 WTForms. Used for template's forms rendering.
@@ -95,7 +95,7 @@ class QueryJobForm(Form):
                                   default=config.get('DB_TIMEOUT', 0))
     emails = FieldList(StringField('Email',
                                    render_kw={
-                                       'placeholder': 'report_to@dancecat.com'
+                                       'placeholder': 'report_to@viisix.space'
                                    },
                                    validators=[
                                        validators.Optional(),

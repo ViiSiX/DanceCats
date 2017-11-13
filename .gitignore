@@ -1,10 +1,13 @@
+venv
+var
 node_modules
 
-DanceCat/static/bundle
-DanceCat/static/style/
-DanceCat.iml
+DanceCats/static/bundle
+DanceCats/static/style/
+DanceCats.iml
 
-DanceCatBootstrap.py
+DanceCatsBootstrap.py
+config.cfg
 start.sh
 test.sh
 

@@ -1,4 +1,4 @@
-var Constants = require('../js/DanceCat.Constants');
+var Constants = require('../js/DanceCats.Constants');
 
 
 var TrackerList = React.createClass({

@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.JobWorker module.
+Docstring for DanceCats.JobWorker module.
 
 This module contains the job's workers that will be
 passed to the RQ worker to run in the background.
@@ -10,7 +10,7 @@ import traceback
 from flask_mail import Message
 from StringIO import StringIO
 from pyexcel.sheets import Sheet
-from DanceCat.DatabaseConnector \
+from DanceCats.DatabaseConnector \
     import DatabaseConnector, DatabaseConnectorException
 from .Helpers import Timer
 
@@ -32,7 +32,7 @@ def job_worker_send_mail_result(tracker_id, job_name, recipients):
         )
     )
 
-    from DanceCat import app, rdb, mail
+    from DanceCats import app, rdb, mail
 
     with app.app_context():
         queue = rdb.queue['default']
@@ -47,7 +47,7 @@ def job_worker_send_mail_result(tracker_id, job_name, recipients):
         Sheet(results_file_data).save_to_memory("xlsx", results_file)
 
         message = Message(
-            "Job {job_name} ran successfully on DanceCat!".format(
+            "Job {job_name} ran successfully on DanceCats!".format(
                 job_name=job_name
             ),
             recipients=recipients,
@@ -55,7 +55,7 @@ def job_worker_send_mail_result(tracker_id, job_name, recipients):
                  "the job \"{job_name}\" ran successfully.\n"
                  "We attached the result in this email "
                  "for your later check.\n\n"
-                 "DanceCat.".format(job_name=job_name)
+                 "DanceCats.".format(job_name=job_name)
         )
 
         message.attach(
@@ -85,7 +85,7 @@ def job_worker_query(job_id, tracker_id):
     )
 
     from .Models import QueryDataJob, TrackJobRun
-    from DanceCat import app, db, rdb, config, \
+    from DanceCats import app, db, rdb, config, \
         Constants
 
     job = QueryDataJob.query.get(job_id)

@@ -1,10 +1,10 @@
-"""Unit tests for DanceCat.Models module."""
+"""Unit tests for DanceCats.Models module."""
 
 from __future__ import print_function
 import datetime
-from DanceCat import db
-from DanceCat import Models
-from DanceCat import Constants
+from DanceCats import db
+from DanceCats import Models
+from DanceCats import Constants
 import pytest
 import sqlalchemy.exc as sqlalchemy_exc
 
@@ -130,7 +130,7 @@ class TestUserModel(object):
         db.session.commit()
         assert user.is_active is False
 
-    @pytest.mark.skip(reason='https://github.com/scattm/DanceCat/issues/83')
+    @pytest.mark.skip(reason='https://github.com/ViiSiX/DanceCats/issues/83')
     def test_should_get_user_version(self, app):
         user = Models.User(**self.user_1)
         db.session.add(user)

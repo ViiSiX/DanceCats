@@ -7,5 +7,5 @@ export CONFIG_FILE=</path/to/config/file>
 
 source </path/to/your/virtualenv>/bin/activate
 
-cd </path/to/your/DanceCat>
-python DanceCatBootstrap.py
+cd </path/to/your/DanceCats>
+python DanceCatsBootstrap.py

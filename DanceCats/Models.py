@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.Models module.
+Docstring for DanceCats.Models module.
 
 This module contains the Models which is extended from
 SQLAlchemy's Base Model.
@@ -13,7 +13,7 @@ from sqlalchemy import and_, not_
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.associationproxy import association_proxy
-from DanceCat import db, config
+from DanceCats import db, config
 from . import Helpers
 from . import Constants
 

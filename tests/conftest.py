@@ -1,10 +1,10 @@
-"""Utils for DanceCat's unit tests ."""
+"""Utils for DanceCats' unit tests ."""
 
 import os
 import datetime
 import pytest
-from DanceCat import app as dancecat_app
-from DanceCat import db, Constants, Models
+from DanceCats import app as dancecats_app
+from DanceCats import db, Constants, Models
 
 
 db_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/.unittest'
@@ -19,7 +19,7 @@ def app():
     if db.session:
         db.session.remove()
 
-    dancecat_app.config.update({
+    dancecats_app.config.update({
         'SQLALCHEMY_DATABASE_URI': ('sqlite:///' + db_file_path),
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'DB_ENCRYPT_KEY': 'easy to guess!\\'
@@ -31,7 +31,7 @@ def app():
         pass
 
     db.create_all()
-    return dancecat_app
+    return dancecats_app
 
 
 @pytest.fixture

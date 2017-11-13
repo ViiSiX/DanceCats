@@ -1,5 +1,5 @@
 """
-Docstring for DanceCat.FrequencyTaskChecker(FTC) module.
+Docstring for DanceCats.FrequencyTaskChecker(FTC) module.
 
 This module will be used to check the schedule and
 enqueue the next running job into the queue.
@@ -12,10 +12,10 @@ import atexit
 import signal
 from setproctitle import setproctitle
 from dateutil.relativedelta import relativedelta as dateutil_relativedelta
-from DanceCat import Helpers
-from DanceCat import app, db, rdb
-from DanceCat.Models import Schedule, TrackJobRun
-from DanceCat.JobWorker import job_worker_query
+from DanceCats import Helpers
+from DanceCats import app, db, rdb
+from DanceCats.Models import Schedule, TrackJobRun
+from DanceCats.JobWorker import job_worker_query
 
 
 class FrequencyTaskChecker(Helpers.Daemonize):
